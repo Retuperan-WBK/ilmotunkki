@@ -22,7 +22,6 @@ export const fetchAPI = async <T>(
   const requestUrl = `${getStrapiURL(
     `/api${path}${queryString ? `?${queryString}` : ""}`
   )}`;
-  console.trace("HERE");
   // Trigger API call
   const response = await fetch(requestUrl, mergedOptions);
   // Handle response

@@ -1,10 +1,9 @@
 import ReactMarkdown from 'react-markdown';
-import Link from 'next/link';
-
 import { fetchAPI } from '@/lib/api';
 import { StrapiBaseType } from '@/utils/models';
-import { useRouter } from 'next/navigation';
 import { getTranslation } from '@/utils/translationHelper';
+import GoBack from "@/components/GoBack";
+
 export const dynamic = 'force-dynamic';
 type Fields = StrapiBaseType<{
   terms: string;
@@ -12,12 +11,17 @@ type Fields = StrapiBaseType<{
 }>
 
 const getContent = async (locale: string) => {
-  const response = await fetchAPI<Fields>('/terms-and-condition',{
-    next: {revalidate: 300}
-  },{
-    locale,
-  });
-  return response;
+  try {
+    const response = await fetchAPI<Fields>('/terms-and-condition', {
+      next: { revalidate: 300 }
+    }, {
+      locale,
+    });
+    return response;
+  } catch (error) {
+    console.error(error);
+    return undefined;
+  }
 }
 
 type Props = {
@@ -25,24 +29,20 @@ type Props = {
     locale: string
   }
 }
-const Terms = async ({params: {locale}}: Props) => {
+
+const Terms = async ({ params: { locale } }: Props) => {
   const content = await getContent(locale);
   const translation = await getTranslation(locale);
-  const goBack = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-    e.preventDefault();
-    router.back();
+  if (!content) {
+    return <div className="text-white">No terms and conditions found</div>
   }
-  const router = useRouter();
   return (
     <div className="container max-w-3xl bg-secondary-50 dark:bg-secondary-800 mx-auto rounded shadow-md p-8">
       <ReactMarkdown className='prose prose-secondary dark:prose-invert'>{content.attributes.terms}</ReactMarkdown>
       <ReactMarkdown className="prose prose-secondary dark:prose-invert">{content.attributes.gdpr}</ReactMarkdown>
       <div className='my-4'>
-        <Link onClick={goBack} className='underline text-primary-900 dark:text-primary-500' href="">
-            {translation.back}
-        </Link>
+        <GoBack translation={translation} />
       </div>
-
     </div>
   )
 }

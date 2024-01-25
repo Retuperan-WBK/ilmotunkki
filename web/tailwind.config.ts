@@ -27,14 +27,14 @@ const configuration = {
   ],
   darkMode: 'class', // class/media
   theme: {
-    colors: {
-      primary: getColor(PRIMARY_COLOR,"blue"),
-      secondary: getColor(SECONDARY_COLOR,"neutral"),
-      transparent: colors.transparent,
-      success: colors.green,
-      danger: colors.red,
-    },
     extend: {
+      colors: {
+        primary: getColor(PRIMARY_COLOR,"blue"),
+        secondary: getColor(SECONDARY_COLOR,"neutral"),
+        transparent: colors.transparent,
+        success: colors.green,
+        danger: colors.red,
+      },
     },
   },
   plugins: [

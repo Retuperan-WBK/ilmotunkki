@@ -1,5 +1,5 @@
 import { fetchAPI } from "@/lib/api";
-import GoBack from "./GoBack";
+import GoBack from "@/components/GoBack";
 import { ItemCategory, StrapiBaseType } from "@/utils/models";
 import { getTranslation } from "@/utils/translationHelper";
 export const dynamic = 'force-dynamic';
@@ -17,9 +17,9 @@ const getData = async () => {
   const [
     content,
     categories,
-    ] = await Promise.all([
-    fetchAPI<Field[]>('/orders/signups',{cache: 'no-store'}),
-    fetchAPI<ItemCategory[]>('/item-categories',{cache: 'no-store'},{
+  ] = await Promise.all([
+    fetchAPI<Field[]>('/orders/signups', { cache: 'no-store' }),
+    fetchAPI<ItemCategory[]>('/item-categories', { cache: 'no-store' }, {
       populate: [
         'overflowItem',
         'itemTypes',
@@ -40,7 +40,7 @@ type Props = {
   }
 }
 
-const SignupsPage = async ({params: {locale}}: Props) => {
+const SignupsPage = async ({ params: { locale } }: Props) => {
   const data = await getData();
   const translation = await getTranslation(locale);
   const itemCategories = data.categories;
@@ -50,21 +50,21 @@ const SignupsPage = async ({params: {locale}}: Props) => {
       <div className="flex gap-5 mb-6">
         {itemCategories?.map(category => <div key={category.id}>
           {translation[category.attributes.name]}: {category.attributes.currentQuantity}/{category.attributes.maximumItemLimit}
-          </div>)}
+        </div>)}
       </div>
       <div className="flex border-b-4 border-b-secondary-200 dark:border-b-secondary-700 py-2 justify-around text-xl ">
-          <div className='flex-[0.5]'>
-            #
-          </div>
-          <div className='flex-1'>
-            {translation.name}
-          </div>
-          <div className='flex-1'>
-            {translation.group}
-          </div>
+        <div className='flex-[0.5]'>
+          #
         </div>
-        {signups?.map(field =>
-        <div 
+        <div className='flex-1'>
+          {translation.name}
+        </div>
+        <div className='flex-1'>
+          {translation.group}
+        </div>
+      </div>
+      {signups?.map(field =>
+        <div
           key={field.id}
           data-verified={field.attributes.status !== 'ok'}
           className="flex border-b-2 border-b-secondary-200 dark:border-b-secondary-700 py-4 justify-around verified data-[verified=true]:opacity-8">
@@ -84,7 +84,7 @@ const SignupsPage = async ({params: {locale}}: Props) => {
           </div>
         </div>)}
       <div className='mt-4'>
-        <GoBack translation={translation}/>
+        <GoBack translation={translation} />
       </div>
     </div>
   )
