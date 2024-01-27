@@ -57,6 +57,7 @@ export default factories.createCoreController('api::order.order', {
           }
         }
       },
+      orderBy: {createdAt: 'asc'},
       populate: {
         customer: true,
       },
