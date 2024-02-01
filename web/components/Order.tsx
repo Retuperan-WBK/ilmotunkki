@@ -48,7 +48,7 @@ const Order = ({ items: cartItems, children, translation }: Props) => {
           <b>{translation.total}</b>
         </div>
         <div className="flex-1">
-          <b>{cartTotal} €</b>
+          <b>{centsToEuros(cartTotal)} €</b>
         </div>
       </div>
     </div>
