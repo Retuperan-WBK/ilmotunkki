@@ -1,4 +1,4 @@
-import { mappedItems } from "../utils/helpers";
+import { centsToEuros, mappedItems } from "../utils/helpers";
 
 import { Item } from "../utils/models";
 
@@ -31,7 +31,9 @@ const Order = ({ items: cartItems, children, translation }: Props) => {
               <p className="text-lg">{item.name}</p>
               <p>{item.quantity} kpl</p>
             </div>
-            <p className="flex-1 text-lg">{item.quantity * item.price} €</p>
+            <p className="flex-1 text-lg">
+              {centsToEuros(item.quantity * item.price)} €
+            </p>
           </div>
         );
       })}

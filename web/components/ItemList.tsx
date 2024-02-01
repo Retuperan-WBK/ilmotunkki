@@ -6,6 +6,7 @@ import { Item, ItemCategory, ItemType } from "../utils/models";
 import useSWR from "swr";
 import Loader from "./Loader";
 import { useTranslation } from "@/context/useTranslation";
+import { centsToEuros } from "@/utils/helpers";
 const itemCount = (items: Item[], itemId: number) =>
   items.filter(
     ({
@@ -75,7 +76,7 @@ const ItemList = ({ locale, seperateCategories, sortByPrice }: Props) => {
         </p>
       </div>
       <p className="text-secondary-500 dark:text-secondary-300 flex-1">
-        {item.attributes.price} €
+        {centsToEuros(item.attributes.price)} €
       </p>
       <div className="flex-1 gap-4 flex items-center relative">
         <button
@@ -103,8 +104,6 @@ const ItemList = ({ locale, seperateCategories, sortByPrice }: Props) => {
 
   const mapCategoriesAndItems = (categories?: ItemCategory[]): ItemType[][] => {
     if (!categories) return [];
-
-    console.log(categories, sortByPrice);
 
     if (!seperateCategories) {
       const mappedItems: ItemType[] = [];

@@ -79,7 +79,7 @@ const generatePaymentBody = (
   const items: PaymentBodyItem[] = mappedCart
     .map((item) => {
       return {
-        unitPrice: item.price * 100,
+        unitPrice: item.price,
         units: item.quantity,
         vatPercentage: 0,
         productCode: item.name,

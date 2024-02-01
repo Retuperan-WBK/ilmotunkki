@@ -91,6 +91,10 @@ export const updateOrderState = async (
   });
 };
 
+export const centsToEuros = (cents: number) => {
+  return (cents / 100).toFixed(2);
+};
+
 export const createPayment = async (orderId: number) => {
   try {
     const order = await serverFetchAPI<Order>(
