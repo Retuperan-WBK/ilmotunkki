@@ -170,7 +170,7 @@ Categories define the inventories and limits per item type. I agree that the nam
 
 The attributes of a purchassable item
 
-- Price: The price in Euros
+- Price: The price in Cents (100 = 1€)
 - availableFrom: When is this item available
 - availableTo: When does the availability end
 - itemCategory: To which category does this item belong to
