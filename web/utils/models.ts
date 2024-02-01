@@ -1,7 +1,6 @@
-
 export type StrapiResponse<T> = {
-  data: T
-}
+  data: T;
+};
 export type StrapiBaseType<T> = {
   id: number;
   attributes: T & {
@@ -12,30 +11,32 @@ export type StrapiBaseType<T> = {
 };
 
 type ImageFields = {
-  ext: string
-  url: string,
-  hash: string
-  mime: string
-  name: string
-  path: null,
-  size: number
-  width: number
-  height: number
-}
+  ext: string;
+  url: string;
+  hash: string;
+  mime: string;
+  name: string;
+  path: null;
+  size: number;
+  width: number;
+  height: number;
+};
 
-export type StrapiImage = StrapiBaseType<{
-  alternativeText: string | null;
-  caption: string | null;
-  formats?: {
-    large: ImageFields;
-    medium: ImageFields;
-    small: ImageFields;
-    thumbnail: ImageFields;
-  };
-  previewUrl: string | null;
-  provider: string;
-  provider_metadata: string;
-} & ImageFields>;
+export type StrapiImage = StrapiBaseType<
+  {
+    alternativeText: string | null;
+    caption: string | null;
+    formats?: {
+      large: ImageFields;
+      medium: ImageFields;
+      small: ImageFields;
+      thumbnail: ImageFields;
+    };
+    previewUrl: string | null;
+    provider: string;
+    provider_metadata: string;
+  } & ImageFields
+>;
 
 export type ItemCategory = StrapiBaseType<{
   orderItemLimit: number;
@@ -65,14 +66,12 @@ export type Translation = StrapiBaseType<{
   translations: {
     key: string;
     value: string;
-  }[]
-}>
+  }[];
+}>;
 
 export type GiftCard = StrapiBaseType<{
   code: string;
 }>;
-
-
 
 export type CallbackPageFields = StrapiBaseType<{
   onSuccess: string;
@@ -81,11 +80,11 @@ export type CallbackPageFields = StrapiBaseType<{
 }>;
 
 export type Field = {
-  id: number,
-  label: string,
+  id: number;
+  label: string;
   type: "text" | "checkbox" | "email" | "number";
-  required: boolean,
-  fieldName: string,
+  required: boolean;
+  fieldName: string;
 };
 
 export type Group = StrapiBaseType<{
@@ -98,7 +97,7 @@ export type ContactForm = StrapiBaseType<{
 }>;
 
 export type Order = StrapiBaseType<{
-  status: 'new'| 'ok' | 'fail' | 'pending' | 'admin-new',
+  status: "new" | "ok" | "fail" | "pending" | "admin-new";
   transactionId?: string;
   createdAt: string;
   items: StrapiResponse<Item[]>;
@@ -107,7 +106,7 @@ export type Order = StrapiBaseType<{
 }>;
 
 export type Customer = StrapiBaseType<{
-  firstName: string,
+  firstName: string;
   lastName: string;
   email: string;
   uid: string;
@@ -115,17 +114,12 @@ export type Customer = StrapiBaseType<{
   [key: string]: string | number | boolean;
 }>;
 
-type PaymentMethodGroup = 
-    | 'mobile' 
-    | 'bank' 
-    | 'creditcard' 
-    | 'credit';
-
+type PaymentMethodGroup = "mobile" | "bank" | "creditcard" | "credit";
 
 type PaytrailFormField = {
-  name: string,
-  value: string
-}
+  name: string;
+  value: string;
+};
 export type Provider = {
   id: string;
   name: string;
@@ -138,16 +132,16 @@ export type Provider = {
 
 export type SkipPaymentParams = {
   status: string;
-  params: Record<string,string>
-}
+  params: Record<string, string>;
+};
 
 export type PaytrailPaymentResponse = {
   transactionId: string;
   href: string;
   terms: string;
-  groups: PaymentMethodGroup[];  // Adjusted based on the new definition
+  groups: PaymentMethodGroup[]; // Adjusted based on the new definition
   reference: string;
   providers: Provider[];
-}
+};
 
 export type PaymentApiResponse = SkipPaymentParams | PaytrailPaymentResponse;

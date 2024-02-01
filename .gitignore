@@ -4,3 +4,4 @@
 .env
 certbot
 postgres-data
+cms/base_content
