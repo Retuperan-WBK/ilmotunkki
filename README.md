@@ -165,6 +165,7 @@ Categories define the inventories and limits per item type. I agree that the nam
 - itemTypes: Which ItemTypes does this category contain
 - maximumItemLimit: How many items in total are in the inventory.
 - overFlowItem: What itemType is used if the user tries to add an item that has no inventory left. This could be for example a reserve spot if someone cancels their purchase.
+- listPriority: In which order are the categories shown in the front page. Lower number means higher priority. Categories with the same number are sorted arbitrarily and empty categories will appear last.
 
 ### ItemType
 
