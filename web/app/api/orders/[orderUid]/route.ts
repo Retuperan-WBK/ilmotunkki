@@ -16,6 +16,6 @@ export const GET = async (request: NextRequest, {params}: Props) => {
     return NextResponse.json(response);
   } catch(error) {
     console.error(error);
-    return NextResponse.json({},{status: 500});
+    return NextResponse.json(null, {status: 404});
   }
 }

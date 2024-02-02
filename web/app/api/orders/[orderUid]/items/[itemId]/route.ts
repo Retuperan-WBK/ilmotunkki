@@ -20,7 +20,7 @@ export const DELETE = async (request: NextRequest, {params}: Props) => {
     return NextResponse.json(removeResult)
   } catch(error) {
     console.error(error);
-    return NextResponse.json({}, {status: 500})
+    return NextResponse.json(null, {status: 500})
   }
 }
 

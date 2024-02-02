@@ -24,6 +24,6 @@ export const POST = async () => {
     return NextResponse.json(newOrder);
   } catch(error) {
     console.error(error);
-    return NextResponse.json({},{status: 500})
+    return NextResponse.json(null,{status: 500})
   }
 }

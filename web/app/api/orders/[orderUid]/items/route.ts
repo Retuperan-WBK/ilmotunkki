@@ -27,6 +27,6 @@ export const POST = async (request: NextRequest, {params}: Props) => {
     return NextResponse.json(newItem)
   } catch(error) {
     console.error(error);
-    return NextResponse.json({}, {status: 500})
+    return NextResponse.json(null, {status: 500})
   }
 }

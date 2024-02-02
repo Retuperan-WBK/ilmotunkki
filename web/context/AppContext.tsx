@@ -5,6 +5,7 @@ import {
 } from "react";
 import useSWR from "swr";
 import { Customer, Item, ItemType, Order } from "../utils/models";
+import { fetcher } from "@/utils/clientHelper";
 
 export interface AppContextType {
   order?: Order;
@@ -17,7 +18,7 @@ export interface AppContextType {
   isEmpty: boolean;
   reset: () => void;
 }
-export const initialCustomer =  {
+export const initialCustomer = {
   id: 0,
   attributes: {
     firstName: '',
@@ -67,30 +68,28 @@ export const AppContext = createContext<AppContextType>(appContextDefault);
 type Props = {
   children: React.ReactNode
 }
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 const AppProvider: FC<Props> = ({ children }) => {
   const [orderUid, setOrderUid] = useState<string | undefined>(undefined);
-  const {data: order, mutate: mutateOrder, error} = useSWR<Order>(orderUid ? `/api/orders/${orderUid}` : null, fetcher);
-  const customer = useMemo(() => order?.attributes.customer.data || appContextDefault.customer,[order]);
+  const { data: order, mutate: mutateOrder, error } = useSWR<Order>(orderUid ? `/api/orders/${orderUid}` : null, fetcher);
+  const customer = useMemo(() => order?.attributes.customer.data || appContextDefault.customer, [order]);
   const items = useMemo(() => order?.attributes.items?.data || appContextDefault.items, [order]);
   const reset = useCallback(() => {
     localStorage.removeItem('orderUid');
     setOrderUid('');
     mutateOrder(undefined);
-  },[mutateOrder]);
-
+  }, [mutateOrder]);
   useEffect(() => {
-    if(error && error.status === 404) {
+    if (error && error.status === 404) {
       reset();
     }
-  },[error,reset]);
+  }, [error, reset]);
 
   const initializeOrder = async () => {
     const response = await fetch('/api/orders', {
       method: 'POST',
     });
-    if(!response.ok) {
+    if (!response.ok) {
       throw new Error("Error in initializing order");
     }
 
@@ -102,7 +101,7 @@ const AppProvider: FC<Props> = ({ children }) => {
   };
 
   const deleteItem = async (itemId: number) => {
-    const itemToRemove = items?.find(({attributes: {itemType}}) => itemType.data.id === itemId);
+    const itemToRemove = items?.find(({ attributes: { itemType } }) => itemType.data.id === itemId);
     if (!itemToRemove) return;
     try {
       const response = await fetch(`/api/orders/${orderUid}/items/${itemToRemove.id}`, {
@@ -111,9 +110,9 @@ const AppProvider: FC<Props> = ({ children }) => {
       const removeResult = await response.json() as Item;
       const filteredItems = items?.filter(item => item.id !== removeResult.id) || [];
       const newOrder = order || appContextDefault.order;
-      newOrder.attributes.items = {data:filteredItems};
+      newOrder.attributes.items = { data: filteredItems };
       mutateOrder(newOrder);
-    } catch(error) {
+    } catch (error) {
       // Error in deleting an item
     }
   };
@@ -130,9 +129,9 @@ const AppProvider: FC<Props> = ({ children }) => {
       const newItem = await response.json() as Item
       const newItems = [...items, newItem];
       const newOrder = order || appContextDefault.order;
-      newOrder.attributes.items = {data: newItems};
+      newOrder.attributes.items = { data: newItems };
       mutateOrder(newOrder);
-    } catch(error) {
+    } catch (error) {
       // Error in adding an item
     }
   }
@@ -142,12 +141,12 @@ const AppProvider: FC<Props> = ({ children }) => {
 
   useEffect(() => {
     const savedOrderUid = localStorage.getItem('orderUid');
-    if(savedOrderUid) {
+    if (savedOrderUid) {
       setOrderUid(savedOrderUid);
       return;
     }
     setOrderUid('');
-  },[]);
+  }, []);
   return (
     <AppContext.Provider value={
       {

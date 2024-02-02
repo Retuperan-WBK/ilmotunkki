@@ -7,6 +7,7 @@ import useSWR from "swr";
 import Loader from "./Loader";
 import { useTranslation } from "@/context/useTranslation";
 import { centsToEuros } from "@/utils/helpers";
+import { fetcher } from "@/utils/clientHelper";
 const itemCount = (items: Item[], itemId: number) =>
   items.filter(
     ({
@@ -45,7 +46,6 @@ type Props = {
   seperateCategories: boolean;
   sortByPrice: boolean;
 };
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 const ItemList = ({ locale, seperateCategories, sortByPrice }: Props) => {
   const { translation } = useTranslation(locale);

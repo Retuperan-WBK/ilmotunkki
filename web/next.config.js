@@ -1,4 +1,5 @@
 /** @type {import('next').NextConfig} */
+
 const nextConfig = {
   reactStrictMode: true,
   images: {
@@ -14,7 +15,11 @@ const nextConfig = {
       },
       {
         protocol: 'http',
-        hostname: 'cms',
+        hostname: '**',
+      },
+      {
+        protocol: 'https',
+        hostname: '**',
       }
     ],
   },
