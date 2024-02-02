@@ -105,8 +105,6 @@ const ItemList = ({ locale, seperateCategories, sortByPrice }: Props) => {
   const mapCategoriesAndItems = (categories?: ItemCategory[]): ItemType[][] => {
     if (!categories) return [];
 
-    console.log("categories", categories);
-
     if (!seperateCategories) {
       const sortCategories = categories.sort((a, b) => {
         return a.attributes.listPriority && b.attributes.listPriority
