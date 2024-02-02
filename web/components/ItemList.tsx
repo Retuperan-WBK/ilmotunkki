@@ -106,8 +106,19 @@ const ItemList = ({ locale, seperateCategories, sortByPrice }: Props) => {
     if (!categories) return [];
 
     if (!seperateCategories) {
+      const sortCategories = categories.sort((a, b) => {
+        return a.attributes.listPriority && b.attributes.listPriority
+          ? a.attributes.listPriority - b.attributes.listPriority
+          : a.attributes.listPriority
+          ? -1
+          : b.attributes.listPriority
+          ? 1
+          : 0;
+      });
+
       const mappedItems: ItemType[] = [];
-      categories?.map((category) =>
+
+      sortCategories.map((category) =>
         category.attributes.itemTypes.data
           .filter((item) => {
             // Remove overflowItem if present
@@ -177,31 +188,38 @@ const ItemList = ({ locale, seperateCategories, sortByPrice }: Props) => {
           <Loader />
         </div>
       )}
-      {mapCategoriesAndItems(itemCategories).map((category, index) => (
-        <div key={index}>
-          {index > 0 && (
-            <div className="w-full border-b-2 border-b-primary-700 dark:border-b-primary-300 opacity-20 my-4" />
-          )}
-          {category.map((item) => (
-            <div key={item.id}>
-              <Item item={item} category={item.attributes.itemCategory.data} />
-              {item.attributes.upgradeTarget.data &&
-                itemCount(items, item.id) > 0 && (
+      {mapCategoriesAndItems(itemCategories).map((category, index) => {
+        if (category.length === 0) return null;
+        else
+          return (
+            <div key={index}>
+              {index > 0 && (
+                <div className="w-full border-b-2 border-b-primary-700 dark:border-b-primary-300 opacity-20 my-4" />
+              )}
+              {category.map((item) => (
+                <div key={item.id}>
                   <Item
-                    key={item.attributes.upgradeTarget.data.id}
-                    item={item.attributes.upgradeTarget.data}
-                    category={
-                      findCategory(
-                        item.attributes.upgradeTarget.data,
-                        itemCategories || [],
-                      ) || item.attributes.itemCategory.data
-                    }
+                    item={item}
+                    category={item.attributes.itemCategory.data}
                   />
-                )}
+                  {item.attributes.upgradeTarget.data &&
+                    itemCount(items, item.id) > 0 && (
+                      <Item
+                        key={item.attributes.upgradeTarget.data.id}
+                        item={item.attributes.upgradeTarget.data}
+                        category={
+                          findCategory(
+                            item.attributes.upgradeTarget.data,
+                            itemCategories || [],
+                          ) || item.attributes.itemCategory.data
+                        }
+                      />
+                    )}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      ))}
+          );
+      })}
     </div>
   );
 };

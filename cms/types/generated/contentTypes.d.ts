@@ -1237,6 +1237,7 @@ export interface ApiItemCategoryItemCategory extends Schema.CollectionType {
       'oneToOne',
       'api::item-type.item-type'
     >;
+    listPriority: Attribute.Integer;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<

@@ -31,6 +31,9 @@
       "type": "relation",
       "relation": "oneToOne",
       "target": "api::item-type.item-type"
+    },
+    "listPriority": {
+      "type": "integer"
     }
   }
 }
