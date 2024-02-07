@@ -115,19 +115,9 @@ const ItemList = ({ locale, seperateCategories, sortByPrice }: Props) => {
     console.log("categories", categories);
 
     if (!seperateCategories) {
-      const sortCategories = categories.sort((a, b) => {
-        return a.attributes.listPriority && b.attributes.listPriority
-          ? a.attributes.listPriority - b.attributes.listPriority
-          : a.attributes.listPriority
-          ? -1
-          : b.attributes.listPriority
-          ? 1
-          : 0;
-      });
-
       const mappedItems: ItemType[] = [];
 
-      sortCategories.map((category) =>
+      categories.map((category) =>
         category.attributes.itemTypes.data
           .filter((item) => {
             // Remove overflowItem if present
@@ -156,8 +146,18 @@ const ItemList = ({ locale, seperateCategories, sortByPrice }: Props) => {
 
       return [{ items: mappedItems, topSeperator: false }];
     } else {
+      const sortCategories = categories.sort((a, b) => {
+        return a.attributes.listPriority && b.attributes.listPriority
+          ? a.attributes.listPriority - b.attributes.listPriority
+          : a.attributes.listPriority
+          ? -1
+          : b.attributes.listPriority
+          ? 1
+          : 0;
+      });
+
       const listCategories: ListCategory[] = [];
-      categories?.map((category) => {
+      sortCategories?.map((category) => {
         const items: ItemType[] = [];
         category.attributes.itemTypes.data
           .filter((item) => {
