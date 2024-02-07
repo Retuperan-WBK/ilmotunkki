@@ -46,6 +46,7 @@ export type ItemCategory = StrapiBaseType<{
   currentQuantity: number;
   overflowItem: StrapiResponse<ItemType | null>;
   listPriority?: number;
+  topSeperator?: boolean;
 }>;
 
 export type ItemType = StrapiBaseType<{
@@ -54,6 +55,7 @@ export type ItemType = StrapiBaseType<{
   availableTo: string;
   itemCategory: StrapiResponse<ItemCategory>;
   upgradeTarget: StrapiResponse<ItemType | null>;
+  topSeperator: boolean;
   slug: string;
 }>;
 
