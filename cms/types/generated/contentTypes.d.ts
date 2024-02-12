@@ -1238,6 +1238,7 @@ export interface ApiItemCategoryItemCategory extends Schema.CollectionType {
       'api::item-type.item-type'
     >;
     listPriority: Attribute.Integer;
+    topSeperator: Attribute.Boolean & Attribute.DefaultTo<false>;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<
@@ -1281,6 +1282,7 @@ export interface ApiItemTypeItemType extends Schema.CollectionType {
       'oneToOne',
       'api::item-type.item-type'
     >;
+    topSeperator: Attribute.Boolean & Attribute.DefaultTo<false>;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<

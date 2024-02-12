@@ -37,6 +37,10 @@
       "type": "relation",
       "relation": "oneToOne",
       "target": "api::item-type.item-type"
+    },
+    "topSeperator": {
+      "type": "boolean",
+      "default": false
     }
   }
 }

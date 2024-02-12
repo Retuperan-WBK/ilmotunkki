@@ -166,6 +166,9 @@ Categories define the inventories and limits per item type. I agree that the nam
 - maximumItemLimit: How many items in total are in the inventory.
 - overFlowItem: What itemType is used if the user tries to add an item that has no inventory left. This could be for example a reserve spot if someone cancels their purchase.
 - listPriority: In which order are the categories shown in the front page. Lower number means higher priority. Categories with the same number are sorted arbitrarily and empty categories will appear last.
+  requires: `seperateCategories` to be set `true` in the `Front page` single type.
+- topSeperator: Adds a seperator above this category listing on the front page.
+  requires: `seperateCategories` to be set `true` in the `Front page` single type.
 
 ### ItemType
 
@@ -177,6 +180,7 @@ The attributes of a purchassable item
 - itemCategory: To which category does this item belong to
 - slug: unique identifier of the type. **Used in translations**
 - upgradeTarget: If there is an additional **itemType** that can be purchased when buying this item. For example after adding the main event ticket, allow them to purchase sillis.
+- topSeperator: Adds a seperator above this item listing on the front page.
 
 ### Order
 
@@ -212,7 +216,7 @@ The front page content. Remember to fill in the required locales.
 - Header: Hero image shown throughout the site
 - headerTitle
 - showSignups: Enables a button to show signups to all users.
-- seperateCategories: Seperate ItemCategories into their own sections
+- seperateCategories: Seperate ItemCategories into their own sections, enables the use of the `listPriority`, and `topSeperator` fields in the `ItemCategory` collection type.
 - sortByPrice: Order the items by price
 
 ### Global
@@ -222,7 +226,7 @@ Global settings for the site.
 - updateEnd: When to prevent the users from editing their details
 - Sponsors: List of sponsors to show in the footer
   - Logo
-  - name
+  - names
   - url: Clicking the logo takes them to this url
 - title: Page title
 - description: Page meta description

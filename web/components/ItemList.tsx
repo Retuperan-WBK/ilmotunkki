@@ -102,23 +102,20 @@ const ItemList = ({ locale, seperateCategories, sortByPrice }: Props) => {
     </div>
   );
 
-  const mapCategoriesAndItems = (categories?: ItemCategory[]): ItemType[][] => {
+  interface ListCategory {
+    items: ItemType[];
+    topSeperator: boolean;
+  }
+
+  const mapCategoriesAndItems = (
+    categories?: ItemCategory[],
+  ): ListCategory[] => {
     if (!categories) return [];
 
     if (!seperateCategories) {
-      const sortCategories = categories.sort((a, b) => {
-        return a.attributes.listPriority && b.attributes.listPriority
-          ? a.attributes.listPriority - b.attributes.listPriority
-          : a.attributes.listPriority
-          ? -1
-          : b.attributes.listPriority
-          ? 1
-          : 0;
-      });
-
       const mappedItems: ItemType[] = [];
 
-      sortCategories.map((category) =>
+      categories.map((category) =>
         category.attributes.itemTypes.data
           .filter((item) => {
             // Remove overflowItem if present
@@ -142,13 +139,23 @@ const ItemList = ({ locale, seperateCategories, sortByPrice }: Props) => {
         const sorted = mappedItems.sort(
           (a, b) => a.attributes.price - b.attributes.price,
         );
-        return [sorted];
+        return [{ items: sorted, topSeperator: false }];
       }
 
-      return [mappedItems];
+      return [{ items: mappedItems, topSeperator: false }];
     } else {
-      const mappedItems: ItemType[][] = [];
-      categories?.map((category) => {
+      const sortCategories = categories.sort((a, b) => {
+        return a.attributes.listPriority && b.attributes.listPriority
+          ? a.attributes.listPriority - b.attributes.listPriority
+          : a.attributes.listPriority
+          ? -1
+          : b.attributes.listPriority
+          ? 1
+          : 0;
+      });
+
+      const listCategories: ListCategory[] = [];
+      sortCategories?.map((category) => {
         const items: ItemType[] = [];
         category.attributes.itemTypes.data
           .filter((item) => {
@@ -167,17 +174,26 @@ const ItemList = ({ locale, seperateCategories, sortByPrice }: Props) => {
             };
             items.push(item);
           });
-        mappedItems.push(items);
+
+        listCategories.push({
+          items,
+          topSeperator: category.attributes.topSeperator || false,
+        });
       });
 
       if (sortByPrice) {
-        const sorted = mappedItems.map((items) =>
-          items.sort((a, b) => a.attributes.price - b.attributes.price),
-        );
+        const sorted = listCategories.map((category) => {
+          return {
+            items: category.items.sort(
+              (a, b) => a.attributes.price - b.attributes.price,
+            ),
+            topSeperator: category.topSeperator,
+          };
+        });
         return sorted;
       }
 
-      return mappedItems;
+      return listCategories;
     }
   };
 
@@ -189,15 +205,20 @@ const ItemList = ({ locale, seperateCategories, sortByPrice }: Props) => {
         </div>
       )}
       {mapCategoriesAndItems(itemCategories).map((category, index) => {
-        if (category.length === 0) return null;
+        if (category.items.length === 0) return null;
         else
           return (
             <div key={index}>
-              {index > 0 && (
+              {index > 0 && category.topSeperator && (
                 <div className="w-full border-b-2 border-b-primary-700 dark:border-b-primary-300 opacity-20 my-4" />
               )}
-              {category.map((item) => (
+              {category.items.map((item) => (
                 <div key={item.id}>
+                  <div>
+                    {item.attributes.topSeperator && (
+                      <div className="w-full border-b-2 border-b-primary-700 dark:border-b-primary-300 opacity-20 my-4" />
+                    )}
+                  </div>
                   <Item
                     item={item}
                     category={item.attributes.itemCategory.data}
