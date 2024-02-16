@@ -41,6 +41,10 @@ const sendConfirmationEmail = async (order: any) => {
       }
     }
   });
+  if(!customer) {
+    console.error("There is no customer for this order");
+    return;
+  }
   const [template, form, translation] = await Promise.all([
     strapi.query('api::email.email').findOne({
       where: {
