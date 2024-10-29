@@ -30,6 +30,22 @@
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::item-type.item-type"
+    },
+    "useGroups": {
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "type": "boolean"
+    },
+    "useGiftCard": {
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "type": "boolean"
     }
   }
 }

@@ -75,6 +75,32 @@ export const getContactForm = (
   return fields;
 };
 
+export const getUseGroups = (forms: ContactForm[]): boolean => {
+
+  let useGroups = false;
+
+  forms.forEach((form) => {
+    if (form.attributes.useGroups === true) {
+      useGroups = true;
+    }
+  });
+
+  return useGroups;
+}
+
+export const getUseGiftCard = (forms: ContactForm[]): boolean => {
+  
+    let useGiftCard = false;
+  
+    forms.forEach((form) => {
+      if (form.attributes.useGiftCard === true) {
+        useGiftCard = true;
+      }
+    });
+  
+    return useGiftCard;
+  }
+
 export const updateOrderState = async (
   orderId: number,
   status: string,

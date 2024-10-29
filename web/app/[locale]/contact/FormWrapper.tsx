@@ -36,10 +36,10 @@ const FormWrapper = ({locale, contactForms}: Props) => {
         locale={locale}
         onSubmit={handleSubmit}
       />
-        <div>
-          <Link href={`/${locale}/`} className='btn h-12'>
-            {translation.back}
-          </Link>
+      <div>
+        <Link href={`/${locale}/`}>
+          <button className='btn h-12'>{translation.back}</button>
+        </Link>
       </div>
     </div>
   );

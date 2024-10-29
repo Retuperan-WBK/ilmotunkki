@@ -6,6 +6,7 @@ import { getTranslation } from "@/utils/translationHelper";
 export const dynamic = 'force-dynamic';
 type Global = StrapiBaseType<{
   updateEnd: string;
+  useGiftCard?: boolean;
 }>
 
 
@@ -22,7 +23,7 @@ const getContactForms = async (locale: string) => {
   }
 };
 
-const getGlobalSettings = async () => {
+export const getGlobalSettings = async () => {
   try {
     return fetchAPI<Global>('/global', { cache: 'no-store' });
   } catch (error) {
@@ -55,10 +56,10 @@ type Props = {
   params: {
     locale: string;
     customerUid: string;
-  }
+  },
 }
 
-const EditPage = async ({ params: { locale, customerUid } }: Props) => {
+const EditPage = async ({ params: { locale, customerUid }}: Props) => {
   const [
     global,
     contactForms,

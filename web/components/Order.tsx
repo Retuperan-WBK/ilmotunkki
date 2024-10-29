@@ -27,7 +27,7 @@ const Order = ({ items: cartItems, children, translation }: Props) => {
             className="flex border-b-2 border-b-secondary-300 py-3 px-2 gap-2 items-center"
             key={item.id}
           >
-            <div className="flex-1">
+            <div className="flex-[4]">
               <p className="text-lg">{item.name}</p>
               <p>{item.quantity} kpl</p>
             </div>

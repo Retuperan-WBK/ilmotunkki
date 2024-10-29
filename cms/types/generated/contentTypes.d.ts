@@ -854,6 +854,18 @@ export interface ApiContactFormContactForm extends Schema.CollectionType {
       'oneToMany',
       'api::item-type.item-type'
     >;
+    useGroups: Attribute.Boolean &
+      Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    useGiftCard: Attribute.Boolean &
+      Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<
@@ -1158,7 +1170,12 @@ export interface ApiGroupGroup extends Schema.CollectionType {
     draftAndPublish: false;
   };
   attributes: {
-    name: Attribute.UID;
+    orders: Attribute.Relation<
+      'api::group.group',
+      'oneToMany',
+      'api::order.order'
+    >;
+    name: Attribute.String & Attribute.Required & Attribute.Unique;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<
@@ -1328,6 +1345,11 @@ export interface ApiOrderOrder extends Schema.CollectionType {
       'api::item.item'
     >;
     uid: Attribute.UID;
+    group: Attribute.Relation<
+      'api::order.order',
+      'manyToOne',
+      'api::group.group'
+    >;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<

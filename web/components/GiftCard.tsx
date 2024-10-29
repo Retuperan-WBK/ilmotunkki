@@ -44,8 +44,9 @@ const GiftCardComponent = ({locale}: Props) => {
     setGiftCard(e.target.value);
   }
   return(
-    <div className='w-full'>
-      <div className='mt-2 flex gap-2 w-full'>
+    <div className='w-full mt-2'>
+      <p className='text-white'>{translation.got_giftcard}</p>
+      <div className='flex gap-2 w-full'>
         <input
           className='tx-input'
           type="text"

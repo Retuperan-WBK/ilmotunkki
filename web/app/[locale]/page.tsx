@@ -40,6 +40,7 @@ const Home = async ({ params: { locale } }: Props) => {
   const showSignups = response?.attributes.showSignups || false;
   const seperateCategories = response?.attributes.seperateCategories || false;
   const sortByPrice = response?.attributes.sortByPrice || false;
+
   return (
     <div className="container max-w-3xl bg-secondary-50 dark:bg-secondary-800 mx-auto rounded shadow-md mt-4 p-1 sm:p-8">
       <main className="container mx-auto px-4">

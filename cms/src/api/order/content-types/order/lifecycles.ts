@@ -75,7 +75,14 @@ const sendConfirmationEmail = async (order: any) => {
     text: text,
   }
   try {
-    await strapi.service('api::email.email').create(mailOptions);
+
+    if (customer.email) {
+      await strapi.service('api::email.email').create(mailOptions);
+    } else {
+      const newSubject = `No email provided for order ${order.id} --- ${template.subject}`;
+      await strapi.service('api::email.email').create({...mailOptions, to: template.from, subject: newSubject});
+    }
+
   } catch(error) {
     console.error(`Order id: ${order.id} had an issue sending the email`);
   }
@@ -95,6 +102,7 @@ export default {
       }
     });
     if(order.status !== 'ok' && data.status === 'ok') {
+
       sendConfirmationEmail(order);
     }
   },

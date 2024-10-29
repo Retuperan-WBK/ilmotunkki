@@ -13,6 +13,7 @@ export default factories.createCoreController('api::order.order', {
       },
       populate: {
         customer: true,
+        group: true,
         items: {
           populate: {
             itemType: {
@@ -36,6 +37,7 @@ export default factories.createCoreController('api::order.order', {
         },
       },
       populate: {
+        group: true,
         items: {
           populate: {
             itemType: true,

@@ -1,6 +1,11 @@
 export type StrapiResponse<T> = {
   data: T;
 };
+
+export type StrapiResponseUndefined<T> = {
+  data: T | undefined;
+};
+
 export type StrapiBaseType<T> = {
   id: number;
   attributes: T & {
@@ -97,6 +102,8 @@ export type Group = StrapiBaseType<{
 export type ContactForm = StrapiBaseType<{
   contactForm: Field[];
   itemTypes: StrapiResponse<ItemType[]>;
+  useGroups: boolean;
+  useGiftCard: boolean;
 }>;
 
 export type Order = StrapiBaseType<{
@@ -106,6 +113,7 @@ export type Order = StrapiBaseType<{
   items: StrapiResponse<Item[]>;
   customer: StrapiResponse<Customer>;
   uid: string;
+  group: StrapiResponseUndefined<Group>;
 }>;
 
 export type Customer = StrapiBaseType<{

@@ -12,8 +12,16 @@
   },
   "pluginOptions": {},
   "attributes": {
+    "orders": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::order.order",
+      "mappedBy": "group"
+    },
     "name": {
-      "type": "uid"
+      "type": "string",
+      "unique": true,
+      "required": true
     }
   }
 }
