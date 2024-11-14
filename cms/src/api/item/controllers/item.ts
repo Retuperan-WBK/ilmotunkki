@@ -46,6 +46,12 @@ export default factories.createCoreController('api::item.item',({strapi}) => ({
     if(order.status === 'ok') {
       return ctx.badRequest('Order already done');
     }
+    if(order.status === 'pending') {
+      return ctx.badRequest('Order is pending');
+    }
+    if(order.status === 'expired') {
+      return ctx.badRequest('Order is expired');
+    }
     const orderId = order.id;
     const [totalCategoryItemCount,orderCategoryItemCount] = await Promise.all([
       strapi.query('api::item.item').count({
