@@ -31,7 +31,7 @@ docker compose up -d
 Import the base settings and content:
 
 ```
-docker compose exec cms npx strapi import -f base_content.tar.gz
+docker compose exec cms npx strapi import -f rwbk_content.tar.gz
 ```
 
 Go to [http://localhost:7800/cms/admin](http://localhost:7800/cms/admin), create an account and login. Go to Settings > API Tokens > Add new API Token. Name it something descriptive and set the token type to `full-access`.
@@ -232,6 +232,7 @@ Global settings for the site.
 - description: Page meta description
 - url: Page url, set this to you domain
 - favicon
+- TESTMODE: If set to true, all contact information will be generated and the payment processor is not contacted and the payment is always succesful. **Remember to set this to false before going live**
 
 ### Paytrail
 

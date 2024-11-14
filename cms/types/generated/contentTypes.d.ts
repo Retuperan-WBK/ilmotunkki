@@ -1141,6 +1141,9 @@ export interface ApiGlobalGlobal extends Schema.SingleType {
     description: Attribute.String;
     favicon: Attribute.Media;
     url: Attribute.String;
+    TESTMODE: Attribute.Boolean &
+      Attribute.Required &
+      Attribute.DefaultTo<false>;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<
