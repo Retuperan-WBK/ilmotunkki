@@ -1,0 +1,31 @@
+{
+  "kind": "collectionType",
+  "collectionName": "seats",
+  "info": {
+    "singularName": "seat",
+    "pluralName": "seats",
+    "displayName": "Seat",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Row": {
+      "type": "string"
+    },
+    "Number": {
+      "type": "string"
+    },
+    "x_cord": {
+      "type": "float"
+    },
+    "y_cord": {
+      "type": "float"
+    },
+    "special": {
+      "type": "text"
+    }
+  }
+}

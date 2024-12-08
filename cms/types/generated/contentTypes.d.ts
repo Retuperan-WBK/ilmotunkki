@@ -1223,6 +1223,7 @@ export interface ApiItemItem extends Schema.CollectionType {
       'oneToOne',
       'api::giftcard.giftcard'
     >;
+    seat: Attribute.Relation<'api::item.item', 'oneToOne', 'api::seat.seat'>;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<'api::item.item', 'oneToOne', 'admin::user'> &
@@ -1353,6 +1354,7 @@ export interface ApiOrderOrder extends Schema.CollectionType {
       'manyToOne',
       'api::group.group'
     >;
+    kutsuvieras: Attribute.Boolean;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<
@@ -1397,6 +1399,67 @@ export interface ApiPaytrailPaytrail extends Schema.SingleType {
       Attribute.Private;
     updatedBy: Attribute.Relation<
       'api::paytrail.paytrail',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
+export interface ApiSeatSeat extends Schema.CollectionType {
+  collectionName: 'seats';
+  info: {
+    singularName: 'seat';
+    pluralName: 'seats';
+    displayName: 'Seat';
+    description: '';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    Row: Attribute.String;
+    Number: Attribute.String;
+    x_cord: Attribute.Float;
+    y_cord: Attribute.Float;
+    special: Attribute.Text;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<'api::seat.seat', 'oneToOne', 'admin::user'> &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<'api::seat.seat', 'oneToOne', 'admin::user'> &
+      Attribute.Private;
+  };
+}
+
+export interface ApiSectionSection extends Schema.CollectionType {
+  collectionName: 'sections';
+  info: {
+    singularName: 'section';
+    pluralName: 'sections';
+    displayName: 'Section';
+    description: '';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    Name: Attribute.String & Attribute.Required;
+    seats: Attribute.Relation<
+      'api::section.section',
+      'oneToMany',
+      'api::seat.seat'
+    >;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::section.section',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      'api::section.section',
       'oneToOne',
       'admin::user'
     > &
@@ -1534,6 +1597,8 @@ declare module '@strapi/types' {
       'api::item-type.item-type': ApiItemTypeItemType;
       'api::order.order': ApiOrderOrder;
       'api::paytrail.paytrail': ApiPaytrailPaytrail;
+      'api::seat.seat': ApiSeatSeat;
+      'api::section.section': ApiSectionSection;
       'api::terms-and-condition.terms-and-condition': ApiTermsAndConditionTermsAndCondition;
       'api::translation.translation': ApiTranslationTranslation;
     }

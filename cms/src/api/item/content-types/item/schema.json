@@ -28,6 +28,11 @@
       "relation": "oneToOne",
       "target": "api::giftcard.giftcard",
       "inversedBy": "item"
+    },
+    "seat": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::seat.seat"
     }
   }
 }

@@ -48,6 +48,9 @@
       "relation": "manyToOne",
       "target": "api::group.group",
       "inversedBy": "orders"
+    },
+    "kutsuvieras": {
+      "type": "boolean"
     }
   }
 }

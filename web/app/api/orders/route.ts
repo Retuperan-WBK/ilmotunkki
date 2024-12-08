@@ -1,6 +1,6 @@
-import { fetchAPI } from "@/lib/api";
+import { fetchAPI, fetchAuthenticatedAPI } from "@/lib/api";
 import { Customer, Order } from "@/utils/models";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 export const dynamic = 'force-dynamic';
 
 
@@ -25,5 +25,22 @@ export const POST = async () => {
   } catch(error) {
     console.error(error);
     return NextResponse.json(null,{status: 500})
+  }
+}
+
+export const GET = async (req: NextRequest) => {
+  try {
+    const token = req.cookies.get('adminToken');
+
+    if (!token) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const orders = await fetchAuthenticatedAPI<Order[]>('/orders', {}, {}, token.value);
+    
+    return NextResponse.json(orders);
+  } catch(error) {
+    console.error(error);
+    return NextResponse.json(null,{status: 500});
   }
 }

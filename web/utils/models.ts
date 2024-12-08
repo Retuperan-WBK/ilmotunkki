@@ -68,6 +68,7 @@ export type Item = StrapiBaseType<{
   itemType: StrapiResponse<ItemType>;
   order: StrapiResponse<Order>;
   giftCard: StrapiResponse<GiftCard | null>;
+  seat: StrapiResponse<Seat | null>;
 }>;
 
 export type Translation = StrapiBaseType<{
@@ -154,5 +155,19 @@ export type PaytrailPaymentResponse = {
   reference: string;
   providers: Provider[];
 };
+
+export type Section = StrapiBaseType<{
+  Name: string;
+  seats: StrapiResponse<Seat[]>;
+}>;
+
+export type Seat = StrapiBaseType<{
+  Row: string;
+  Number: string;
+  x_cord: number;
+  y_cord: number;
+  special: string | null;
+  item: StrapiResponse<Item | null>;
+}>;
 
 export type PaymentApiResponse = SkipPaymentParams | PaytrailPaymentResponse;

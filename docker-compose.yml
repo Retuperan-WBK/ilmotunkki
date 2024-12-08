@@ -3,7 +3,7 @@ version: '3'
 services:
   db:
     image: postgres:14.4
-    environment: 
+    environment:
       POSTGRES_DB: strapi
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_USER: ${DATABASE_USERNAME}

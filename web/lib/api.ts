@@ -59,3 +59,67 @@ export const getStrapiMedia = (media: Media) => {
   const imageUrl = url.startsWith("/") ? getPublicStrapiURL(url) : url;
   return imageUrl;
 }
+
+export const fetchLoginApi= async <T>(
+  path: string,
+  options: RequestInit = {},
+  urlParamsObject = {},
+  ): Promise<T> => {
+  // Merge default and user options
+  const mergedOptions: RequestInit = {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    ...options,
+  };
+  const queryString = qs.stringify(urlParamsObject);
+  // Build request URL
+  const requestUrl = `${getStrapiURL(
+    `/api${path}${queryString ? `?${queryString}` : ""}`
+  )}`;
+  // Trigger API call
+  const response = await fetch(requestUrl, mergedOptions);
+  // Handle response
+  if (!response.ok) {
+    const {error} = await response.json()
+    throw error;
+  }
+
+  const data = await response.json();
+  return data as T;
+};
+
+export const fetchAuthenticatedAPI = async <T>(
+  path: string,
+  options: RequestInit = {},
+  urlParamsObject = {},
+  jwt: string
+): Promise<T> => {
+  // Merge default options and user options
+
+  const mergedOptions: RequestInit = {
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${jwt}`
+    },
+    ...options,
+  };
+
+  const queryString = qs.stringify(urlParamsObject);
+  
+  // Build the request URL
+  const requestUrl = `${getStrapiURL(`/api${path}${queryString ? `?${queryString}` : ""}`)}`;
+
+  // Trigger the API call
+  const response = await fetch(requestUrl, mergedOptions);
+
+  // Handle errors
+  if (!response.ok) {
+    const errorResponse = await response.json();
+    throw new Error(errorResponse?.error?.message || 'An unknown error occurred.');
+  }
+
+  // Return the response data
+  const jsonResponse = await response.json();
+  return jsonResponse.data as T;
+}
