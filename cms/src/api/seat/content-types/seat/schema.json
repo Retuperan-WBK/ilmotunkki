@@ -32,6 +32,11 @@
       "relation": "manyToOne",
       "target": "api::section.section",
       "inversedBy": "seats"
+    },
+    "item_type": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::item-type.item-type"
     }
   }
 }

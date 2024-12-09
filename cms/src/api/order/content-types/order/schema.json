@@ -51,6 +51,9 @@
     },
     "kutsuvieras": {
       "type": "boolean"
+    },
+    "tickets_sent": {
+      "type": "boolean"
     }
   }
 }

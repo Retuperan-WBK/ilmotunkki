@@ -5,9 +5,10 @@ import Logo from './Logo';
 import SeatMap from './SeatMap';
 import OrdersDrawer from './OrdersDrawer';
 import GroupsDrawer from './GroupsDrawer';
+import MapDrawer from './MapDrawer';
 
 export default function SeatDashboard() {
-  const [activeTab, setActiveTab] = useState<'tilaukset' | 'ryhmat'>('tilaukset'); // State to track active tab
+  const [activeTab, setActiveTab] = useState<'tilaukset' | 'ryhmat' | 'kartta'>('tilaukset'); // State to track active tab
 
   return (
     <div className="flex flex-col w-full h-full">
@@ -34,6 +35,14 @@ export default function SeatDashboard() {
           >
             Ryhmät
           </button>
+          <button
+            onClick={() => setActiveTab('kartta')}
+            className={`text-2xl font-bold ml-4 cursor-pointer ${
+              activeTab === 'kartta' ? 'text-white' : 'text-gray-400'
+            }`}
+          >
+            Kartta
+          </button>
         </div>
       </div>
 
@@ -47,6 +56,9 @@ export default function SeatDashboard() {
           )}
           {activeTab === 'ryhmat' && (
             <GroupsDrawer />
+          )}
+          {activeTab === 'kartta' && (
+            <MapDrawer />
           )}
         </div>
 

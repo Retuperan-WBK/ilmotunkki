@@ -1,0 +1,68 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { fetchAuthenticatedAPI } from '@/lib/api';
+
+/**
+ * Handle PUT request to update a seat by ID
+ */
+export async function PUT(req: NextRequest) {
+  try {
+    const token = req.cookies.get('adminToken');
+
+    if (!token) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const seatId = req.nextUrl.pathname.split('/').pop();
+    const body = await req.json();
+
+    const payload = {
+      data: {
+        x_cord: body.x_cord,
+        y_cord: body.y_cord,
+        Row: body.Row,
+        Number: body.Number,
+        special: body.special || null,
+        itemType: body.itemType || null,
+      }
+    };
+
+    console.log('Updating Seat with ID:', seatId);
+    console.log('Payload Sent to Strapi:', payload);
+    
+    const response = await fetchAuthenticatedAPI(`/seats/${seatId}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    }, {}, token.value);
+
+    return NextResponse.json(response);
+  } catch (error) {
+    console.error('Error updating seat:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+/**
+ * Handle DELETE request to delete a seat by ID
+ */
+export async function DELETE(req: NextRequest) {
+  try {
+    const token = req.cookies.get('adminToken');
+
+    if (!token) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const seatId = req.nextUrl.pathname.split('/').pop();
+
+    console.log('Deleting Seat with ID:', seatId);
+    
+    const response = await fetchAuthenticatedAPI(`/seats/${seatId}`, {
+      method: 'DELETE',
+    }, {}, token.value);
+
+    return NextResponse.json(response);
+  } catch (error) {
+    console.error('Error deleting seat:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}

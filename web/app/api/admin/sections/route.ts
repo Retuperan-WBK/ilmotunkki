@@ -15,6 +15,7 @@ export async function GET(req: NextRequest) {
     }, {
       populate: [
         'seats',
+        'seats.item_type',
         'background_image'
       ]
     }, token.value);

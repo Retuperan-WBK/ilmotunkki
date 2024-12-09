@@ -49,18 +49,18 @@ const GroupsDrawer = () => {
     const orders = selectedGroup.attributes.orders?.data || [];
 
     return (
-      <div className="p-6">
+      <div className="p-6 flex flex-col items-start w-full h-full">
         <button
           className="mb-4 underline"
           onClick={() => setSelectedGroup(null)}
         >
           ← Takaisin ryhmiin
         </button>
-        <h1 className="text-xl font-bold mb-4">Ryhmän Tiedot</h1>
-        <div className="flex flex-col bg-[#868686] rounded-md p-4">
-          <p className="text-md font-bold mb-4">
-            Ryhmän nimi: {selectedGroup.attributes.name}
-          </p>
+        <h1 className="text-xl font-bold mb-4">Ryhmä: {selectedGroup.attributes.name}</h1>
+        <div className="flex w-full h-full flex-col bg-[#868686] border-4 border-[#868686] rounded-md p-4 pb-8 mb-4 overflow-y-scroll">
+        <p className="text-md font-bold mb-4">
+          Tilaukset:
+        </p>
           {orders.map((order) => {
             const tickets = order.attributes.items?.data || [];
             const totalCount = tickets.length || 0;

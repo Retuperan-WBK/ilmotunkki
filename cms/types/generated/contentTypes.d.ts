@@ -1355,6 +1355,7 @@ export interface ApiOrderOrder extends Schema.CollectionType {
       'api::group.group'
     >;
     kutsuvieras: Attribute.Boolean;
+    tickets_sent: Attribute.Boolean;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<
@@ -1427,6 +1428,11 @@ export interface ApiSeatSeat extends Schema.CollectionType {
       'api::seat.seat',
       'manyToOne',
       'api::section.section'
+    >;
+    item_type: Attribute.Relation<
+      'api::seat.seat',
+      'oneToOne',
+      'api::item-type.item-type'
     >;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
