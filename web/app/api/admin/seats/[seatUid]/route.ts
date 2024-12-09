@@ -25,9 +25,6 @@ export async function PUT(req: NextRequest) {
         itemType: body.itemType || null,
       }
     };
-
-    console.log('Updating Seat with ID:', seatId);
-    console.log('Payload Sent to Strapi:', payload);
     
     const response = await fetchAuthenticatedAPI(`/seats/${seatId}`, {
       method: 'PUT',
@@ -53,8 +50,6 @@ export async function DELETE(req: NextRequest) {
     }
 
     const seatId = req.nextUrl.pathname.split('/').pop();
-
-    console.log('Deleting Seat with ID:', seatId);
     
     const response = await fetchAuthenticatedAPI(`/seats/${seatId}`, {
       method: 'DELETE',

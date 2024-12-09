@@ -157,8 +157,9 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const activeSection = sections.find((section) => section.id === activeSectionId) || null;
 
   const handleSeatClick = (seat: Seat) => {
-    console.log('Seat Clicked:', seat);
     if (!currentMode) return;
+
+    console.log('Seat Clicked:', currentMode);
 
     switch (currentMode) {
       case 'edit-seat':

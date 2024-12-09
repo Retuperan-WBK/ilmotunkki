@@ -24,9 +24,6 @@ export async function POST(req: NextRequest) {
       }
     };
 
-    console.log('Creating Seat with Payload:', payload);
-    console.log('Token:', token.value);
-
     const response = await fetchAuthenticatedAPI('/seats', {
       method: 'POST',
       body: JSON.stringify(payload),
@@ -62,8 +59,6 @@ export async function PUT(req: NextRequest) {
       }
     };
 
-    console.log(`Updating Seat ID: ${seatId} with Payload:`, payload);
-
     const response = await fetchAuthenticatedAPI(`/seats/${seatId}`, {
       method: 'PUT',
       body: JSON.stringify(payload),
@@ -86,8 +81,6 @@ export async function DELETE(req: NextRequest) {
     }
 
     const seatId = req.nextUrl.pathname.split('/').pop();
-
-    console.log(`Deleting Seat ID: ${seatId}`);
 
     const response = await fetchAuthenticatedAPI(`/seats/${seatId}`, {
       method: 'DELETE',
