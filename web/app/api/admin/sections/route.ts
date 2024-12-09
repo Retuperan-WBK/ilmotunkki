@@ -10,11 +10,14 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    console.log('JWT Token:', token.value);
-
     const sections = await fetchAuthenticatedAPI<Section[]>('/sections', {
       method: 'GET'
-    }, {}, token.value);
+    }, {
+      populate: [
+        'seats',
+        'background_image'
+      ]
+    }, token.value);
 
     return NextResponse.json(sections, { status: 200 });
 

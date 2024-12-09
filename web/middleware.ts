@@ -12,6 +12,10 @@ export const middleware = async (request: NextRequest) => {
     return; 
   }
 
+  if (pathname.startsWith('/public')) {
+    return;
+  }
+
   const pathnameHasLocale = locales.some(
     (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
   );

@@ -1423,6 +1423,11 @@ export interface ApiSeatSeat extends Schema.CollectionType {
     x_cord: Attribute.Float;
     y_cord: Attribute.Float;
     special: Attribute.Text;
+    section: Attribute.Relation<
+      'api::seat.seat',
+      'manyToOne',
+      'api::section.section'
+    >;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<'api::seat.seat', 'oneToOne', 'admin::user'> &
@@ -1450,6 +1455,7 @@ export interface ApiSectionSection extends Schema.CollectionType {
       'oneToMany',
       'api::seat.seat'
     >;
+    background_image: Attribute.Media;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<

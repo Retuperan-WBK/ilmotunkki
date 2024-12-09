@@ -26,6 +26,12 @@
     },
     "special": {
       "type": "text"
+    },
+    "section": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::section.section",
+      "inversedBy": "seats"
     }
   }
 }

@@ -159,6 +159,7 @@ export type PaytrailPaymentResponse = {
 export type Section = StrapiBaseType<{
   Name: string;
   seats: StrapiResponse<Seat[]>;
+  background_image: StrapiResponse<StrapiImage>;
 }>;
 
 export type Seat = StrapiBaseType<{
@@ -168,6 +169,12 @@ export type Seat = StrapiBaseType<{
   y_cord: number;
   special: string | null;
   item: StrapiResponse<Item | null>;
+  section: StrapiResponse<Section>;
+}>;
+
+export type AdminGroup = StrapiBaseType<{
+  name: string;
+  orders: StrapiResponse<Order[]>;
 }>;
 
 export type PaymentApiResponse = SkipPaymentParams | PaytrailPaymentResponse;

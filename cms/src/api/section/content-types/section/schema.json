@@ -19,7 +19,15 @@
     "seats": {
       "type": "relation",
       "relation": "oneToMany",
-      "target": "api::seat.seat"
+      "target": "api::seat.seat",
+      "mappedBy": "section"
+    },
+    "background_image": {
+      "allowedTypes": [
+        "images"
+      ],
+      "type": "media",
+      "multiple": false
     }
   }
 }
