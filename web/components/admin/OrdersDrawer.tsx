@@ -5,7 +5,7 @@ import { useAdminContext } from "./AdminContext";
 const OrdersDrawer = () => {
 
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const { orders } = useAdminContext();
+  const { orders, selectedTicket, setSelectedTicket, setMode } = useAdminContext();
 
   const getOrderStatusColor = (placedCount: number, totalCount: number) => {
     if (placedCount === 0) return 'bg-red-500'; // All unplaced
@@ -28,6 +28,21 @@ const OrdersDrawer = () => {
     }
     return 'EI PAIKKAA';
   };
+
+  const handleSetTicketToSeat = (ticket: Item) => {
+    setMode('add-ticket-to-seat');
+    setSelectedTicket(ticket);
+  }
+
+  const handleRemoveTicketFromSeat = (ticket: Item) => {
+    setMode('remove-ticket-from-seat');
+    setSelectedTicket(ticket);
+  }
+
+  const handleMoveTicketToSeat = (ticket: Item) => {
+    setMode('change-ticket-seat');
+    setSelectedTicket(ticket);
+  }
 
   const ticketBorderColor = (ticket: Item) => {
     console.log(ticket.attributes.itemType.data.attributes.slug);
@@ -86,7 +101,7 @@ const OrdersDrawer = () => {
               <div
                 key={ticket.id}
                 className="flex items-center justify-between bg-[#3D3D3D] rounded-md p-2 mb-2 py-4"
-                style={{ borderTop: `6px solid ${ticketBorderColor(ticket)}` }}
+                style={selectedTicket && selectedTicket.id === ticket.id ? { border: "6px solid green" } : { borderTop: `6px solid ${ticketBorderColor(ticket)}`, cursor: 'pointer' }}
               >
                 <div
                   className={`w-4 h-4 rounded-full ${getTicketStatusColor(ticket)} mr-2`}
@@ -96,8 +111,15 @@ const OrdersDrawer = () => {
                 </p>
                 <p className="text-sm">{getTicketSeatNumber(ticket)}</p>
                 <button
-                  className="underline"
-                  onClick={() => console.log(`Show details for ticket ${ticket.id}`)}
+                  onClick={() => 
+                  {
+                    if (ticket.attributes.seat.data) {
+                      handleMoveTicketToSeat(ticket);
+                    } else {
+                      handleSetTicketToSeat(ticket);
+                    }
+                  }
+                  }
                 >
                   →
                 </button>

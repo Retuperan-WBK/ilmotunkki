@@ -137,5 +137,64 @@ export default factories.createCoreController('api::item.item',({strapi}) => ({
       return ctx.notFound('Not found');
     }
     return this.transformResponse(entity);
+  },
+  async assignSeat(ctx) {
+    const { id } = ctx.params; // Item ID
+    const { seat } = ctx.request.body; // Seat ID from the request
+
+    if (!seat) {
+      return ctx.badRequest('Seat ID is required');
+    }
+
+    try {
+      const updatedItem = await strapi.entityService.update('api::item.item', id, {
+        data: {
+          seat: seat, // Assuming "seat" is the relation field in your item
+        },
+      });
+
+      return ctx.send(updatedItem);
+    } catch (error) {
+      ctx.throw(500, 'Error assigning seat');
+    }
+  },
+
+  // **Remove Seat from Item**
+  async removeSeat(ctx) {
+    const { id } = ctx.params; // Item ID
+
+    try {
+      const updatedItem = await strapi.entityService.update('api::item.item', id, {
+        data: {
+          seat: null, // Remove the relationship
+        },
+      });
+
+      return ctx.send(updatedItem);
+    } catch (error) {
+      ctx.throw(500, 'Error removing seat from item');
+    }
+  },
+
+  // **Change Item Seat**
+  async changeSeat(ctx) {
+    const { id } = ctx.params; // Item ID
+    const { seat } = ctx.request.body; // Seat ID from the request
+
+    if (!seat) {
+      return ctx.badRequest('Seat ID is required');
+    }
+
+    try {
+      const updatedItem = await strapi.entityService.update('api::item.item', id, {
+        data: {
+          seat: seat, // Update the relationship
+        },
+      });
+
+      return ctx.send(updatedItem);
+    } catch (error) {
+      ctx.throw(500, 'Error changing seat for item');
+    }
   }
 }));

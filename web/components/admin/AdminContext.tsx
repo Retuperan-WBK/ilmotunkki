@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Order, AdminGroup, Section, Seat, ItemType } from '@/utils/models';
+import { Order, AdminGroup, Section, Seat, ItemType, Item } from '@/utils/models';
 
 interface AdminContextProps {
   orders: Order[];
@@ -10,9 +10,9 @@ interface AdminContextProps {
   activeSectionId: number | null;
   currentMode: 'add-seat' | 'edit-seat' | 'add-ticket-to-seat' | 'remove-ticket-from-seat' | 'change-ticket-seat' | null;
   setMode: (mode: AdminContextProps['currentMode']) => void;
-  setSelectedTicket: (ticketId: number | null) => void;
+  setSelectedTicket: (ticketId: Item | null) => void;
   setActiveSection: (sectionId: number) => void;
-  selectedTicketId: number | null;
+  selectedTicket: Item | null;
   activeSection: Section | null;
   addSeat: (sectionId: number, seatData: Partial<Seat['attributes']>) => Promise<void>;
   updateSeat: (seatId: number, seatData: Partial<Seat['attributes']>) => Promise<void>;
@@ -48,12 +48,15 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [sections, setSections] = useState<Section[]>([]);
   const [activeSectionId, setActiveSectionId] = useState<number | null>(null);
   const [currentMode, setCurrentMode] = useState<AdminContextProps['currentMode']>(null);
-  const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
+  
   const [itemTypes, setItemTypes] = useState<ItemType[]>([]);
 
   // MapDrawer
   const [selectedSeat, setSelectedSeat] = useState<Seat | null>(null);
   const [newSeat, setNewSeat] = useState<NewSeat>({ row: '1', seatNumber: '1', special: '', itemType: 0 });
+
+  // OrderDrawer
+  const [selectedTicket, setSelectedTicket] = useState<Item | null>(null);
 
   // Fetch all orders
   const fetchOrders = async () => {
@@ -117,36 +120,68 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     await fetchSections();
   }
 
-  // **Add Ticket to Seat**
   const addTicketToSeat = async (ticketId: number, seatId: number) => {
-    await fetch(`/api/admin/tickets/${ticketId}/assign-seat`, {
-      method: 'POST',
-      body: JSON.stringify({ seatId }),
-      headers: { 'Content-Type': 'application/json' },
-    });
-    await fetchOrders();
-    await fetchSections();
+    try {
+      const response = await fetch(`/api/admin/items/${ticketId}`, {
+        method: 'POST',
+        body: JSON.stringify({ seatId }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+  
+      // if (!response.ok) {
+      //   const errorData = await response.json();
+      //   console.error('Error adding ticket to seat:', errorData);
+      //   throw new Error('Failed to add ticket to seat');
+      // }
+  
+      await fetchOrders();
+      await fetchSections();
+    } catch (error) {
+      console.error('Error in addTicketToSeat:', error);
+    }
   };
-
+  
   // **Remove Ticket from Seat**
   const removeTicketFromSeat = async (ticketId: number) => {
-    await fetch(`/api/admin/tickets/${ticketId}/remove-seat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    });
-    await fetchOrders();
-    await fetchSections();
+    try {
+      const response = await fetch(`/api/admin/items/${ticketId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      });
+  
+      // if (!response.ok) {
+      //   const errorData = await response.json();
+      //   console.error('Error removing ticket from seat:', errorData);
+      //   throw new Error('Failed to remove ticket from seat');
+      // }
+  
+      await fetchOrders();
+      await fetchSections();
+    } catch (error) {
+      console.error('Error in removeTicketFromSeat:', error);
+    }
   };
-
+  
   // **Change Ticket from Seat to Another**
   const changeTicketSeat = async (ticketId: number, newSeatId: number) => {
-    await fetch(`/api/admin/tickets/${ticketId}/change-seat`, {
-      method: 'POST',
-      body: JSON.stringify({ seatId: newSeatId }),
-      headers: { 'Content-Type': 'application/json' },
-    });
-    await fetchOrders();
-    await fetchSections();
+    try {
+      const response = await fetch(`/api/admin/items/${ticketId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ seatId: newSeatId }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+  
+      // if (!response.ok) {
+      //   const errorData = await response.json();
+      //   console.error('Error changing ticket seat:', errorData);
+      //   throw new Error('Failed to change ticket seat');
+      // }
+  
+      await fetchOrders();
+      await fetchSections();
+    } catch (error) {
+      console.error('Error in changeTicketSeat:', error);
+    }
   };
 
   const setActiveSection = (sectionId: number) => {
@@ -166,13 +201,15 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setSelectedSeat(seat);
         break;
       case 'add-ticket-to-seat':
-        console.log('Add Ticket to Seat', seat);
+        if (!selectedTicket) return;
+        addTicketToSeat(selectedTicket?.id, seat.id);
         break;
       case 'remove-ticket-from-seat':
         console.log('Remove Ticket from Seat', seat);
         break;
       case 'change-ticket-seat':
-        console.log('Change Ticket Seat', seat);
+        if (!selectedTicket) return;
+        changeTicketSeat(selectedTicket?.id, seat.id);
         break;
     }
   };
@@ -205,8 +242,6 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setActiveSection,
         currentMode,
         setMode: setCurrentMode,
-        selectedTicketId,
-        setSelectedTicket: setSelectedTicketId,
         addSeat,
         updateSeat,
         deleteSeat,
@@ -224,6 +259,8 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         fetchItemTypes,
         newSeat,
         setNewSeat,
+        selectedTicket,
+        setSelectedTicket,
       }}
     >
       {children}
