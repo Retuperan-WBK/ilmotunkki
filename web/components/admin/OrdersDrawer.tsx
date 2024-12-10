@@ -101,7 +101,7 @@ const OrdersDrawer = () => {
               <div
                 key={ticket.id}
                 className="flex items-center justify-between bg-[#3D3D3D] rounded-md p-2 mb-2 py-4"
-                style={selectedTicket && selectedTicket.id === ticket.id ? { border: "6px solid green" } : { borderTop: `6px solid ${ticketBorderColor(ticket)}`, cursor: 'pointer' }}
+                style={{ borderTop: `6px solid ${ticketBorderColor(ticket)}`, cursor: 'pointer' }}
               >
                 <div
                   className={`w-4 h-4 rounded-full ${getTicketStatusColor(ticket)} mr-2`}
@@ -111,17 +111,22 @@ const OrdersDrawer = () => {
                 </p>
                 <p className="text-sm">{getTicketSeatNumber(ticket)}</p>
                 <button
+                  className="text-white px-2 py-1 rounded-md"
+                  style={ selectedTicket && selectedTicket.id === ticket.id ? { backgroundColor: "green" } : { backgroundColor: 'red' }}
                   onClick={() => 
                   {
+                    if (selectedTicket && selectedTicket.id === ticket.id) {
+                      setSelectedTicket(null);
+                    } else {
                     if (ticket.attributes.seat.data) {
                       handleMoveTicketToSeat(ticket);
                     } else {
                       handleSetTicketToSeat(ticket);
-                    }
+                    }}
                   }
                   }
                 >
-                  →
+                  {selectedTicket && selectedTicket.id === ticket.id ? "Peruuta" : ticket.attributes.seat.data ? "Siirrä" : "Plassaa"}
                 </button>
               </div>
             ))}
@@ -208,7 +213,7 @@ const OrdersDrawer = () => {
                     </p>
                   </div>
                 </div>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm">
                   Ryhmä: {order.attributes.group?.data?.attributes.name || 'N/A'}
                 </p>
               </div>
