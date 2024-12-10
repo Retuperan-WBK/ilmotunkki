@@ -1,10 +1,11 @@
-import { AdminGroup, Item } from "@/utils/models";
+import { AdminGroup} from "@/utils/models";
 import { useAdminContext } from "./AdminContext";
 import { useEffect, useState } from "react";
+import TicketList from "./TicketList";
 
 const GroupsDrawer = () => {
 
-  const { groups, selectedTicket, setSelectedTicket, setMode} = useAdminContext();
+  const { groups} = useAdminContext();
   const [selectedGroup, setSelectedGroup] = useState<AdminGroup | null>(null);
 
   const getOrderStatusColor = (placedCount: number, totalCount: number) => {
@@ -12,52 +13,6 @@ const GroupsDrawer = () => {
     if (placedCount === totalCount) return "bg-green-500"; // All placed
     return "bg-yellow-500"; // Some unplaced
   };
-
-  const getTicketStatusColor = (ticket: Item) => {
-    if (ticket.attributes.seat.data) return "bg-green-500"; // Placed
-    return "bg-red-500"; // Unplaced
-  };
-
-  const getTicketSeatNumber = (ticket: Item) => {
-    if (ticket.attributes.seat && ticket.attributes.seat.data) {
-      const section = ticket.attributes.seat.data.attributes.section.data.attributes.Name;
-      const number = ticket.attributes.seat.data.attributes.Number;
-      const row = ticket.attributes.seat.data.attributes.Row;
-
-      return `${section} R:${row} N:${number}`;
-    }
-    return "EI PAIKKAA";
-  };
-
-  const ticketBorderColor = (ticket: Item) => {
-    switch (ticket.attributes.itemType.data.attributes.slug) {
-      case "deluxe":
-        return "#DAA520";
-      case "iluokka":
-        return "#C8C8C8";
-      case "iiluokka":
-        return "#E98E35";
-      case "opiskelija":
-        return "#E98E35";
-      default:
-        return "";
-    }
-  };
-
-  const handleSetTicketToSeat = (ticket: Item) => {
-    setMode('add-ticket-to-seat');
-    setSelectedTicket(ticket);
-  }
-
-  const handleRemoveTicketFromSeat = (ticket: Item) => {
-    setMode('remove-ticket-from-seat');
-    setSelectedTicket(ticket);
-  }
-
-  const handleMoveTicketToSeat = (ticket: Item) => {
-    setMode('change-ticket-seat');
-    setSelectedTicket(ticket);
-  }
 
   useEffect(() => {
     if (selectedGroup) {
@@ -73,7 +28,7 @@ const GroupsDrawer = () => {
     const orders = selectedGroup.attributes.orders?.data || [];
 
     return (
-      <div className="p-6 flex flex-col items-start w-full h-full">
+      <div className="py-4 px-2 flex flex-col items-start w-full h-full">
         <button
           className="mb-4 underline"
           onClick={() => setSelectedGroup(null)}
@@ -88,11 +43,10 @@ const GroupsDrawer = () => {
           {orders.map((order) => {
             const tickets = order.attributes.items?.data || [];
             const totalCount = tickets.length || 0;
-
             return (
               <div
                 key={order.id}
-                className="flex flex-col bg-[#3D3D3D] rounded-md p-4 mb-4"
+                className="flex flex-col bg-[#5e5e5e] rounded-md py-4 px-2 mb-4"
               >
                 <div className="flex justify-between items-center">
                   <p className="text-md font-bold">
@@ -103,46 +57,7 @@ const GroupsDrawer = () => {
                     {tickets.filter((item) => item.attributes.seat.data).length}/{totalCount} paikkaa
                   </p>
                 </div>
-                <div className="mt-4">
-                  <h2 className="text-md font-bold mb-2">Liput:</h2>
-                  {tickets.map((ticket) => (
-                    <div
-                      key={ticket.id}
-                      className="flex items-center justify-between bg-[#3D3D3D] rounded-md p-2 mb-2 py-4"
-                      style={{
-                        borderTop: `6px solid ${ticketBorderColor(ticket)}`,
-                      }}
-                    >
-                      <div
-                        className={`w-4 h-4 rounded-full ${getTicketStatusColor(
-                          ticket
-                        )} mr-2`}
-                      ></div>
-                      <p className="text-sm">
-                        {ticket.attributes.itemType?.data?.attributes.slug || "Unknown"}{" "}
-                      </p>
-                      <p className="text-sm">{getTicketSeatNumber(ticket)}</p>
-                      <button
-                        className="text-white px-2 py-1 rounded-md"
-                        style={selectedTicket && selectedTicket.id === ticket.id ? { backgroundColor: "green" } : { backgroundColor: 'red' }}
-                        onClick={() => 
-                        {
-                          if (selectedTicket && selectedTicket.id === ticket.id) {
-                            setSelectedTicket(null);
-                          } else {
-                          if (ticket.attributes.seat.data) {
-                            handleMoveTicketToSeat(ticket);
-                          } else {
-                            handleSetTicketToSeat(ticket);
-                          }}
-                        }
-                        }
-                      >
-                        {selectedTicket && selectedTicket.id === ticket.id ? "Peruuta" : ticket.attributes.seat.data ? "Siirrä" : "Plassaa"}
-                      </button>
-                    </div>
-                  ))}
-                </div>
+                <TicketList tickets={tickets} />
               </div>
             );
           })}

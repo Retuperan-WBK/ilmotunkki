@@ -115,6 +115,8 @@ export default function SeatMap() {
             </button>
           ))}
         </div>
+        <div>
+        </div>
       </div>
 
       {/* Zoom Controls */}
