@@ -203,6 +203,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       case 'add-ticket-to-seat':
         if (!selectedTicket) return;
         addTicketToSeat(selectedTicket?.id, seat.id);
+        setSelectedTicket(null);
         break;
       case 'remove-ticket-from-seat':
         console.log('Remove Ticket from Seat', seat);
@@ -210,6 +211,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       case 'change-ticket-seat':
         if (!selectedTicket) return;
         changeTicketSeat(selectedTicket?.id, seat.id);
+        setSelectedTicket(null);
         break;
     }
   };

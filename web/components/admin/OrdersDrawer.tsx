@@ -1,5 +1,5 @@
 import { Item, Order } from "@/utils/models";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAdminContext } from "./AdminContext";
 
 const OrdersDrawer = () => {
@@ -59,6 +59,16 @@ const OrdersDrawer = () => {
         return '';
     }
   }
+
+  useEffect(() => {
+    if (selectedOrder) {
+      const order = orders.find((order) => order.id === selectedOrder.id);
+      console.log(order);
+      if (order) {
+      setSelectedOrder(order);
+      }
+    }
+  } , [orders, selectedOrder]);
 
   if (selectedOrder) {
     // Render selected order details

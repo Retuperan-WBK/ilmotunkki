@@ -75,7 +75,6 @@ export default function SeatMap() {
 
     if (!svgRef.current || !imageRef.current) return;
 
-    const rect = svgRef.current.getBoundingClientRect();
     const imageRect = imageRef.current.getBoundingClientRect();
 
     // Get click position relative to the image on screen
@@ -167,12 +166,13 @@ export default function SeatMap() {
               fill="blue"
               stroke="#000"
               strokeWidth="1"
+              style={{ cursor: 'pointer' }}
               onClick={(e) => {
                 e.stopPropagation();
                 handleSeatClick(seat);
               }}
             />
-            <text x={x} y={y} fontSize="4" textAnchor="middle" fill="white" style={{ userSelect: 'none' }} onClick={(e) => {
+            <text x={x} y={y} fontSize="4" textAnchor="middle" fill="white" style={{ userSelect: 'none', cursor: 'pointer' }} onClick={(e) => {
                   e.stopPropagation();
                   handleSeatClick(seat);
                 }}>
@@ -194,12 +194,13 @@ export default function SeatMap() {
                 fill={getSeatColor(seat)}
                 stroke="#000"
                 strokeWidth="1"
+                style={{ cursor: 'pointer' }}
                 onClick={(e) => {
                   e.stopPropagation();
                   handleSeatClick(seat);
                 }}
               />
-              <text x={x} y={y} fontSize="4" textAnchor="middle" fill="white" style={{ userSelect: 'none' }} onClick={(e) => {
+              <text x={x} y={y} fontSize="4" textAnchor="middle" fill="white" style={{ userSelect: 'none', cursor: 'pointer' }} onClick={(e) => {
                   e.stopPropagation();
                   handleSeatClick(seat);
                 }}>

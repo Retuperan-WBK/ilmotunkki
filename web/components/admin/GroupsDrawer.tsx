@@ -1,6 +1,6 @@
 import { AdminGroup, Item } from "@/utils/models";
 import { useAdminContext } from "./AdminContext";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const GroupsDrawer = () => {
 
@@ -58,6 +58,15 @@ const GroupsDrawer = () => {
     setMode('change-ticket-seat');
     setSelectedTicket(ticket);
   }
+
+  useEffect(() => {
+    if (selectedGroup) {
+      const group = groups.find((group) => group.id === selectedGroup.id);
+      if (group) {
+        setSelectedGroup(group);
+      }
+    }
+  } , [groups, selectedGroup]);
 
   if (selectedGroup) {
     // Render selected group details
