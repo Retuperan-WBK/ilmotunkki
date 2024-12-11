@@ -9,11 +9,15 @@ import MapDrawer from './MapDrawer';
 import { useAdminContext } from './AdminContext';
 
 export default function SeatDashboard() {
-  const { setMode } = useAdminContext();
+  const { setMode, setSelectedGroup, setSelectedOrder, setSelectedTicket, setSelectedSeat } = useAdminContext();
   const [activeTab, setActiveTab] = useState<'tilaukset' | 'ryhmat' | 'kartta'>('tilaukset'); // State to track active tab
 
   const handleChangeTab = (tab: 'tilaukset' | 'ryhmat' | 'kartta') => {
     setMode(null);
+    setSelectedGroup(null);
+    setSelectedOrder(null);
+    setSelectedTicket(null);
+    setSelectedSeat(null);
     setActiveTab(tab);
   }
 
