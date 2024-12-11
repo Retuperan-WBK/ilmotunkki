@@ -24,7 +24,6 @@ const MapDrawer = () => {
   };
 
   const handleUpdateSeat = () => {
-    console.log('Update Seat', selectedSeat);
     if (!selectedSeat) return;
 
     updateSeat(selectedSeat.id, {

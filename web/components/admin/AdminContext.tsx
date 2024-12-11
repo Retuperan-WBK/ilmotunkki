@@ -223,15 +223,12 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const setActiveSection = (sectionId: number) => {
     setActiveSectionId(sectionId);
-    console.log('Active Section:', sections.find((section) => section.id === sectionId));
   };
 
   const activeSection = sections.find((section) => section.id === activeSectionId) || null;
 
   const handleSeatClick = (seat: Seat) => {
     if (!currentMode) return;
-
-    console.log('Seat Clicked:', currentMode);
 
     switch (currentMode) {
       case 'edit-seat':
@@ -251,8 +248,6 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const handleMapClick = (x: number, y: number) => {
-
-    console.log('Map Clicked:', x, y);
 
     if (currentMode === 'add-seat' && activeSectionId) {
       addSeat(activeSectionId, { x_cord: x, y_cord: y });

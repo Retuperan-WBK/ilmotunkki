@@ -37,9 +37,6 @@ export default function AdminDashboard() {
 
         const data = await response.json();
 
-        console.log('Data from API:', data);
-        console.log('Response from API:', response);
-
         if (!response.ok || data.error) {
           console.error('Error from API:', data.error || 'Unauthorized');
           router.push('/admin/login');

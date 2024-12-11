@@ -22,8 +22,6 @@ export async function POST(req: NextRequest) {
       seat: body.seatId
     };
 
-    console.log('Assigning Ticket to Seat:', { ticketId: uid, payload });
-
     const response = await fetchAuthenticatedAPI(`/items/${uid}/assign-seat`, {
       method: 'POST',
       body: JSON.stringify(payload),
@@ -50,8 +48,6 @@ export async function DELETE(req: NextRequest) {
     }
 
     const uid = req.nextUrl.pathname.split('/').filter(Boolean).pop();
-
-    console.log('Removing Ticket from Seat:', { ticketId: uid });
 
     const response = await fetchAuthenticatedAPI(`/items/${uid}/remove-seat`, {
       method: 'DELETE',
@@ -84,8 +80,6 @@ export async function PUT(req: NextRequest) {
     const payload = {
       seat: body.seatId
     };
-
-    console.log('Changing Ticket to New Seat:', { ticketId: uid, payload });
 
     const response = await fetchAuthenticatedAPI(`/items/${uid}/change-seat`, {
       method: 'POST',
