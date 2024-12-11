@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { useAdminContext } from "./AdminContext";
 import TicketList from "./TicketList";
 
 const GroupsDrawer = () => {
 
   const { groups, selectedGroup, setSelectedGroup } = useAdminContext();
+  const [search, setSearch] = useState("");
 
   const getOrderStatusColor = (placedCount: number, totalCount: number) => {
     if (placedCount === 0) return "bg-red-500"; // All unplaced
@@ -75,11 +77,33 @@ const GroupsDrawer = () => {
 
   return (
     <div className="p-6 pl-2 pr-0 h-full w-full flex flex-col">
-      <h1 className="text-xl font-bold mb-4">Ryhmät</h1>
+      <div className="flex items-center flex-col mb-8">
+        <div className="flex gap-4">
+          <h1 className="text-2xl font-bold">Ryhmät</h1>
+          <input
+              type="text"
+              placeholder="Hae nimellä"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-1/2 p-1 rounded-sm text-sm text-black"
+            />
+            <p
+              className="bg-[#868686] rounded-md hover:underline cursor-pointer p-1"
+              onClick={() => setSearch('')}
+            >
+              Tyhjennä
+            </p>
+        </div>
+        <div className="flex items-center gap-2 mt-4 pl-4">
+          Tähän muita filttereitä
+        </div>
+      </div>
 
       <div className="flex-1 overflow-y-auto mb-16">
         <h2 className="text-md font-bold mb-4">Plassaamattomat</h2>
-        {groups_with_unplaced_tickets.map((group) => {
+        {groups_with_unplaced_tickets.filter((group) => { 
+          return group.attributes.name.toLowerCase().includes(search.toLowerCase());
+        }).map((group) => {
           const orders = group.attributes.orders?.data || [];
           const totalTickets = orders.reduce(
             (sum, order) => sum + (order.attributes.items?.data.length || 0),
@@ -119,7 +143,9 @@ const GroupsDrawer = () => {
         })}
 
         <h2 className="text-md font-bold mt-6 mb-4">Plassatut</h2>
-        {groups_without_unplaced_tickets.map((group) => {
+        {groups_without_unplaced_tickets.filter((group) => { 
+          return group.attributes.name.toLowerCase().includes(search.toLowerCase());
+        }).map((group) => {
           const orders = group.attributes.orders?.data || [];
           const totalTickets = orders.reduce(
             (sum, order) => sum + (order.attributes.items?.data.length || 0),

@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { useAdminContext } from "./AdminContext";
 import TicketList from "./TicketList";
 
 const OrdersDrawer = () => {
   const { orders, selectedOrder, setSelectedOrder } = useAdminContext();
+  const [search, setSearch] = useState('');
 
   const getOrderStatusColor = (placedCount: number, totalCount: number) => {
     if (placedCount === 0) return 'bg-red-500'; // All unplaced
@@ -67,11 +69,34 @@ const OrdersDrawer = () => {
 
   return (
     <div className="p-6 pl-2 pr-0 h-full w-full flex flex-col">
-      <h1 className="text-xl font-bold">Tilaukset</h1>
+      <div className="flex items-center flex-col mb-8">
+        <div className="flex gap-4">
+          <h1 className="text-2xl font-bold">Tilaukset</h1>
+          <input
+              type="text"
+              placeholder="Hae nimellä"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-1/2 p-1 rounded-sm text-sm text-black"
+            />
+            <p
+              className="bg-[#868686] rounded-md hover:underline cursor-pointer p-1"
+              onClick={() => setSearch('')}
+            >
+              Tyhjennä
+            </p>
+        </div>
+        <div className="flex items-center gap-2 mt-4 pl-4">
+          Tähän muita filttereitä
+        </div>
+      </div>
 
       <div className="py-4 flex-1 overflow-y-auto mb-16">
         <h2 className="text-md font-bold">Plassaamattomat</h2>
-        {unplacedOrders.map((order) => {
+        {unplacedOrders.filter((order) => { 
+          const fullName = `${order.attributes.customer?.data.attributes.firstName} ${order.attributes.customer?.data.attributes.lastName}`;
+          return fullName.toLowerCase().includes(search.toLowerCase());
+        }).map((order) => {
           const totalCount = order.attributes.items?.data.length || 0;
           const placedCount =
             order.attributes.items?.data.filter((item) => item.attributes.seat.data).length || 0;
@@ -107,7 +132,10 @@ const OrdersDrawer = () => {
         })}
 
         <h2 className="text-md font-bold mt-6">Plassatut</h2>
-        {placedOrders.map((order) => {
+        {placedOrders.filter((order) => { 
+          const fullName = `${order.attributes.customer?.data.attributes.firstName} ${order.attributes.customer?.data.attributes.lastName}`;
+          return fullName.toLowerCase().includes(search.toLowerCase());
+        }).map((order) => {
           const totalCount = order.attributes.items?.data.length || 0;
 
           return (
