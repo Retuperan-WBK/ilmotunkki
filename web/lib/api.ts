@@ -30,6 +30,7 @@ export const fetchAPI = async <T>(
     throw error;
   }
   const {data} = await response.json();
+  
   return data as T;
 };
 

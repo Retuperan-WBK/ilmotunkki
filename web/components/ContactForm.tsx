@@ -43,6 +43,7 @@ const Form = ({locale, contactForms, customer, items, onSubmit=() => Promise.res
   const getFieldValue = (key: keyof Customer["attributes"]) => {
     return customer.attributes[key] as string;
   };
+  console.log('contactForm', contactForm);
   return (
     <form className='mb-6 text-secondary-800 dark:text-secondary-100' 
           onSubmit={handleSubmit}>
@@ -50,6 +51,7 @@ const Form = ({locale, contactForms, customer, items, onSubmit=() => Promise.res
         <div className="mb-8" key={field.fieldName}>
           <label className='block p-1'>
           {field.label}{field.required && '*'}
+          {field.description && <p className='text-sm text-gray-500'>{field.description}</p>}
           <input
             className='tx-input mt-2'
             type={field.type}

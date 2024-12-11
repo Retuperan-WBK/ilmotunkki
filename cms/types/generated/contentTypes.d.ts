@@ -922,6 +922,7 @@ export interface ApiCustomerCustomer extends Schema.CollectionType {
     avec: Attribute.String;
     representativeOf: Attribute.String;
     greeting: Attribute.Boolean;
+    special_arragements: Attribute.Text;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<

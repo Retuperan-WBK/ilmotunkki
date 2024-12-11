@@ -71,6 +71,9 @@
     },
     "greeting": {
       "type": "boolean"
+    },
+    "special_arragements": {
+      "type": "text"
     }
   }
 }

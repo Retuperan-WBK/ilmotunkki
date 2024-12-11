@@ -25,6 +25,9 @@
         "number",
         "checkbox"
       ]
+    },
+    "description": {
+      "type": "text"
     }
   }
 }

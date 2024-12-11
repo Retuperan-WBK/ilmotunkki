@@ -12,6 +12,7 @@ export interface ContactFormFormField extends Schema.Component {
     required: Attribute.Boolean & Attribute.DefaultTo<false>;
     fieldName: Attribute.String;
     type: Attribute.Enumeration<['text', 'email', 'number', 'checkbox']>;
+    description: Attribute.Text;
   };
 }
 

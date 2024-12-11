@@ -16,6 +16,7 @@ const getContactForms = async (locale: string) => {
       locale,
       populate: ['contactForm', 'itemTypes']
     });
+
     return contactForms;
   } catch (error) {
     console.error(error);

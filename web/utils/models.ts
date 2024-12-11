@@ -94,6 +94,7 @@ export type Field = {
   type: "text" | "checkbox" | "email" | "number";
   required: boolean;
   fieldName: string;
+  description: string | null;
 };
 
 export type Group = StrapiBaseType<{
@@ -123,7 +124,8 @@ export type Customer = StrapiBaseType<{
   email: string;
   uid: string;
   locale: string;
-  [key: string]: string | number | boolean;
+  special_arragements: string | null;
+  [key: string]: string | number | boolean | null;
 }>;
 
 type PaymentMethodGroup = "mobile" | "bank" | "creditcard" | "credit";
