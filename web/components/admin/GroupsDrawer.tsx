@@ -77,7 +77,7 @@ const GroupsDrawer = () => {
     <div className="p-6 pl-2 pr-0 h-full w-full flex flex-col">
       <h1 className="text-xl font-bold mb-4">Ryhmät</h1>
 
-      <div className="flex-1 overflow-y-auto mb-20">
+      <div className="flex-1 overflow-y-auto mb-16">
         <h2 className="text-md font-bold mb-4">Plassaamattomat</h2>
         {groups_with_unplaced_tickets.map((group) => {
           const orders = group.attributes.orders?.data || [];

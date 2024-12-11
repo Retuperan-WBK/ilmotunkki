@@ -69,7 +69,7 @@ const OrdersDrawer = () => {
     <div className="p-6 pl-2 pr-0 h-full w-full flex flex-col">
       <h1 className="text-xl font-bold">Tilaukset</h1>
 
-      <div className="py-4 flex-1 overflow-y-auto mb-20">
+      <div className="py-4 flex-1 overflow-y-auto mb-16">
         <h2 className="text-md font-bold">Plassaamattomat</h2>
         {unplacedOrders.map((order) => {
           const totalCount = order.attributes.items?.data.length || 0;
