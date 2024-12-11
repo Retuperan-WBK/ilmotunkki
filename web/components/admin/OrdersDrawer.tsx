@@ -66,7 +66,7 @@ const OrdersDrawer = () => {
   );
 
   return (
-    <div className="p-6 h-full w-full flex flex-col">
+    <div className="p-6 pl-2 pr-0 h-full w-full flex flex-col">
       <h1 className="text-xl font-bold">Tilaukset</h1>
 
       <div className="py-4 flex-1 overflow-y-auto mb-20">
@@ -79,7 +79,7 @@ const OrdersDrawer = () => {
           return (
             <div
               key={order.id}
-              className="flex flex-col bg-[#868686] rounded-md p-4 mb-4 cursor-pointer"
+              className="flex flex-col bg-[#868686] rounded-md p-4 mr-1 mb-4 cursor-pointer"
               onClick={() => setSelectedOrder(order)}
             >
               <div className="flex justify-between items-center">
@@ -113,7 +113,7 @@ const OrdersDrawer = () => {
           return (
             <div
               key={order.id}
-              className="flex items-center justify-between bg-[#868686] rounded-md p-4 mb-4 cursor-pointer"
+              className="flex items-center justify-between bg-[#868686] rounded-md p-4 mr-1 mb-4 cursor-pointer"
               onClick={() => setSelectedOrder(order)}
             >
               <div className="flex items-center">

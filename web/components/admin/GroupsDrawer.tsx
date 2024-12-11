@@ -74,7 +74,7 @@ const GroupsDrawer = () => {
   );
 
   return (
-    <div className="p-6 h-full w-full flex flex-col">
+    <div className="p-6 pl-2 pr-0 h-full w-full flex flex-col">
       <h1 className="text-xl font-bold mb-4">Ryhmät</h1>
 
       <div className="flex-1 overflow-y-auto mb-20">
@@ -97,7 +97,7 @@ const GroupsDrawer = () => {
           return (
             <div
               key={group.id}
-              className="flex flex-col bg-[#868686] rounded-md p-4 mb-4 cursor-pointer"
+              className="flex flex-col bg-[#868686] rounded-md  p-4 mr-1 mb-4 cursor-pointer"
               onClick={() => setSelectedGroup(group)}
             >
               <div className="flex justify-between items-center">
@@ -137,7 +137,7 @@ const GroupsDrawer = () => {
           return (
             <div
               key={group.id}
-              className="flex flex-col bg-[#868686] rounded-md p-4 mb-4 cursor-pointer"
+              className="flex flex-col bg-[#868686] rounded-md p-4 mr-1 mb-4 cursor-pointer"
               onClick={() => setSelectedGroup(group)}
             >
               <div className="flex justify-between items-center">
