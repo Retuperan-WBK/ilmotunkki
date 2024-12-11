@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Order, AdminGroup, Section, Seat, ItemType, Item } from '@/utils/models';
-import { group } from 'console';
 
 interface AdminContextProps {
   orders: Order[];
@@ -142,11 +141,11 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         headers: { 'Content-Type': 'application/json' },
       });
   
-      // if (!response.ok) {
-      //   const errorData = await response.json();
-      //   console.error('Error adding ticket to seat:', errorData);
-      //   throw new Error('Failed to add ticket to seat');
-      // }
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error adding ticket to seat:', errorData);
+        return;
+      }
   
       await reFetch();
     } catch (error) {
@@ -162,11 +161,11 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         headers: { 'Content-Type': 'application/json' },
       });
   
-      // if (!response.ok) {
-      //   const errorData = await response.json();
-      //   console.error('Error removing ticket from seat:', errorData);
-      //   throw new Error('Failed to remove ticket from seat');
-      // }
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error removing ticket from seat:', errorData);
+        return;
+      }
   
       await reFetch();
     } catch (error) {
@@ -183,11 +182,11 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         headers: { 'Content-Type': 'application/json' },
       });
   
-      // if (!response.ok) {
-      //   const errorData = await response.json();
-      //   console.error('Error changing ticket seat:', errorData);
-      //   throw new Error('Failed to change ticket seat');
-      // }
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error changing ticket seat:', errorData);
+        return;
+      }
 
       await reFetch();
     } catch (error) {

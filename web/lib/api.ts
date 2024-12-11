@@ -97,7 +97,6 @@ export const fetchAuthenticatedAPI = async <T>(
   jwt: string
 ): Promise<T> => {
   // Merge default options and user options
-
   const mergedOptions: RequestInit = {
     headers: {
       "Content-Type": "application/json",
@@ -105,6 +104,11 @@ export const fetchAuthenticatedAPI = async <T>(
     },
     ...options,
   };
+
+  // Ensure the body is JSON serializable
+  if (mergedOptions.body && typeof mergedOptions.body !== 'string') {
+    mergedOptions.body = JSON.stringify(mergedOptions.body);
+  }
 
   const queryString = qs.stringify(urlParamsObject);
   
@@ -122,5 +126,11 @@ export const fetchAuthenticatedAPI = async <T>(
 
   // Return the response data
   const jsonResponse = await response.json();
-  return jsonResponse.data as T;
+
+  // Check if the response has a data property
+  if (jsonResponse.data !== undefined) {
+    return jsonResponse.data as T;
+  } else {
+    return jsonResponse as T;
+  }
 }
