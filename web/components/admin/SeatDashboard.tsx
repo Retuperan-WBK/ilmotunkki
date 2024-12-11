@@ -6,9 +6,16 @@ import SeatMap from './SeatMap';
 import OrdersDrawer from './OrdersDrawer';
 import GroupsDrawer from './GroupsDrawer';
 import MapDrawer from './MapDrawer';
+import { useAdminContext } from './AdminContext';
 
 export default function SeatDashboard() {
+  const { setMode } = useAdminContext();
   const [activeTab, setActiveTab] = useState<'tilaukset' | 'ryhmat' | 'kartta'>('tilaukset'); // State to track active tab
+
+  const handleChangeTab = (tab: 'tilaukset' | 'ryhmat' | 'kartta') => {
+    setMode(null);
+    setActiveTab(tab);
+  }
 
   return (
     <div className="flex flex-col w-full h-full">
@@ -20,7 +27,7 @@ export default function SeatDashboard() {
         </div>
         <div className="flex items-center justify-start h-full w-full">
           <button
-            onClick={() => setActiveTab('tilaukset')}
+            onClick={() => handleChangeTab('tilaukset')}
             className={`text-2xl font-bold cursor-pointer ${
               activeTab === 'tilaukset' ? 'text-white' : 'text-gray-400'
             }`}
@@ -28,7 +35,7 @@ export default function SeatDashboard() {
             Tilaukset
           </button>
           <button
-            onClick={() => setActiveTab('ryhmat')}
+            onClick={() => handleChangeTab('ryhmat')}
             className={`text-2xl font-bold ml-4 cursor-pointer ${
               activeTab === 'ryhmat' ? 'text-white' : 'text-gray-400'
             }`}
@@ -36,7 +43,7 @@ export default function SeatDashboard() {
             Ryhmät
           </button>
           <button
-            onClick={() => setActiveTab('kartta')}
+            onClick={() => handleChangeTab('kartta')}
             className={`text-2xl font-bold ml-4 cursor-pointer ${
               activeTab === 'kartta' ? 'text-white' : 'text-gray-400'
             }`}
@@ -47,7 +54,7 @@ export default function SeatDashboard() {
       </div>
 
       {/* Main Content Section */}
-      <div className="bg-[#3D3D3D] h-full w-full m-4 rounded-md flex">
+      <div className="bg-[#3D3D3D] h-full w-full rounded-md flex">
         {/* Tilaukset Sidebar */}
         <div className="h-full w-[20%] min-w-[400px] border-r-2 border-gray-500">
           {/* Render content based on the active tab */}

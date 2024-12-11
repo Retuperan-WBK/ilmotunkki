@@ -2,18 +2,23 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Order, AdminGroup, Section, Seat, ItemType, Item } from '@/utils/models';
+import { group } from 'console';
 
 interface AdminContextProps {
   orders: Order[];
   groups: AdminGroup[];
   sections: Section[];
   activeSectionId: number | null;
-  currentMode: 'add-seat' | 'edit-seat' | 'add-ticket-to-seat' | 'remove-ticket-from-seat' | 'change-ticket-seat' | null;
+  currentMode: 'add-seat' | 'edit-seat' | 'add-ticket-to-seat' | 'change-ticket-seat' | null;
   setMode: (mode: AdminContextProps['currentMode']) => void;
   setSelectedTicket: (ticketId: Item | null) => void;
   setActiveSection: (sectionId: number) => void;
   selectedTicket: Item | null;
   activeSection: Section | null;
+  selectedOrder: Order | null;
+  setSelectedOrder: (order: Order | null) => void;
+  selectedGroup: AdminGroup | null;
+  setSelectedGroup: (group: AdminGroup | null) => void;
   addSeat: (sectionId: number, seatData: Partial<Seat['attributes']>) => Promise<void>;
   updateSeat: (seatId: number, seatData: Partial<Seat['attributes']>) => Promise<void>;
   deleteSeat: (seatId: number) => Promise<void>;
@@ -55,8 +60,17 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [selectedSeat, setSelectedSeat] = useState<Seat | null>(null);
   const [newSeat, setNewSeat] = useState<NewSeat>({ row: '1', seatNumber: '1', special: '', itemType: 0 });
 
-  // OrderDrawer
+
+  // OrderDrawer and GroupDrawer
   const [selectedTicket, setSelectedTicket] = useState<Item | null>(null);
+
+  // OrderDrawer
+
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
+  // GroupDrawer
+
+  const [selectedGroup, setSelectedGroup] = useState<AdminGroup | null>(null);
 
   // Fetch all orders
   const fetchOrders = async () => {
@@ -98,7 +112,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       body: JSON.stringify({ sectionId, ...seatData, Row: newSeat.row, Number: newSeat.seatNumber, special: newSeat.special, itemType: newSeat.itemType }),
       headers: { 'Content-Type': 'application/json' },
     });
-    await fetchSections();
+    await reFetch();
     // Automatically up the seat number for the next seat by 1
     setNewSeat({ ...newSeat, seatNumber: (parseInt(newSeat.seatNumber) + 1).toString() });
   };
@@ -110,14 +124,14 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       body: JSON.stringify(seatData),
       headers: { 'Content-Type': 'application/json' },
     });
-    await fetchSections();
+    await reFetch();
   };
 
   const deleteSeat = async (seatId: number) => {
     await fetch(`/api/admin/seats/${seatId}`, {
       method: 'DELETE',
     });
-    await fetchSections();
+    await reFetch();
   }
 
   const addTicketToSeat = async (ticketId: number, seatId: number) => {
@@ -134,8 +148,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       //   throw new Error('Failed to add ticket to seat');
       // }
   
-      await fetchOrders();
-      await fetchSections();
+      await reFetch();
     } catch (error) {
       console.error('Error in addTicketToSeat:', error);
     }
@@ -155,8 +168,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       //   throw new Error('Failed to remove ticket from seat');
       // }
   
-      await fetchOrders();
-      await fetchSections();
+      await reFetch();
     } catch (error) {
       console.error('Error in removeTicketFromSeat:', error);
     }
@@ -176,13 +188,39 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       //   console.error('Error changing ticket seat:', errorData);
       //   throw new Error('Failed to change ticket seat');
       // }
-  
-      await fetchOrders();
-      await fetchSections();
+
+      await reFetch();
     } catch (error) {
       console.error('Error in changeTicketSeat:', error);
     }
   };
+
+  const reFetch = async () => {
+    fetchGroups();
+    fetchOrders();
+    fetchSections();
+  }
+
+  useEffect(() => {
+    if (!groups) return;
+    if (!selectedGroup) return;
+
+    setSelectedGroup(groups.find((group) => group.id === selectedGroup.id) || null);
+  }, [groups]);
+
+  useEffect(() => {
+    if (!orders) return;
+    if (!selectedOrder) return;
+
+    setSelectedOrder(orders.find((order) => order.id === selectedOrder.id) || null);
+  }, [orders]);
+
+  useEffect(() => {
+    if (!sections) return;
+    if (!activeSectionId) return;
+
+    setActiveSectionId(activeSectionId);
+  }, [sections]);
 
   const setActiveSection = (sectionId: number) => {
     setActiveSectionId(sectionId);
@@ -204,9 +242,6 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         if (!selectedTicket) return;
         addTicketToSeat(selectedTicket?.id, seat.id);
         setSelectedTicket(null);
-        break;
-      case 'remove-ticket-from-seat':
-        console.log('Remove Ticket from Seat', seat);
         break;
       case 'change-ticket-seat':
         if (!selectedTicket) return;
@@ -263,6 +298,10 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setNewSeat,
         selectedTicket,
         setSelectedTicket,
+        selectedOrder,
+        setSelectedOrder,
+        selectedGroup,
+        setSelectedGroup,
       }}
     >
       {children}

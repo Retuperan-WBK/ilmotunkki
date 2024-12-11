@@ -1,27 +1,15 @@
-import { AdminGroup} from "@/utils/models";
 import { useAdminContext } from "./AdminContext";
-import { useEffect, useState } from "react";
 import TicketList from "./TicketList";
 
 const GroupsDrawer = () => {
 
-  const { groups} = useAdminContext();
-  const [selectedGroup, setSelectedGroup] = useState<AdminGroup | null>(null);
+  const { groups, selectedGroup, setSelectedGroup } = useAdminContext();
 
   const getOrderStatusColor = (placedCount: number, totalCount: number) => {
     if (placedCount === 0) return "bg-red-500"; // All unplaced
     if (placedCount === totalCount) return "bg-green-500"; // All placed
     return "bg-yellow-500"; // Some unplaced
   };
-
-  useEffect(() => {
-    if (selectedGroup) {
-      const group = groups.find((group) => group.id === selectedGroup.id);
-      if (group) {
-        setSelectedGroup(group);
-      }
-    }
-  } , [groups, selectedGroup]);
 
   if (selectedGroup) {
     // Render selected group details
@@ -36,10 +24,11 @@ const GroupsDrawer = () => {
           ← Takaisin ryhmiin
         </button>
         <h1 className="text-xl font-bold mb-4">Ryhmä: {selectedGroup.attributes.name}</h1>
-        <div className="flex w-full h-full flex-col bg-[#868686] border-4 border-[#868686] rounded-md p-4 pb-8 mb-4 overflow-y-scroll">
-        <p className="text-md font-bold mb-4">
-          Tilaukset:
-        </p>
+
+        <div className="flex flex-col flex-1 bg-[#868686] border-4 border-[#868686] rounded-md p-2 overflow-y-auto">
+          <p className="text-md font-bold mb-4">
+            Tilaukset:
+          </p>
           {orders.map((order) => {
             const tickets = order.attributes.items?.data || [];
             const totalCount = tickets.length || 0;
@@ -85,12 +74,11 @@ const GroupsDrawer = () => {
   );
 
   return (
-    <div className="p-6">
-      <h1 className="text-xl font-bold">Ryhmät</h1>
+    <div className="p-6 h-full w-full flex flex-col">
+      <h1 className="text-xl font-bold mb-4">Ryhmät</h1>
 
-
-      <div className="py-4">
-        <h2 className="text-md font-bold">Plassaamattomat</h2>
+      <div className="flex-1 overflow-y-auto mb-20">
+        <h2 className="text-md font-bold mb-4">Plassaamattomat</h2>
         {groups_with_unplaced_tickets.map((group) => {
           const orders = group.attributes.orders?.data || [];
           const totalTickets = orders.reduce(
@@ -129,10 +117,8 @@ const GroupsDrawer = () => {
             </div>
           );
         })}
-      </div>
 
-      <div className="py-4">
-        <h2 className="text-md font-bold">Plassatut</h2>
+        <h2 className="text-md font-bold mt-6 mb-4">Plassatut</h2>
         {groups_without_unplaced_tickets.map((group) => {
           const orders = group.attributes.orders?.data || [];
           const totalTickets = orders.reduce(

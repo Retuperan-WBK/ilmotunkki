@@ -9,11 +9,11 @@ type PropType = {
 
 const AdminLayout = ({ children }: PropType) => {
   return (
-    <html lang='fi' className='dark w-full h-full'>
+    <html lang='fi' className='dark w-screen h-screen overflow-hidden'>
       <head />
-      <body className="bg-secondary-200 dark:bg-secondary-900 p-2 text-secondary-700 dark:text-secondary-100">
+      <body className="bg-secondary-200 dark:bg-secondary-900 text-secondary-700 dark:text-secondary-100 w-screen h-screen">
         <AppProvider>
-          <main className='max-w-screen flex flex-col mx-auto h-full w-full overflow-hidden'>
+          <main className='flex flex-col mx-auto w-screen h-screen'>
             {children}
           </main>
         </AppProvider>

@@ -59,14 +59,14 @@ export default function AdminDashboard() {
 
 
   if (loading) return (
-    <div className="flex justify-center items-center w-full h-full">
+    <div className="flex justify-center items-center w-screen h-screen">
       <h2 className="text-2xl font-bold">Loading...</h2>
     </div>
   )
 
   if (user) {
     return (
-      <div className="flex flex-col w-full h-full">
+      <div className="flex flex-col w-screen h-screen">
         <AdminProvider>
           <SeatDashboard /> {/* Renders the new SeatDashboard component */}
         </AdminProvider>
@@ -75,13 +75,13 @@ export default function AdminDashboard() {
   }
 
   if (!user) return (
-    <div className="flex justify-center items-center w-full h-full">
+    <div className="flex justify-center items-center w-screen h-screen">
       <h2 className="text-2xl font-bold">Redirecting to login...</h2>
     </div>
   )
 
   return (
-    <div className="flex justify-center items-center w-full h-full">
+    <div className="flex justify-center items-center w-screen h-screen">
       <h2 className="text-2xl font-bold">Unauthorized</h2>
     </div>
   )

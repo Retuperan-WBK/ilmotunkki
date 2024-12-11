@@ -54,7 +54,7 @@ export async function DELETE(req: NextRequest) {
     console.log('Removing Ticket from Seat:', { ticketId: uid });
 
     const response = await fetchAuthenticatedAPI(`/items/${uid}/remove-seat`, {
-      method: 'POST',
+      method: 'DELETE',
     }, {}, token.value);
 
     return NextResponse.json(response);

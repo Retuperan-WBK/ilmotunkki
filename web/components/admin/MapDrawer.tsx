@@ -1,8 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAdminContext } from './AdminContext';
-import { Seat } from '@/utils/models';
 
 const MapDrawer = () => {
   const { 
@@ -45,6 +44,10 @@ const MapDrawer = () => {
     deleteSeat(selectedSeat.id);
     setSelectedSeat(null);
   };
+
+  useEffect(() => {
+    setMode("edit-seat");
+  }, []);
 
   return (
     <div className="p-6">

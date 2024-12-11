@@ -5,7 +5,7 @@ import { useAdminContext } from "./AdminContext";
 
 const TicketList = ({tickets} : {tickets: Item[]}) => {
 
-  const { selectedTicket, setSelectedTicket, setMode} = useAdminContext();
+  const { selectedTicket, setSelectedTicket, setMode, removeTicketFromSeat} = useAdminContext();
 
   const getTicketStatusColor = (ticket: Item) => {
     if (ticket.attributes.seat.data) return "bg-green-500"; // Placed
@@ -50,8 +50,9 @@ const TicketList = ({tickets} : {tickets: Item[]}) => {
   }
 
   const handleRemoveTicketFromSeat = (ticket: Item) => {
-    setMode('remove-ticket-from-seat');
-    setSelectedTicket(ticket);
+    if (confirm(`Haluatko varmasti poistaa lipun paikalta ${getTicketSeatNumber(ticket)}?`)) {
+      removeTicketFromSeat(ticket.id);
+    }
   }
 
   const handleMoveTicketToSeat = (ticket: Item) => {
@@ -75,31 +76,36 @@ const TicketList = ({tickets} : {tickets: Item[]}) => {
               ticket
             )} mr-2`}
           ></div>
-          <p className="text-sm">
+          <p className="text-sm flex-[4] font-semibold text-center">
             {ticket.attributes.itemType?.data?.attributes.slug || "Unknown"}{" "}
           </p>
-          <div className="ml-2">
+          <div className="flex-[8]">
             <p className="text-sm">{getTicketSection(ticket)}</p>
             <p className="text-sm">{getTicketSeatNumber(ticket)}</p>
           </div>
-          <button
-            className="text-white px-2 py-1 rounded-md text-sm"
-            style={selectedTicket && selectedTicket.id === ticket.id ? { backgroundColor: "green" } : { backgroundColor: 'gray' }}
-            onClick={() => 
-            {
-              if (selectedTicket && selectedTicket.id === ticket.id) {
-                setSelectedTicket(null);
-              } else {
-              if (ticket.attributes.seat.data) {
-                handleMoveTicketToSeat(ticket);
-              } else {
-                handleSetTicketToSeat(ticket);
-              }}
-            }
-            }
-          >
-            {selectedTicket && selectedTicket.id === ticket.id ? "Peruuta" : ticket.attributes.seat.data ? "Siirrä" : "Plassaa"}
-          </button>
+          <div className="flex flex-col items-center flex-[4]">
+            <button
+              className="text-white px-2 py-1 rounded-md text-sm flex-[2]"
+              style={selectedTicket && selectedTicket.id === ticket.id ? { backgroundColor: "green" } : { backgroundColor: 'gray' }}
+              onClick={() => 
+              {
+                if (selectedTicket && selectedTicket.id === ticket.id) {
+                  setSelectedTicket(null);
+                } else {
+                if (ticket.attributes.seat.data) {
+                  handleMoveTicketToSeat(ticket);
+                } else {
+                  handleSetTicketToSeat(ticket);
+                }}
+              }
+              }
+            >
+              {selectedTicket && selectedTicket.id === ticket.id ? "Peruuta" : ticket.attributes.seat.data ? "Siirrä" : "Plassaa"}
+            </button>
+            <p className="text-xs flex-[1] mt-2 mb-[-12px] hover:underline cursor-pointer" onClick={() => handleRemoveTicketFromSeat(ticket)}>
+              Poista plassi
+            </p>
+          </div>
         </div>
       ))}
     </div>
