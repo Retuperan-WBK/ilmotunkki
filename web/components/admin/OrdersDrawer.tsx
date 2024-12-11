@@ -47,7 +47,7 @@ const OrdersDrawer = () => {
               {tickets.filter((item) => item.attributes.seat.data).length}/{totalCount} paikkaa
             </p>
           </div>
-          <div className="mb-8">
+          <div className="mb-16">
             <TicketList tickets={tickets} />
           </div>
         </div>

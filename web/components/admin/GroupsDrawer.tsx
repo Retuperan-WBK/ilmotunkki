@@ -27,7 +27,7 @@ const GroupsDrawer = () => {
         </button>
         <h1 className="text-xl font-bold mb-4">Ryhmä: {selectedGroup.attributes.name}</h1>
 
-        <div className="flex flex-col flex-1 bg-[#868686] border-4 border-[#868686] rounded-md p-2 overflow-y-auto">
+        <div className="flex flex-col flex-1 bg-[#868686] border-4 border-[#868686] rounded-md p-2 overflow-y-auto w-full mb-16">
           <p className="text-md font-bold mb-4">
             Tilaukset:
           </p>
