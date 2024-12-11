@@ -33,6 +33,7 @@ export const initialCustomer = {
     startYear: '',
     updatedAt: '',
     uid: '',
+    special_arragements: '',
   },
 };
 const appContextDefault: Required<AppContextType> = {
@@ -46,6 +47,9 @@ const appContextDefault: Required<AppContextType> = {
       status: 'new',
       updatedAt: '',
       transactionId: '',
+      group: {
+        data: undefined
+      },
       items: {
         data: []
       },
