@@ -135,17 +135,21 @@ export default function SeatMap() {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onWheel={handleScroll}
+        onMouseLeave={() => setIsDragging(false)}
       >
-        {/* Background Image */}
-        <image
-          ref={imageRef}
-          href={activeSection ? `/api/admin/image?url=${activeSection?.attributes.background_image.data.attributes.url}` : ''}
-          x="0"
-          y="0"
-          width="100%"
-          height="100%"
-          preserveAspectRatio="xMidYMid meet"
-        />
+        {/* Background Images */}
+        {sections.map((section) => (
+          <image
+            key={section.id}
+            href={`/api/admin/image?url=${section.attributes.background_image.data.attributes.url}`}
+            x="0"
+            y="0"
+            width="100%"
+            height="100%"
+            preserveAspectRatio="xMidYMid meet"
+            style={{ display: activeSection?.id === section.id ? 'block' : 'none' }}
+          />
+        ))}
 
         {/* Render Seats */}
         {activeSection?.attributes.seats.data.map((seat) => {
