@@ -140,6 +140,14 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const addTicketToSeat = async (ticketId: number, seatId: number) => {
     try {
+
+      // Check if the seat is not already occupied
+      const seat = activeSection?.attributes.seats.data.find((seat) => seat.id === seatId);
+      if (!seat) {
+        console.error('Seat not found');
+        return;
+      }
+
       const response = await fetch(`/api/admin/items/${ticketId}`, {
         method: 'POST',
         body: JSON.stringify({ seatId }),
@@ -181,6 +189,14 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // **Change Ticket from Seat to Another**
   const changeTicketSeat = async (ticketId: number, newSeatId: number) => {
     try {
+
+      // Check if the seat is not already occupied
+      const seat = activeSection?.attributes.seats.data.find((seat) => seat.id === newSeatId);
+      if (!seat) {
+        console.error('Seat not found');
+        return;
+      }
+
       const response = await fetch(`/api/admin/items/${ticketId}`, {
         method: 'PUT',
         body: JSON.stringify({ seatId: newSeatId }),
