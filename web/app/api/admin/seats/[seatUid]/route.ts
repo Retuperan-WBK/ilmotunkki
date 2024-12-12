@@ -22,10 +22,12 @@ export async function PUT(req: NextRequest) {
         Row: body.Row,
         Number: body.Number,
         special: body.special || null,
-        itemType: body.itemType || null,
+        item_type: body.item_type || null,
       }
     };
     
+    console.log('Updating seat:', payload);
+
     const response = await fetchAuthenticatedAPI(`/seats/${seatId}`, {
       method: 'PUT',
       body: JSON.stringify(payload),

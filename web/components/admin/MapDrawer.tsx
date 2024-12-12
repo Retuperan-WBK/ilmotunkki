@@ -48,6 +48,8 @@ const MapDrawer = () => {
     setMode("edit-seat");
   }, []);
 
+  console.log(selectedSeat ? selectedSeat.attributes.item_type.data?.id : null);
+
   return (
     <div className="p-6">
       <h1 className="text-xl font-bold mb-4">Kartta</h1>
@@ -111,7 +113,9 @@ const MapDrawer = () => {
         </div>
       )}
 
-      {isEditMode && selectedSeat && (
+      {isEditMode && (
+        selectedSeat ? (
+
         <div className="flex flex-col bg-[#545454] p-4">
           <h2 className="text-lg font-bold">Muokkaa istuinta</h2>
 
@@ -166,7 +170,19 @@ const MapDrawer = () => {
             }
             className="p-2 bg-[#868686] rounded-md"
           />
-
+          <label className="mt-2 text-sm">Lippuluokka</label>
+          <select
+            value={selectedSeat.attributes.item_type.data?.id || ""}
+            onChange={(e) => setSelectedSeat({...selectedSeat, itemTypeId: parseInt(e.target.value)})}
+            className="p-2 bg-[#868686] rounded-md"
+          >
+            <option value={""}>Ei valittu</option>
+            {itemTypes.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.attributes.slug}
+              </option>
+            ))}
+          </select>
           <button
             className="mt-4 px-4 py-2 bg-green-500 text-white rounded-md"
             onClick={() => handleUpdateSeat()}
@@ -181,6 +197,11 @@ const MapDrawer = () => {
             Poista istuin
           </button>
         </div>
+        ) : (
+          <div className="flex flex-col bg-[#545454] p-4">
+            <h2 className="text-lg font-bold">Valitse istuin</h2>
+          </div>
+        )
       )}
     </div>
   );

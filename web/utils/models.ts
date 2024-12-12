@@ -171,7 +171,7 @@ export type Seat = StrapiBaseType<{
   y_cord: number;
   special: string | null;
   item: StrapiResponse<Item | null>;
-  itemType: StrapiResponse<ItemType | null>;
+  item_type: StrapiResponse<ItemType | null>;
   section: StrapiResponse<Section>;
 }>;
 

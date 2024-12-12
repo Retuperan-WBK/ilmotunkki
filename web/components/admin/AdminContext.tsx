@@ -32,7 +32,7 @@ interface AdminContextProps {
   newSeat: NewSeat;
   setNewSeat: (newSeat: NewSeat) => void;
   selectedSeat: Seat | null;
-  setSelectedSeat: (seat: Seat | null) => void;
+  setSelectedSeat: (seat: ExtendedSeat | null) => void;
   itemTypes: ItemType[];
   fetchItemTypes: () => Promise<void>;
 }
@@ -46,6 +46,10 @@ type NewSeat = {
   itemType: number;
 };
 
+interface ExtendedSeat extends Seat {
+  itemTypeId?: number;
+}
+
 export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [groups, setGroups] = useState<AdminGroup[]>([]);
@@ -56,7 +60,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [itemTypes, setItemTypes] = useState<ItemType[]>([]);
 
   // MapDrawer
-  const [selectedSeat, setSelectedSeat] = useState<Seat | null>(null);
+  const [selectedSeat, setSelectedSeat] = useState<ExtendedSeat | null>(null);
   const [newSeat, setNewSeat] = useState<NewSeat>({ row: '1', seatNumber: '1', special: '', itemType: 0 });
 
 
@@ -117,10 +121,11 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   // **Edit Seat**
-  const updateSeat = async (seatId: number, seatData: Partial<Seat['attributes']>) => {
+  const updateSeat = async (seatId: number, seatData: Partial<Seat['attributes']>,) => {
+    console.log('updateSeat', JSON.stringify({ ...seatData, item_type: selectedSeat?.itemTypeId ? selectedSeat.itemTypeId : seatData.item_type?.data?.id }));
     await fetch(`/api/admin/seats/${seatId}`, {
       method: 'PUT',
-      body: JSON.stringify(seatData),
+      body: JSON.stringify({ ...seatData, item_type: selectedSeat?.itemTypeId ? selectedSeat.itemTypeId : seatData.item_type?.data?.id }),
       headers: { 'Content-Type': 'application/json' },
     });
     await reFetch();
