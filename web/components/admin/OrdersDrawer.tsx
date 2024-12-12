@@ -79,12 +79,14 @@ const OrdersDrawer = () => {
               onChange={(e) => setSearch(e.target.value)}
               className="w-1/2 p-1 rounded-sm text-sm text-black"
             />
+            {search &&
             <p
               className="bg-[#868686] rounded-md hover:underline cursor-pointer p-1"
               onClick={() => setSearch('')}
             >
               Tyhjennä
             </p>
+          }
         </div>
         <div className="flex items-center gap-2 mt-4 pl-4">
           Tähän muita filttereitä
