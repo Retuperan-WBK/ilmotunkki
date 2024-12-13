@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useAdminContext } from "./AdminContext";
 import TicketList from "./TicketList";
+import DisabledSvg from "./DisabledSvg";
+import InviteSvg from "./InviteSvg";
 
 const GroupsDrawer = () => {
 
@@ -47,6 +49,14 @@ const GroupsDrawer = () => {
                   <p className="text-md">
                     {tickets.filter((item) => item.attributes.seat.data).length}/{totalCount} paikkaa
                   </p>
+                </div>
+                <div className="flex items-center gap-2 w-full">
+                  {order.attributes.customer.data.attributes.special_arragements && (
+                    <DisabledSvg height={40} width={40} />
+                  )}
+                  {order.attributes.kutsuvieras && (
+                    <InviteSvg height={40} width={40} />
+                  )}
                 </div>
                 <TicketList tickets={tickets} />
               </div>
@@ -120,25 +130,38 @@ const GroupsDrawer = () => {
             0
           );
 
+          const hasSpecialArrangements = orders.some(
+            (order) => order.attributes.customer?.data.attributes.special_arragements
+          );
+          const hasInvite = orders.some((order) => order.attributes.kutsuvieras);
+
           return (
             <div
-              key={group.id}
-              className="flex flex-col bg-[#868686] rounded-md  p-4 mr-1 mb-4 cursor-pointer"
-              onClick={() => setSelectedGroup(group)}
-            >
+                key={group.id}
+                className="flex flex-col bg-[#868686] rounded-md p-4 mr-1 mb-4 cursor-pointer"
+                onClick={() => setSelectedGroup(group)}
+              >
               <div className="flex justify-between items-center">
                 <p className="text-md font-bold">{group.attributes.name}</p>
                 <p className="text-md">
                   {placedTickets}/{totalTickets} paikkaa
                 </p>
               </div>
-              <div className="flex items-center mt-4">
+              <div className="flex items-center mt-4 gap-4">
                 <div
                   className={`w-4 h-4 rounded-full ${getOrderStatusColor(
                     placedTickets,
                     totalTickets
                   )} mr-2`}
                 ></div>
+                <div className="flex items-center gap-2 flex-[1] justify-end">
+                  {hasSpecialArrangements && (
+                    <DisabledSvg height={40} width={40} />
+                  )}
+                  {hasInvite && (
+                    <InviteSvg height={40} width={40} />
+                  )}
+                </div>
               </div>
             </div>
           );
@@ -162,25 +185,39 @@ const GroupsDrawer = () => {
             0
           );
 
+          const hasSpecialArrangements = orders.some(
+            (order) => order.attributes.customer?.data.attributes.special_arragements
+          );
+          const hasInvite = orders.some((order) => order.attributes.kutsuvieras);
+
+
           return (
             <div
-              key={group.id}
-              className="flex flex-col bg-[#868686] rounded-md p-4 mr-1 mb-4 cursor-pointer"
-              onClick={() => setSelectedGroup(group)}
-            >
+                key={group.id}
+                className="flex flex-col bg-[#868686] rounded-md p-4 mr-1 mb-4 cursor-pointer"
+                onClick={() => setSelectedGroup(group)}
+              >
               <div className="flex justify-between items-center">
                 <p className="text-md font-bold">{group.attributes.name}</p>
                 <p className="text-md">
                   {placedTickets}/{totalTickets} paikkaa
                 </p>
               </div>
-              <div className="flex items-center mt-4">
+              <div className="flex items-center mt-4 gap-4">
                 <div
                   className={`w-4 h-4 rounded-full ${getOrderStatusColor(
                     placedTickets,
                     totalTickets
                   )} mr-2`}
                 ></div>
+                <div className="flex items-center gap-2 flex-[1] justify-end">
+                  {hasSpecialArrangements && (
+                    <DisabledSvg height={40} width={40} />
+                  )}
+                  {hasInvite && (
+                    <InviteSvg height={40} width={40} />
+                  )}
+                </div>
               </div>
             </div>
           );

@@ -1435,6 +1435,7 @@ export interface ApiSeatSeat extends Schema.CollectionType {
       'oneToOne',
       'api::item-type.item-type'
     >;
+    item: Attribute.Relation<'api::seat.seat', 'oneToOne', 'api::item.item'>;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<'api::seat.seat', 'oneToOne', 'admin::user'> &

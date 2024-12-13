@@ -98,7 +98,7 @@ export default function SeatMap() {
   };
 
   const getSeatColor = (seat: Seat) => {
-    if (seat.attributes.item) return 'red'; // Occupied seats
+    if (seat.attributes.item.data) return 'red'; // Reserved seats
     return 'green'; // Default available seats
   };
 

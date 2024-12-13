@@ -142,9 +142,21 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     try {
 
       // Check if the seat is not already occupied
-      const seat = activeSection?.attributes.seats.data.find((seat) => seat.id === seatId);
+      if (!activeSection) {
+        console.error('Section not found');
+        return;
+      }
+
+      const seat = activeSection.attributes.seats.data.find((seat) => seat.id === seatId);
+      
       if (!seat) {
         console.error('Seat not found');
+        return;
+      }
+      console.log('addTicketToSeat', seat);
+
+      if (seat.attributes.item.data) {
+        alert(`Seat R:${seat.attributes.Row} N:${seat.attributes.Number} is already occupied`);
         return;
       }
 
@@ -194,6 +206,11 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const seat = activeSection?.attributes.seats.data.find((seat) => seat.id === newSeatId);
       if (!seat) {
         console.error('Seat not found');
+        return;
+      }
+
+      if (seat.attributes.item.data) {
+        alert(`Seat R:${seat.attributes.Row} N:${seat.attributes.Number} is already occupied`);
         return;
       }
 

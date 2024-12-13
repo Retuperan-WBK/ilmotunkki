@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useAdminContext } from "./AdminContext";
 import TicketList from "./TicketList";
+import InviteSvg from "./InviteSvg";
+import DisabledSvg from "./DisabledSvg";
 
 const OrdersDrawer = () => {
   const { orders, selectedOrder, setSelectedOrder } = useAdminContext();
@@ -118,16 +120,28 @@ const OrdersDrawer = () => {
                   Ryhmä: {order.attributes.group?.data?.attributes.name || 'N/A'}
                 </p>
               </div>
-              <div className="flex items-center mt-4">
+              <div className="flex items-center mt-4 gap-4">
                 <div
                   className={`w-4 h-4 rounded-full ${getOrderStatusColor(
                     placedCount,
                     totalCount
                   )} mr-2`}
                 ></div>
-                <p className="text-md">
+                <p className="text-md flex-[1]">
                   {placedCount}/{totalCount} paikkaa
                 </p>
+                <div className="flex items-center gap-2 flex-[1] justify-end">
+                {order.attributes.customer.data.attributes.special_arragements &&
+                <>
+                  <DisabledSvg height={40} width={40}/>
+                </>
+                }
+                {order.attributes.kutsuvieras && 
+                <>
+                  <InviteSvg height={40} width={40} />
+                </>
+                }
+                </div>
               </div>
             </div>
           );
@@ -143,24 +157,41 @@ const OrdersDrawer = () => {
           return (
             <div
               key={order.id}
-              className="flex items-center justify-between bg-[#868686] rounded-md p-4 mr-1 mb-4 cursor-pointer"
+              className="flex flex-col bg-[#868686] rounded-md p-4 mr-1 mb-4 cursor-pointer"
               onClick={() => setSelectedOrder(order)}
             >
-              <div className="flex items-center">
-                <div className="w-4 h-4 rounded-full bg-green-500 mr-2"></div>
-                <div>
-                  <p className="text-sm font-bold">
-                    {order.attributes.customer?.data.attributes.firstName}{' '}
-                    {order.attributes.customer?.data.attributes.lastName}
-                  </p>
-                  <p className="text-sm">
-                    {totalCount}/{totalCount} paikkaa
-                  </p>
+              <div className="flex justify-between items-center">
+                <p className="text-md font-bold">
+                  {order.attributes.customer?.data.attributes.firstName}{' '}
+                  {order.attributes.customer?.data.attributes.lastName}
+                </p>
+                <p className="text-md">
+                  Ryhmä: {order.attributes.group?.data?.attributes.name || 'N/A'}
+                </p>
+              </div>
+              <div className="flex items-center mt-4 gap-4">
+                <div
+                  className={`w-4 h-4 rounded-full ${getOrderStatusColor(
+                    totalCount,
+                    totalCount
+                  )} mr-2`}
+                ></div>
+                <p className="text-md flex-[1]">
+                  {totalCount}/{totalCount} paikkaa
+                </p>
+                <div className="flex items-center gap-2 flex-[1] justify-end">
+                {order.attributes.customer.data.attributes.special_arragements &&
+                <>
+                  <DisabledSvg height={40} width={40}/>
+                </>
+                }
+                {order.attributes.kutsuvieras && 
+                <>
+                  <InviteSvg height={40} width={40} />
+                </>
+                }
                 </div>
               </div>
-              <p className="text-sm">
-                Ryhmä: {order.attributes.group?.data?.attributes.name || 'N/A'}
-              </p>
             </div>
           );
         })}
