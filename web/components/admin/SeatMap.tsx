@@ -11,7 +11,11 @@ export default function SeatMap() {
     setActiveSection, 
     handleMapClick, 
     handleSeatClick,
-    selectedSeat
+    selectedSeat,
+    filter,
+    setFilter,
+    selectedGroup,
+    selectedOrder
   } = useAdminContext();
   
   const [zoomLevelIndex, setZoomLevelIndex] = useState(3); // Default zoom at index 3 (1x)
@@ -91,15 +95,78 @@ export default function SeatMap() {
     handleMapClick(relativeX, relativeY);
   };
 
+  const generateColor = (id: number): string => {
+    // Generate a unique color using the HSL color model
+    const hue = (id * 137.508) % 360; // Use a larger multiplier to spread out the hues
+    const saturation = 70 + (id % 30); // Vary saturation between 70% and 100%
+    const lightness = 50 + (id % 20); // Vary lightness between 50% and 70%
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+  };
+
   const handleScroll = (e: React.WheelEvent<SVGSVGElement>) => {
     e.stopPropagation();
     const direction = e.deltaY > 0 ? 'out' : 'in';
     handleZoom(direction);
   };
 
-  const getSeatColor = (seat: Seat) => {
-    if (seat.attributes.item.data) return 'red'; // Reserved seats
-    return 'green'; // Default available seats
+  const getSeatStyles = (seat: Seat) => {
+    let backgroundColor = 'gray'; // Default background
+    let borderColor = 'black'; // Default border
+  
+    if (filter.filter === 'show-class') {
+      switch (seat.attributes.item_type.data?.attributes.slug) {
+        case 'deluxe': backgroundColor = '#f39c12'; break;
+        case 'iluokka': backgroundColor = '#3498db'; break;
+        case 'iiluokka': backgroundColor = '#9b59b6'; break;
+      }
+    }
+  
+    // 2️⃣ Visualize Seat Item Type
+    if (filter.filter === 'show-itemtype' && seat.attributes.item.data) {
+      switch (seat.attributes.item.data.attributes.itemType.data.attributes.slug) {
+        case 'deluxe': backgroundColor = '#f39c12'; break;
+        case 'iluokka': backgroundColor = '#3498db'; break;
+        case 'iiluokka': backgroundColor = '#9b59b6'; break;
+      }
+    }
+  
+    // 3️⃣ Highlight by Group
+    if (filter.filter === 'highlight-group' && seat.attributes.item.data?.attributes.order.data.attributes.group.data) {
+      const groupId = seat.attributes.item.data.attributes.order.data.attributes.group.data.id;
+      backgroundColor = generateColor(groupId);
+    }
+  
+    // 4️⃣ Highlight by Order
+    if (filter.filter === 'highlight-order' && seat.attributes.item.data?.attributes.order.data) {
+      const orderId = seat.attributes.item.data.attributes.order.data.id;
+      backgroundColor = generateColor(orderId);
+    }
+
+    if (selectedGroup && seat.attributes.item.data?.attributes.order.data && selectedGroup.id === seat.attributes.item.data.attributes.order.data.attributes.group.data?.id) {
+      backgroundColor = 'gold';
+    }
+
+    if (selectedOrder && seat.attributes.item.data && selectedOrder.id === seat.attributes.item.data.attributes.order.data.id) {
+      backgroundColor = 'gold';
+    }
+  
+    // 5️⃣ Taken/Free indicator
+    if (filter.showReserved) {
+      if (seat.attributes.item.data) {
+        borderColor = 'red';
+      } else {
+        borderColor = 'mediumseagreen';
+      }
+    }
+    
+    if (selectedSeat && selectedSeat.id === seat.id) {
+      backgroundColor = 'red';
+    }
+  
+    return {
+      backgroundColor,
+      borderColor,
+    };
   };
 
   return (
@@ -107,20 +174,31 @@ export default function SeatMap() {
       
       {/* Section Selector */}
       <div className="p-4 absolute w-full flex bg-[#3D3D3D] !z-30 border-gray-200 border-b-2">
-        <h2 className="text-lg font-bold">Salikartta</h2>
-        <div className="ml-24 flex space-x-4">
+        <h2 className="text-lg font-bold flex-[1] mt-[2px]">Salikartta</h2>
+        <div className="flex space-x-4 flex-[5] justify-center">
           {sections.map((section) => (
             <button key={section.id} onClick={() => setActiveSection(section.id)} className="text-lg font-bold"  style={{ color: activeSection?.id === section.id ? 'white' : 'gray' }}>
               {section.attributes.Name}
             </button>
           ))}
         </div>
-        <div>
+        <div className="flex-[7] flex flex-col gap-y-2">
+          <div className="flex gap-4">
+            <button onClick={() => setFilter({...filter, filter: "show-class"})} className={filter.filter === 'show-class' ? 'bg-red-700 rounded-md p-1' : ''}>Penkkiluokka</button>
+            <button onClick={() => setFilter({...filter, filter: "show-itemtype"})} className={filter.filter === 'show-itemtype' ? 'bg-red-700 rounded-md p-1' : ''}>Lippuluokka</button>
+            <button onClick={() => setFilter({...filter, filter: "highlight-group"})} className={filter.filter === 'highlight-group' ? 'bg-red-700 rounded-md p-1' : ''}>Ryhmät</button>
+            <button onClick={() => setFilter({...filter, filter: "highlight-order"})} className={filter.filter === 'highlight-order' ? 'bg-red-700 rounded-md p-1' : ''}>Tilaukset</button>
+            <button onClick={() => setFilter({...filter, filter: null})} className={filter.filter === null ? 'bg-red-700 rounded-md p-1' : ''}>Ei mitään</button>
+          </div>
+          <div className="flex gap-1">
+            <label htmlFor="search" className="text-white">Näytä varattu/vapaa reuna:</label>
+            <input type="checkbox" placeholder="Hae" checked={filter.showReserved} className="p-1 rounded-md" onChange={() => setFilter({...filter, showReserved: !filter.showReserved})} />
+          </div>
         </div>
       </div>
 
       {/* Zoom Controls */}
-      <div className="absolute top-20 left-4 flex flex-col bg-[#3d3d3d94] z-20 rounded-md">
+      <div className="absolute top-28 left-4 flex flex-col bg-[#3d3d3d94] z-20 rounded-md">
         <button className='hover:bg-[#6b6b6b8c]' onClick={() => handleZoom('in')}>+</button>
         <button className='hover:bg-[#6b6b6b8c]' onClick={() => handleZoom('out')}>-</button>
         <br></br>
@@ -146,6 +224,7 @@ export default function SeatMap() {
             y="0"
             width="100%"
             height="100%"
+            filter='grayscale(75%)'
             preserveAspectRatio="xMidYMid meet"
             style={{ display: activeSection?.id === section.id ? 'block' : 'none' }}
           />
@@ -161,6 +240,7 @@ export default function SeatMap() {
             
             const x = (selectedSeat.attributes.x_cord / originalWidth) * 1000;
             const y = (selectedSeat.attributes.y_cord / originalHeight) * 1000;
+            const styles = getSeatStyles(seat);
             
             return (
               <>
@@ -169,9 +249,9 @@ export default function SeatMap() {
               cx={x}
               cy={y}
               r="4"
-              fill="blue"
-              stroke="#000"
-              strokeWidth="1"
+              fill={styles.backgroundColor}
+              stroke={styles.borderColor}
+              strokeWidth={filter.showReserved ? 0.5 : 0}
               style={{ cursor: 'pointer' }}
               onClick={(e) => {
                 e.stopPropagation();
@@ -188,6 +268,7 @@ export default function SeatMap() {
             );
           }
           
+          const styles = getSeatStyles(seat);
           const x = (seat.attributes.x_cord / originalWidth) * 1000;
           const y = (seat.attributes.y_cord / originalHeight) * 1000;
           return (
@@ -197,10 +278,10 @@ export default function SeatMap() {
                 cx={x}
                 cy={y}
                 r="4"
-                fill={getSeatColor(seat)}
-                stroke="#000"
-                strokeWidth="1"
-                style={{ cursor: 'pointer' }}
+                fill={styles.backgroundColor}
+                stroke={styles.borderColor}
+                strokeWidth={filter.showReserved ? 1 : 0.1}
+                style={{ cursor: 'pointer'}}
                 onClick={(e) => {
                   e.stopPropagation();
                   handleSeatClick(seat);

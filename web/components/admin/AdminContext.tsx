@@ -35,6 +35,8 @@ interface AdminContextProps {
   setSelectedSeat: (seat: ExtendedSeat | null) => void;
   itemTypes: ItemType[];
   fetchItemTypes: () => Promise<void>;
+  filter: HighlightedSeat;
+  setFilter: (filter: HighlightedSeat) => void;
 }
 
 const AdminContext = createContext<AdminContextProps | undefined>(undefined);
@@ -50,6 +52,11 @@ interface ExtendedSeat extends Seat {
   itemTypeId?: number;
 }
 
+interface HighlightedSeat {
+  filter: 'show-class' | 'show-itemtype' | 'highlight-group' | 'highlight-order' | null;
+  showReserved: boolean;
+}
+
 export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [groups, setGroups] = useState<AdminGroup[]>([]);
@@ -62,7 +69,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // MapDrawer
   const [selectedSeat, setSelectedSeat] = useState<ExtendedSeat | null>(null);
   const [newSeat, setNewSeat] = useState<NewSeat>({ row: '1', seatNumber: '1', special: '', itemType: 0 });
-
+  const [filter, setFilter] = useState<HighlightedSeat>({ filter: null, showReserved: true });
 
   // OrderDrawer and GroupDrawer
   const [selectedTicket, setSelectedTicket] = useState<Item | null>(null);
@@ -334,6 +341,8 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setSelectedOrder,
         selectedGroup,
         setSelectedGroup,
+        filter,
+        setFilter,
       }}
     >
       {children}

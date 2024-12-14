@@ -24,10 +24,10 @@ export default function SeatDashboard() {
   return (
     <div className="flex flex-col w-full h-full">
       {/* Header Section */}
-      <div className="flex w-full h-24 items-start justify-start gap-4">
+      <div className="flex w-full h-24 items-start justify-start gap-4 pl-2">
         <div className="flex flex-col items-center">
           <Logo />
-          <p>Ilmotunkki</p>
+          <p className="text-lg font-bold">Plassitunkki</p>
         </div>
         <div className="flex items-center justify-start h-full w-full">
           <button

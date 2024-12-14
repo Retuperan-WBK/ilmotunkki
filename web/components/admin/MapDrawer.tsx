@@ -13,7 +13,8 @@ const MapDrawer = () => {
     deleteSeat, 
     setMode, 
     currentMode, 
-    itemTypes
+    itemTypes,
+    sections
   } = useAdminContext();
 
   const isAddMode = currentMode === 'add-seat';
@@ -53,6 +54,35 @@ const MapDrawer = () => {
   return (
     <div className="p-6">
       <h1 className="text-xl font-bold mb-4">Kartta</h1>
+      <div className="flex flex-col p-4">
+        <h2 className="text-lg font-bold">Istuimia</h2>
+        <p className="text-base mt-2">
+          Istuimia yhteensä: {sections.reduce((acc, section) => acc + section.attributes.seats.data.length, 0)}
+        </p>
+        <p className="text-sm flex flex-col ml-4">
+          {sections.map((section) => (
+            <span key={section.id}>
+              {section.attributes.Name}: {section.attributes.seats.data.length}{' '}
+            </span>
+          ))}
+        </p>
+
+        <h2 className="text-lg font-bold mt-4">Lippuluokat</h2>
+        <p className="text-base flex flex-col ml-4">
+          {itemTypes.map((item) => (
+            <span key={item.id} className='flex flex-col'>
+              {item.attributes.slug}: {sections.reduce((acc, section) => acc + section.attributes.seats.data.filter(seat => seat.attributes.item_type.data?.id === item.id).length, 0)}{' '}
+                <div className='text-xs ml-8'>
+                  {sections.map((section) => (
+                    <span  key={section.id}>
+                      {section.attributes.Name}: {section.attributes.seats.data.filter(seat => seat.attributes.item_type.data?.id === item.id).length}{' '}
+                    </span>
+                  ))}
+                </div>
+            </span>
+          ))}
+        </p>
+      </div>
 
       {/* Tab Buttons */}
       <div className="flex">

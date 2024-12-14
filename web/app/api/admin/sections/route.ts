@@ -17,6 +17,9 @@ export async function GET(req: NextRequest) {
         'seats',
         'seats.item_type',
         'seats.item',
+        'seats.item.itemType',
+        'seats.item.order',
+        'seats.item.order.group',
         'background_image'
       ]
     }, token.value);
