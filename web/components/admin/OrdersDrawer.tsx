@@ -34,9 +34,11 @@ const OrdersDrawer = () => {
               {selectedOrder.attributes.customer?.data.attributes.firstName}{' '}
               {selectedOrder.attributes.customer?.data.attributes.lastName}
             </p>
+            {selectedOrder.attributes.group.data &&
             <p className="text-md">
               Ryhmä: {selectedOrder.attributes.group?.data?.attributes.name || 'N/A'}
             </p>
+            }
           </div>
           <div className="flex items-center mt-4">
             <div
@@ -48,6 +50,22 @@ const OrdersDrawer = () => {
             <p className="text-md">
               {tickets.filter((item) => item.attributes.seat.data).length}/{totalCount} paikkaa
             </p>
+          </div>
+          <div className="border-y-2 border-gray-400">
+            {selectedOrder.attributes.customer.data.attributes.special_arragements &&
+            <div className="flex items-center py-2">
+              <div className="flex-[1]">
+                <DisabledSvg height={40} width={40} viewBox="-150 -100 800 800"/>
+              </div>
+              <p className="text-md flex-[6]">{selectedOrder.attributes.customer.data.attributes.special_arragements}</p>
+            </div>
+            }
+            {selectedOrder.attributes.kutsuvieras &&
+            <div className="flex items-center py-2">
+              <InviteSvg height={40} width={40} />
+              <p className="text-md ml-2">Kutsuvieras</p>
+            </div>
+            }
           </div>
           <div className="mb-16">
             <TicketList tickets={tickets} />
@@ -116,9 +134,11 @@ const OrdersDrawer = () => {
                   {order.attributes.customer?.data.attributes.firstName}{' '}
                   {order.attributes.customer?.data.attributes.lastName}
                 </p>
+                {order.attributes.group.data &&
                 <p className="text-md">
                   Ryhmä: {order.attributes.group?.data?.attributes.name || 'N/A'}
                 </p>
+                }
               </div>
               <div className="flex items-center mt-4 gap-4">
                 <div
@@ -165,9 +185,11 @@ const OrdersDrawer = () => {
                   {order.attributes.customer?.data.attributes.firstName}{' '}
                   {order.attributes.customer?.data.attributes.lastName}
                 </p>
+                {order.attributes.group.data &&
                 <p className="text-md">
                   Ryhmä: {order.attributes.group?.data?.attributes.name || 'N/A'}
                 </p>
+                }
               </div>
               <div className="flex items-center mt-4 gap-4">
                 <div

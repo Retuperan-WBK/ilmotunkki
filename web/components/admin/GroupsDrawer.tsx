@@ -31,7 +31,7 @@ const GroupsDrawer = () => {
 
         <div className="flex flex-col flex-1 bg-[#868686] border-4 border-[#868686] rounded-md p-2 overflow-y-auto w-full mb-16">
           <p className="text-md font-bold mb-4">
-            Tilaukset:
+            Tilaukset ({orders.length})
           </p>
           {orders.map((order) => {
             const tickets = order.attributes.items?.data || [];
@@ -51,12 +51,22 @@ const GroupsDrawer = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-2 w-full">
-                  {order.attributes.customer.data.attributes.special_arragements && (
-                    <DisabledSvg height={40} width={40} />
-                  )}
-                  {order.attributes.kutsuvieras && (
+                  <div className="w-full border-gray-400 border-y-2">
+                  {order.attributes.customer.data.attributes.special_arragements &&
+                  <div className={`flex items-center py-2`}>
+                    <div className="flex-[1]">
+                      <DisabledSvg height={40} width={40} viewBox="-150 -100 800 800"/>
+                    </div>
+                    <p className="text-md flex-[6]">{order.attributes.customer.data.attributes.special_arragements}</p>
+                  </div>
+                  }
+                  {order.attributes.kutsuvieras &&
+                  <div className="flex items-center py-2">
                     <InviteSvg height={40} width={40} />
-                  )}
+                    <p className="text-md ml-2">Kutsuvieras</p>
+                  </div>
+                  }
+                  </div>
                 </div>
                 <TicketList tickets={tickets} />
               </div>
@@ -144,6 +154,9 @@ const GroupsDrawer = () => {
               <div className="flex justify-between items-center">
                 <p className="text-md font-bold">{group.attributes.name}</p>
                 <p className="text-md">
+                  {orders.length} tilausta
+                </p>
+                <p className="text-md">
                   {placedTickets}/{totalTickets} paikkaa
                 </p>
               </div>
@@ -199,6 +212,9 @@ const GroupsDrawer = () => {
               >
               <div className="flex justify-between items-center">
                 <p className="text-md font-bold">{group.attributes.name}</p>
+                <p className="text-md">
+                  {orders.length} tilausta
+                </p>
                 <p className="text-md">
                   {placedTickets}/{totalTickets} paikkaa
                 </p>
