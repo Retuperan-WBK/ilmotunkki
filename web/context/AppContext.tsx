@@ -47,6 +47,7 @@ const appContextDefault: Required<AppContextType> = {
       status: 'new',
       updatedAt: '',
       transactionId: '',
+      kutsuvieras: false,
       group: {
         data: undefined
       },
