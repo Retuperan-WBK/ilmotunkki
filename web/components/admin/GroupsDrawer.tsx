@@ -6,7 +6,15 @@ import InviteSvg from "./InviteSvg";
 
 const GroupsDrawer = () => {
 
-  const { groups, selectedGroup, setSelectedGroup } = useAdminContext();
+  const { 
+    groups, 
+    selectedGroup, 
+    setSelectedGroup,
+    setOrderSortOption,
+    orderFilters,
+    setOrderFilters,
+    orderSortOption,
+  } = useAdminContext();
   const [search, setSearch] = useState("");
 
   const getOrderStatusColor = (placedCount: number, totalCount: number) => {
@@ -14,6 +22,44 @@ const GroupsDrawer = () => {
     if (placedCount === totalCount) return "bg-green-500"; // All placed
     return "bg-yellow-500"; // Some unplaced
   };
+
+  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setOrderSortOption(e.target.value as 'newest' | 'oldest' | 'largest' | 'smallest');
+  };
+
+  const toggleFilter = (filterName: 'kutsuvieras' | 'erikoisjarjestely') => {
+    const newFilters = { ...orderFilters, [filterName]: !orderFilters[filterName] };
+    setOrderFilters(newFilters);
+  };
+
+  const filteredGroups = groups.filter((group) => {
+    const hasSpecialArrangement = group.attributes.orders.data.some(
+      (order) => order.attributes.customer?.data.attributes.special_arragements
+    );
+    const isGuest = group.attributes.orders.data.some(
+      (order) => order.attributes.kutsuvieras
+    );
+
+    if (orderFilters.kutsuvieras && !isGuest) return false;
+    if (orderFilters.erikoisjarjestely && !hasSpecialArrangement) return false;
+
+    return true;
+  });
+
+  const sortedGroups = filteredGroups.sort((a, b) => {
+    switch (orderSortOption) {
+      case 'newest':
+        return new Date(b.attributes.createdAt).getTime() - new Date(a.attributes.createdAt).getTime();
+      case 'oldest':
+        return new Date(a.attributes.createdAt).getTime() - new Date(b.attributes.createdAt).getTime();
+      case 'largest':
+        return b.attributes.orders?.data.length - a.attributes.orders?.data.length;
+      case 'smallest':
+        return a.attributes.orders?.data.length - b.attributes.orders?.data.length;
+      default:
+        return 0;
+    }
+  });
 
   if (selectedGroup) {
     // Render selected group details
@@ -80,7 +126,7 @@ const GroupsDrawer = () => {
     );
   }  
 
-  const groups_with_unplaced_tickets = groups.filter((group) =>
+  const groups_with_unplaced_tickets = sortedGroups.filter((group) =>
     group.attributes.orders?.data.some(
       (order) =>
         order.attributes.items?.data.some(
@@ -89,7 +135,7 @@ const GroupsDrawer = () => {
     )
   );
 
-  const groups_without_unplaced_tickets = groups.filter((group) =>
+  const groups_without_unplaced_tickets = sortedGroups.filter((group) =>
     group.attributes.orders?.data.every(
       (order) =>
         order.attributes.items?.data.every(
@@ -100,7 +146,7 @@ const GroupsDrawer = () => {
 
   return (
     <div className="p-6 pl-2 pr-0 h-full w-full flex flex-col">
-      <div className="flex items-center flex-col mb-8">
+      <div className="flex items-center flex-col mb-4">
         <div className="flex gap-4">
           <h1 className="text-2xl font-bold">Ryhmät</h1>
           <input
@@ -119,8 +165,36 @@ const GroupsDrawer = () => {
             </p>
             }
         </div>
-        <div className="flex items-center gap-2 mt-4 pl-4">
-          Tähän muita filttereitä
+        {/* Sort and Filter Section */}
+        <div className="flex gap-4 items-center my-2">
+          <select 
+            value={orderSortOption} 
+            onChange={handleSortChange} 
+            className="p-2 bg-[#868686] rounded-md"
+          >
+            <option value="newest">Uusin ensin</option>
+            <option value="oldest">Vanhin ensin</option>
+            <option value="largest">Suurin ensin</option>
+            <option value="smallest">Pienin ensin</option>
+          </select>
+
+          <label>
+            <input 
+              type="checkbox" 
+              checked={orderFilters.kutsuvieras} 
+              onChange={() => toggleFilter('kutsuvieras')} 
+            />
+            Kutsuvieras
+          </label>
+
+          <label>
+            <input 
+              type="checkbox" 
+              checked={orderFilters.erikoisjarjestely} 
+              onChange={() => toggleFilter('erikoisjarjestely')} 
+            />
+            Erikoisjärjestely
+          </label>
         </div>
       </div>
 

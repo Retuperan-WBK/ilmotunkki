@@ -3,9 +3,17 @@ import { useAdminContext } from "./AdminContext";
 import TicketList from "./TicketList";
 import InviteSvg from "./InviteSvg";
 import DisabledSvg from "./DisabledSvg";
+import { Order } from "@/utils/models";
 
 const OrdersDrawer = () => {
-  const { orders, selectedOrder, setSelectedOrder } = useAdminContext();
+  const { 
+    orders, 
+    selectedOrder, 
+    setSelectedOrder, 
+    orderSortOption, 
+    setOrderSortOption, 
+    orderFilters, 
+    setOrderFilters } = useAdminContext();
   const [search, setSearch] = useState('');
 
   const getOrderStatusColor = (placedCount: number, totalCount: number) => {
@@ -13,6 +21,42 @@ const OrdersDrawer = () => {
     if (placedCount === totalCount) return 'bg-green-500'; // All placed
     return 'bg-yellow-500'; // Some unplaced
   };
+
+  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setOrderSortOption(e.target.value as 'newest' | 'oldest' | 'largest' | 'smallest');
+  };
+
+  const toggleFilter = (filterName: 'kutsuvieras' | 'erikoisjarjestely') => {
+    const newFilters = { ...orderFilters, [filterName]: !orderFilters[filterName] };
+    setOrderFilters(newFilters);
+  };
+
+  const sortOrders = (orders: Order[]) => {
+    switch (orderSortOption) {
+      case 'newest':
+        return [...orders].sort((a, b) => new Date(b.attributes.createdAt).getTime() - new Date(a.attributes.createdAt).getTime());
+      case 'oldest':
+        return [...orders].sort((a, b) => new Date(a.attributes.createdAt).getTime() - new Date(b.attributes.createdAt).getTime());
+      case 'largest':
+        return [...orders].sort((a, b) => b.attributes.items?.data.length - a.attributes.items?.data.length);
+      case 'smallest':
+        return [...orders].sort((a, b) => a.attributes.items?.data.length - b.attributes.items?.data.length);
+      default:
+        return orders;
+    }
+  };
+
+  const filteredOrders = orders.filter((order) => {
+    const hasSpecialArrangement = order.attributes.customer.data.attributes.special_arragements || false;
+    const isGuest = order.attributes.kutsuvieras|| false;
+
+    if (orderFilters.kutsuvieras && !isGuest) return false;
+    if (orderFilters.erikoisjarjestely && !hasSpecialArrangement) return false;
+
+    return true;
+  });
+
+  const sortedOrders = sortOrders(filteredOrders);
 
   if (selectedOrder) {
     // Render selected order details
@@ -78,13 +122,13 @@ const OrdersDrawer = () => {
     );
   }
 
-  const placedOrders = orders.filter(
+  const placedOrders = sortedOrders.filter(
     (order) =>
       order.attributes.items &&
       order.attributes.items.data.every((item) => item.attributes.seat.data) // All items placed
   );
 
-  const unplacedOrders = orders.filter(
+  const unplacedOrders = sortedOrders.filter(
     (order) =>
       order.attributes.items &&
       order.attributes.items.data.some((item) => !item.attributes.seat.data) // Items without seats
@@ -92,7 +136,7 @@ const OrdersDrawer = () => {
 
   return (
     <div className="p-6 pl-2 pr-0 h-full w-full flex flex-col">
-      <div className="flex items-center flex-col mb-8">
+      <div className="flex items-center flex-col">
         <div className="flex gap-4">
           <h1 className="text-2xl font-bold">Tilaukset</h1>
           <input
@@ -111,8 +155,36 @@ const OrdersDrawer = () => {
             </p>
           }
         </div>
-        <div className="flex items-center gap-2 mt-4 pl-4">
-          Tähän muita filttereitä
+        {/* Sort and Filter Section */}
+        <div className="flex gap-4 items-center my-2">
+          <select 
+            value={orderSortOption} 
+            onChange={handleSortChange} 
+            className="p-2 bg-[#868686] rounded-md"
+          >
+            <option value="newest">Uusin ensin</option>
+            <option value="oldest">Vanhin ensin</option>
+            <option value="largest">Suurin ensin</option>
+            <option value="smallest">Pienin ensin</option>
+          </select>
+
+          <label>
+            <input 
+              type="checkbox" 
+              checked={orderFilters.kutsuvieras} 
+              onChange={() => toggleFilter('kutsuvieras')} 
+            />
+            Kutsuvieras
+          </label>
+
+          <label>
+            <input 
+              type="checkbox" 
+              checked={orderFilters.erikoisjarjestely} 
+              onChange={() => toggleFilter('erikoisjarjestely')} 
+            />
+            Erikoisjärjestely
+          </label>
         </div>
       </div>
 

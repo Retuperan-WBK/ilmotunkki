@@ -44,6 +44,10 @@ interface AdminContextProps {
   setMultiSelectedSeats: (seats: Seat[]) => void;
   multiSelectedSeats: Seat[];
   updateMultipleSeats: (seatIds: number[]) => Promise<void>;
+  orderSortOption: 'newest' | 'oldest' | 'largest' | 'smallest';
+  setOrderSortOption: (option: 'newest' | 'oldest' | 'largest' | 'smallest') => void;
+  orderFilters: { kutsuvieras: boolean, erikoisjarjestely: boolean };
+  setOrderFilters: (filters: { kutsuvieras: boolean, erikoisjarjestely: boolean }) => void;
 }
 
 const AdminContext = createContext<AdminContextProps | undefined>(undefined);
@@ -71,8 +75,10 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [activeSectionId, setActiveSectionId] = useState<number | null>(null);
   const [currentMode, setCurrentMode] = useState<AdminContextProps['currentMode']>(null);
   const [activeTab, setActiveTab] = useState<'tilaukset' | 'ryhmat' | 'kartta'>('tilaukset'); // State to track active tab
-  
   const [itemTypes, setItemTypes] = useState<ItemType[]>([]);
+
+  const [orderSortOption, setOrderSortOption] = useState<'newest' | 'oldest' | 'largest' | 'smallest'>('newest');
+  const [orderFilters, setOrderFilters] = useState<{ kutsuvieras: boolean, erikoisjarjestely: boolean }>({ kutsuvieras: false, erikoisjarjestely: false });
 
   // MapDrawer
   const [selectedSeat, setSelectedSeat] = useState<ExtendedSeat | null>(null);
@@ -393,6 +399,10 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setMultiSelectedSeats,
         multiSelectedSeats,
         updateMultipleSeats,
+        orderSortOption,
+        setOrderSortOption,
+        orderFilters,
+        setOrderFilters,
       }}
     >
       {children}
