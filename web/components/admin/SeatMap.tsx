@@ -23,7 +23,8 @@ export default function SeatMap() {
     setSelectedGroup,
     setSelectedOrder,
     setActiveTab,
-    multiSelectedSeats
+    multiSelectedSeats,
+    setSelectedSeat
   } = useAdminContext();
   
   const [zoomLevelIndex, setZoomLevelIndex] = useState(3); // Default zoom at index 3 (1x)
@@ -117,6 +118,11 @@ export default function SeatMap() {
     handleZoom(direction);
   };
 
+  const handleCloseDrawer = () => {
+    setBottomDrawerOpen(false);
+    setSelectedSeat(null);
+  }
+
   const multiSelectedSeatIds = multiSelectedSeats?.map((seat) => seat.id);
 
   const getSeatStyles = (seat: Seat) => {
@@ -186,8 +192,6 @@ export default function SeatMap() {
       borderColor,
     };
   };
-
-  console.log('selectedSeat', selectedSeat);
 
   const getOrderFullName = (seat: Seat) => {
     if (!seat.attributes.item.data) return '';
@@ -272,7 +276,7 @@ export default function SeatMap() {
             </span>
           </div>
           <div className="flex gap-4 absolute top-2 right-2">
-            <button className="bg-red-500 text-white p-2 rounded-md" onClick={() => setBottomDrawerOpen(false)}>Sulje</button>
+            <button className="bg-red-500 text-white p-2 rounded-md" onClick={handleCloseDrawer}>Sulje</button>
           </div>
         </div>
       }
