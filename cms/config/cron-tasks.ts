@@ -3,10 +3,12 @@ import type { Strapi } from "@strapi/strapi";
 const cleanExpiredOrders = async () => {
   const timedLife30 = new Date();
   const timedLife60 = new Date();
-  const timedLife4days = new Date();
+  const timedLife120 = new Date();
+  //const timedLife4days = new Date();
   timedLife30.setMinutes(timedLife30.getMinutes() - 30);
   timedLife60.setMinutes(timedLife60.getMinutes() - 60);
-  timedLife4days.setDate(timedLife4days.getDate() - 4);
+  timedLife120.setMinutes(timedLife120.getMinutes() - 120);
+  //timedLife4days.setDate(timedLife4days.getDate() - 4);
   const [newOrders, pendingOrders, expiredOrders] = await Promise.all([
     strapi.query('api::order.order').deleteMany({
       where: {
@@ -41,7 +43,7 @@ const cleanExpiredOrders = async () => {
       where: {
         status: 'expired',
         updatedAt: {
-          $lt: timedLife4days,
+          $lt: timedLife120,
         }
       }
     })
