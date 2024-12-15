@@ -143,6 +143,7 @@ export default function SeatMap() {
         case 'deluxe': backgroundColor = '#f39c12'; break;
         case 'iluokka': backgroundColor = '#3498db'; break;
         case 'iiluokka': backgroundColor = '#9b59b6'; break;
+        case 'opiskelija': backgroundColor = 'blue'; break;
       }
     }
   
