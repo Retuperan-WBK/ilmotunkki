@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Order, AdminGroup, Section, Seat, ItemType, Item } from '@/utils/models';
+import { handleAddTicketToSeat_State, handleChangeTicketSeat_State, handleRemoveTicketFromSeat_State, UpdatedItem } from './UnHolyFunctions';
 
 interface AdminContextProps {
   orders: Order[];
@@ -85,6 +86,10 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [newSeat, setNewSeat] = useState<NewSeat>({ row: '1', seatNumber: '1', special: '', itemType: 0 });
   const [filter, setFilter] = useState<HighlightedSeat>({ filter: null, showReserved: true });
 
+  // console.log('groups', groups);
+  // console.log('orders', orders);
+  // console.log('sections', sections);
+
   // OrderDrawer and GroupDrawer
   const [selectedTicket, setSelectedTicket] = useState<Item | null>(null);
 
@@ -147,7 +152,6 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // **Edit Seat**
   const updateSeat = async (seatId: number, seatData: Partial<Seat['attributes']>,) => {
-    console.log('updateSeat', JSON.stringify({ ...seatData, item_type: selectedSeat?.itemTypeId ? selectedSeat.itemTypeId : seatData.item_type?.data?.id }));
     await fetch(`/api/admin/seats/${seatId}`, {
       method: 'PUT',
       body: JSON.stringify({ ...seatData, item_type: selectedSeat?.itemTypeId ? selectedSeat.itemTypeId : seatData.item_type?.data?.id }),
@@ -162,7 +166,6 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
     await reFetch();
   }
-
 
   const updateMultipleSeats = async (seatIds: number[]) => {
     try {
@@ -196,7 +199,6 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         console.error('Seat not found');
         return;
       }
-      console.log('addTicketToSeat', seat);
 
       if (seat.attributes.item.data) {
         alert(`Seat R:${seat.attributes.Row} N:${seat.attributes.Number} is already occupied`);
@@ -214,8 +216,19 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         console.error('Error adding ticket to seat:', errorData);
         return;
       }
+
+      const data = await response.json() as UpdatedItem;
   
-      await reFetch();
+      const {
+        updatedOrders,
+        updatedGroups,
+        updatedSections
+      } = await handleAddTicketToSeat_State(orders, groups, sections, data);
+      
+      setOrders(updatedOrders as Order[]);
+      setGroups(updatedGroups as AdminGroup[]);
+      setSections(updatedSections as Section[]);
+      
     } catch (error) {
       console.error('Error in addTicketToSeat:', error);
     }
@@ -235,7 +248,18 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         return;
       }
   
-      await reFetch();
+      const data = await response.json() as UpdatedItem;
+
+      const {
+        updatedOrders,
+        updatedGroups,
+        updatedSections
+      } = await handleRemoveTicketFromSeat_State(orders, groups, sections, data);
+
+      setOrders(updatedOrders as Order[]);
+      setGroups(updatedGroups as AdminGroup[]);
+      setSections(updatedSections as Section[]);
+
     } catch (error) {
       console.error('Error in removeTicketFromSeat:', error);
     }
@@ -269,7 +293,18 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         return;
       }
 
-      await reFetch();
+      const data = await response.json() as UpdatedItem;
+
+      const {
+        updatedOrders,
+        updatedGroups,
+        updatedSections
+      } = await handleChangeTicketSeat_State(orders, groups, sections, data);
+
+      setOrders(updatedOrders as Order[]);
+      setGroups(updatedGroups as AdminGroup[]);
+      setSections(updatedSections as Section[]);
+
     } catch (error) {
       console.error('Error in changeTicketSeat:', error);
     }

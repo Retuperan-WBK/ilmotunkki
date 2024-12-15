@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchAuthenticatedAPI } from '@/lib/api';
+import { Item } from '@/utils/models';
 
 /**
  * **Add Ticket to Seat**
@@ -22,7 +23,7 @@ export async function POST(req: NextRequest) {
       seat: body.seatId
     };
 
-    const response = await fetchAuthenticatedAPI(`/items/${uid}/assign-seat`, {
+    const response = await fetchAuthenticatedAPI<Item>(`/items/${uid}/assign-seat`, {
       method: 'POST',
       body: JSON.stringify(payload),
     }, {}, token.value);
@@ -49,7 +50,7 @@ export async function DELETE(req: NextRequest) {
 
     const uid = req.nextUrl.pathname.split('/').filter(Boolean).pop();
 
-    const response = await fetchAuthenticatedAPI(`/items/${uid}/remove-seat`, {
+    const response = await fetchAuthenticatedAPI<Item>(`/items/${uid}/remove-seat`, {
       method: 'DELETE',
     }, {}, token.value);
 
@@ -81,7 +82,7 @@ export async function PUT(req: NextRequest) {
       seat: body.seatId
     };
 
-    const response = await fetchAuthenticatedAPI(`/items/${uid}/change-seat`, {
+    const response = await fetchAuthenticatedAPI<Item>(`/items/${uid}/change-seat`, {
       method: 'POST',
       body: JSON.stringify(payload),
     }, {}, token.value);
