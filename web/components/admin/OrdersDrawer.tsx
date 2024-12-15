@@ -40,6 +40,9 @@ const OrdersDrawer = () => {
             </p>
             }
           </div>
+          <p className="text-sm mt-2 cursor-pointer">
+            Email: <span onClick={() => navigator.clipboard.writeText(selectedOrder.attributes.customer?.data.attributes.email)} className="cursor-pointer hover:underline">{selectedOrder.attributes.customer?.data.attributes.email}</span>
+          </p>
           <div className="flex items-center mt-4">
             <div
               className={`w-4 h-4 rounded-full ${getOrderStatusColor(

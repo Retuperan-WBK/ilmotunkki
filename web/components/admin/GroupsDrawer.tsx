@@ -50,6 +50,9 @@ const GroupsDrawer = () => {
                     {tickets.filter((item) => item.attributes.seat.data).length}/{totalCount} paikkaa
                   </p>
                 </div>
+                <p className="text-sm mt-2 cursor-pointer">
+                  Email: <span onClick={() => navigator.clipboard.writeText(order.attributes.customer?.data.attributes.email)} className="cursor-pointer hover:underline">{order.attributes.customer?.data.attributes.email}</span>
+                </p>
                 <div className="flex items-center gap-2 w-full">
                   <div className="w-full border-gray-400 border-y-2">
                   {order.attributes.customer.data.attributes.special_arragements &&

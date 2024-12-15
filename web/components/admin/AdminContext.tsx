@@ -8,7 +8,7 @@ interface AdminContextProps {
   groups: AdminGroup[];
   sections: Section[];
   activeSectionId: number | null;
-  currentMode: 'add-seat' | 'edit-seat' | 'add-ticket-to-seat' | 'change-ticket-seat' | ' special' | null;
+  currentMode: 'add-seat' | 'edit-seat' | 'add-ticket-to-seat' | 'change-ticket-seat' | 'multi-select' | null;
   setMode: (mode: AdminContextProps['currentMode']) => void;
   setSelectedTicket: (ticketId: Item | null) => void;
   setActiveSection: (sectionId: number) => void;
@@ -37,6 +37,13 @@ interface AdminContextProps {
   fetchItemTypes: () => Promise<void>;
   filter: HighlightedSeat;
   setFilter: (filter: HighlightedSeat) => void;
+  bottomDrawerOpen: boolean;
+  setBottomDrawerOpen: (open: boolean) => void;
+  setActiveTab: (tab: 'tilaukset' | 'ryhmat' | 'kartta') => void;
+  activeTab: 'tilaukset' | 'ryhmat' | 'kartta';
+  setMultiSelectedSeats: (seats: Seat[]) => void;
+  multiSelectedSeats: Seat[];
+  updateMultipleSeats: (seatIds: number[]) => Promise<void>;
 }
 
 const AdminContext = createContext<AdminContextProps | undefined>(undefined);
@@ -63,6 +70,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [sections, setSections] = useState<Section[]>([]);
   const [activeSectionId, setActiveSectionId] = useState<number | null>(null);
   const [currentMode, setCurrentMode] = useState<AdminContextProps['currentMode']>(null);
+  const [activeTab, setActiveTab] = useState<'tilaukset' | 'ryhmat' | 'kartta'>('tilaukset'); // State to track active tab
   
   const [itemTypes, setItemTypes] = useState<ItemType[]>([]);
 
@@ -81,6 +89,10 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // GroupDrawer
 
   const [selectedGroup, setSelectedGroup] = useState<AdminGroup | null>(null);
+
+  // BottomDrawer
+  const [bottomDrawerOpen, setBottomDrawerOpen] = useState(false);
+  const [multiSelectedSeats, setMultiSelectedSeats] = useState<Seat[]>([]);
 
   // Fetch all orders
   const fetchOrders = async () => {
@@ -144,6 +156,24 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
     await reFetch();
   }
+
+
+  const updateMultipleSeats = async (seatIds: number[]) => {
+    try {
+      await Promise.all(
+        seatIds.map((seatId) =>
+          fetch(`/api/admin/seats/${seatId}`, {
+            method: 'PUT',
+            body: JSON.stringify({ item_type: newSeat.itemType }),
+            headers: { 'Content-Type': 'application/json' },
+          })
+        )
+      );
+      await reFetch();
+    } catch (error) {
+      console.error('Error in updateMultipleSeats:', error);
+    }
+  };
 
   const addTicketToSeat = async (ticketId: number, seatId: number) => {
     try {
@@ -273,7 +303,6 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const activeSection = sections.find((section) => section.id === activeSectionId) || null;
 
   const handleSeatClick = (seat: Seat) => {
-    if (!currentMode) return;
 
     switch (currentMode) {
       case 'edit-seat':
@@ -283,12 +312,26 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         if (!selectedTicket) return;
         addTicketToSeat(selectedTicket?.id, seat.id);
         setSelectedTicket(null);
+        setCurrentMode(null);
+        setSelectedSeat(null);
         break;
       case 'change-ticket-seat':
         if (!selectedTicket) return;
         changeTicketSeat(selectedTicket?.id, seat.id);
         setSelectedTicket(null);
+        setCurrentMode(null);
+        setSelectedSeat(null);
         break;
+      case 'multi-select':
+        if (multiSelectedSeats.includes(seat)) {
+          setMultiSelectedSeats(multiSelectedSeats.filter((selectedSeat) => selectedSeat !== seat));
+        } else {
+          setMultiSelectedSeats([...multiSelectedSeats, seat]);
+        }
+        break;
+      default:
+        setSelectedSeat(seat);
+        setBottomDrawerOpen(true);
     }
   };
 
@@ -343,6 +386,13 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setSelectedGroup,
         filter,
         setFilter,
+        bottomDrawerOpen,
+        setBottomDrawerOpen,
+        setActiveTab,
+        activeTab,
+        setMultiSelectedSeats,
+        multiSelectedSeats,
+        updateMultipleSeats,
       }}
     >
       {children}

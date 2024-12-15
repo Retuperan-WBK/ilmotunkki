@@ -15,7 +15,15 @@ export default function SeatMap() {
     filter,
     setFilter,
     selectedGroup,
-    selectedOrder
+    selectedOrder,
+    bottomDrawerOpen,
+    setBottomDrawerOpen,
+    orders,
+    groups,
+    setSelectedGroup,
+    setSelectedOrder,
+    setActiveTab,
+    multiSelectedSeats
   } = useAdminContext();
   
   const [zoomLevelIndex, setZoomLevelIndex] = useState(3); // Default zoom at index 3 (1x)
@@ -109,6 +117,8 @@ export default function SeatMap() {
     handleZoom(direction);
   };
 
+  const multiSelectedSeatIds = multiSelectedSeats?.map((seat) => seat.id);
+
   const getSeatStyles = (seat: Seat) => {
     let backgroundColor = 'gray'; // Default background
     let borderColor = 'black'; // Default border
@@ -166,12 +176,49 @@ export default function SeatMap() {
     if (selectedSeat && selectedSeat.id === seat.id) {
       backgroundColor = 'red';
     }
+
+    if (multiSelectedSeatIds && multiSelectedSeatIds.includes(seat.id)) {
+      backgroundColor = 'red';
+    }
   
     return {
       backgroundColor,
       borderColor,
     };
   };
+
+  console.log('selectedSeat', selectedSeat);
+
+  const getOrderFullName = (seat: Seat) => {
+    if (!seat.attributes.item.data) return '';
+    const order = seat.attributes.item.data.attributes.order.data.id;
+    const firstName = orders.find((o) => o.id === order)?.attributes.customer.data.attributes.firstName;
+    const lastName = orders.find((o) => o.id === order)?.attributes.customer.data.attributes.lastName;
+
+    if (!firstName || !lastName) return '';
+
+    return `${firstName} ${lastName}`;
+  }
+
+  const getOrderGroup = (seat: Seat) => {
+    if (!seat.attributes.item.data) return '';
+    const order = seat.attributes.item.data.attributes.order.data;
+    return order.attributes.group.data?.attributes.name || '';
+  }
+
+  const handleOpenGroup = (groupId: number) => {
+    const group = groups.find((g) => g.id === groupId);
+    if (!group) return;
+    setSelectedGroup(group);
+    setActiveTab('ryhmat');
+  }
+
+  const handleOpenOrder = (orderId: number) => {
+    const order = orders.find((o) => o.id === orderId);
+    if (!order) return;
+    setSelectedOrder(order);
+    setActiveTab('tilaukset');
+  }
 
   return (
     <div className="seat-map" ref={divRef} style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden', border: '1px solid #ddd' }}>
@@ -202,6 +249,33 @@ export default function SeatMap() {
           </div>
         </div>
       </div>
+
+      {/* Bottom Drawer 
+      Render the bottom drawer if it's open and a seat is selected, include basic information of the seats and the order where it has been set to*/}
+      {bottomDrawerOpen && selectedSeat && 
+        <div className="absolute bottom-20 w-full bg-[#3d3d3dDD] p-4 z-40 h-40">
+          <h2 className="text-lg font-bold">Rivi: {selectedSeat.attributes.Row} - Paikka: {selectedSeat.attributes.Number}</h2>
+          <div className="flex flex-wrap">
+            <span className="flex-[1]">
+              <span className="font-bold">Penkkiluokka:</span> {selectedSeat.attributes.item_type.data?.attributes.slug || 'Ei valittu'}
+            </span>
+            <span className="flex-[1]">
+              <span className="font-bold">Lisähuomio:</span> {selectedSeat.attributes.special || 'Ei'}
+            </span>
+          </div>
+          <div className="flex flex-wrap">
+            <span className="flex-[1] hover:underline cursor-pointer" onClick={() =>selectedSeat.attributes.item.data?.attributes.order.data.id && handleOpenOrder(selectedSeat.attributes.item.data?.attributes.order.data.id)}>
+              <span className="font-bold">Tilaus:</span> {getOrderFullName(selectedSeat) || 'Ei tilausta'}
+            </span>
+            <span className="flex-[1] hover:underline cursor-pointer" onClick={() => selectedSeat.attributes.item.data?.attributes.order.data.attributes.group.data?.id && handleOpenGroup(selectedSeat.attributes.item.data?.attributes.order.data.attributes.group.data?.id)}>
+              <span className="font-bold">Ryhmä:</span> {getOrderGroup(selectedSeat) || 'Ei ryhmää'}
+            </span>
+          </div>
+          <div className="flex gap-4 absolute top-2 right-2">
+            <button className="bg-red-500 text-white p-2 rounded-md" onClick={() => setBottomDrawerOpen(false)}>Sulje</button>
+          </div>
+        </div>
+      }
 
       {/* Zoom Controls */}
       <div className="absolute top-32 left-4 flex flex-col bg-[#3d3d3d94] z-20 rounded-md">

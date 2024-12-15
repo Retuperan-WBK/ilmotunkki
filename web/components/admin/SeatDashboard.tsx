@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import Logo from './Logo';
 import SeatMap from './SeatMap';
 import OrdersDrawer from './OrdersDrawer';
@@ -9,8 +8,7 @@ import MapDrawer from './MapDrawer';
 import { useAdminContext } from './AdminContext';
 
 export default function SeatDashboard() {
-  const { setMode, setSelectedGroup, setSelectedOrder, setSelectedTicket, setSelectedSeat } = useAdminContext();
-  const [activeTab, setActiveTab] = useState<'tilaukset' | 'ryhmat' | 'kartta'>('tilaukset'); // State to track active tab
+  const { setMode, setSelectedGroup, setSelectedOrder, setSelectedTicket, setSelectedSeat, activeTab, setActiveTab } = useAdminContext();
 
   const handleChangeTab = (tab: 'tilaukset' | 'ryhmat' | 'kartta') => {
     setMode(null);

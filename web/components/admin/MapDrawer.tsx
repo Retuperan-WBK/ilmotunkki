@@ -14,14 +14,30 @@ const MapDrawer = () => {
     setMode, 
     currentMode, 
     itemTypes,
-    sections
+    sections,
+    multiSelectedSeats, 
+    setMultiSelectedSeats,
+    updateMultipleSeats,
   } = useAdminContext();
 
   const isAddMode = currentMode === 'add-seat';
   const isEditMode = currentMode === 'edit-seat';
+  const isMultiSelectMode = currentMode === 'multi-select';
 
-  const handleTabChange = (mode: 'add-seat' | 'edit-seat') => {
+  const handleTabChange = (mode: 'add-seat' | 'edit-seat' | 'multi-select') => {
     setMode(mode);
+    setMultiSelectedSeats([]);
+  };
+
+
+  const handleBulkUpdate = () => {
+    if (!multiSelectedSeats.length) return;
+
+    updateMultipleSeats(
+      multiSelectedSeats.map((seat) => seat.id)
+    );
+
+    setMultiSelectedSeats([]);
   };
 
   const handleUpdateSeat = () => {
@@ -99,6 +115,12 @@ const MapDrawer = () => {
         >
           Muokkaa istuimia
         </button>
+        <button
+          className={`px-4 py-2 ${ isMultiSelectMode ? 'bg-[#5f5f5f]' : 'bg-[#4f4f4f]'} text-white`}
+          onClick={() => handleTabChange('multi-select')}
+        >
+          Bulk update
+        </button>
       </div>
 
       {isAddMode && (
@@ -121,7 +143,7 @@ const MapDrawer = () => {
             className="p-2 bg-[#868686] rounded-md"
           />
 
-          <label className="mt-2 text-sm">Erikoislisä</label>
+          <label className="mt-2 text-sm">Lisähuomio</label>
           <input
             type="text"
             value={newSeat.special}
@@ -191,7 +213,7 @@ const MapDrawer = () => {
             className="p-2 bg-[#868686] rounded-md"
           />
 
-          <label className="mt-2 text-sm">Erikoislisä</label>
+          <label className="mt-2 text-sm">Lisähuomio</label>
           <input
             type="text"
             value={selectedSeat.attributes.special || ''}
@@ -233,6 +255,35 @@ const MapDrawer = () => {
           </div>
         )
       )}
+
+      {isMultiSelectMode && (
+        <div className="flex flex-col bg-[#545454] p-4 ">
+          <h2 className="text-lg font-bold">Valitut Istuimet</h2>
+          
+          <p>{multiSelectedSeats.length} paikkaa valittu</p>
+
+          <label className="mt-2 text-sm">Lippuluokka</label>
+          <select
+            value={newSeat.itemType|| ""}
+            onChange={(e) => setNewSeat({...newSeat, itemType: parseInt(e.target.value)})}
+            className="p-2 bg-[#868686] rounded-md"
+          >
+            <option value={""}>Ei valittu</option>
+            {itemTypes.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.attributes.slug}
+              </option>
+            ))}
+          </select>
+
+          <button
+            className="mt-4 px-4 py-2 bg-green-500 text-white rounded-md"
+            onClick={handleBulkUpdate}
+          >
+            Päivitä Lippuluokat
+          </button>
+        </div>
+      )}  
     </div>
   );
 };
