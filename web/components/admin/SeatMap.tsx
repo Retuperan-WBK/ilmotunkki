@@ -142,6 +142,10 @@ export default function SeatMap() {
       backgroundColor = generateColor(orderId);
     }
 
+    if (filter.filter === 'special' && seat.attributes.special) {
+      backgroundColor = 'blue';
+    }
+
     if (selectedGroup && seat.attributes.item.data?.attributes.order.data && selectedGroup.id === seat.attributes.item.data.attributes.order.data.attributes.group.data?.id) {
       backgroundColor = 'gold';
     }
@@ -183,12 +187,14 @@ export default function SeatMap() {
           ))}
         </div>
         <div className="flex-[7] flex flex-col gap-y-2">
+          <h3 className="text-sm my-[-8px] font-bold">Suodattimet:</h3>
           <div className="flex gap-4">
             <button onClick={() => setFilter({...filter, filter: "show-class"})} className={filter.filter === 'show-class' ? 'bg-red-700 rounded-md p-1' : ''}>Penkkiluokka</button>
             <button onClick={() => setFilter({...filter, filter: "show-itemtype"})} className={filter.filter === 'show-itemtype' ? 'bg-red-700 rounded-md p-1' : ''}>Lippuluokka</button>
             <button onClick={() => setFilter({...filter, filter: "highlight-group"})} className={filter.filter === 'highlight-group' ? 'bg-red-700 rounded-md p-1' : ''}>Ryhmät</button>
             <button onClick={() => setFilter({...filter, filter: "highlight-order"})} className={filter.filter === 'highlight-order' ? 'bg-red-700 rounded-md p-1' : ''}>Tilaukset</button>
-            <button onClick={() => setFilter({...filter, filter: null})} className={filter.filter === null ? 'bg-red-700 rounded-md p-1' : ''}>Ei mitään</button>
+            <button onClick={() => setFilter({...filter, filter: "special"})} className={filter.filter === 'special' ? 'bg-red-700 rounded-md p-1' : ''}>Special</button>
+            <button onClick={() => setFilter({...filter, filter: null})} className={filter.filter === null ? 'bg-red-700 rounded-md p-1' : ''}>Ei</button>
           </div>
           <div className="flex gap-1">
             <label htmlFor="search" className="text-white">Näytä varattu/vapaa reuna:</label>
@@ -198,7 +204,7 @@ export default function SeatMap() {
       </div>
 
       {/* Zoom Controls */}
-      <div className="absolute top-28 left-4 flex flex-col bg-[#3d3d3d94] z-20 rounded-md">
+      <div className="absolute top-32 left-4 flex flex-col bg-[#3d3d3d94] z-20 rounded-md">
         <button className='hover:bg-[#6b6b6b8c]' onClick={() => handleZoom('in')}>+</button>
         <button className='hover:bg-[#6b6b6b8c]' onClick={() => handleZoom('out')}>-</button>
         <br></br>

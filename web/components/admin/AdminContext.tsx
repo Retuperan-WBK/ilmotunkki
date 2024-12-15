@@ -8,7 +8,7 @@ interface AdminContextProps {
   groups: AdminGroup[];
   sections: Section[];
   activeSectionId: number | null;
-  currentMode: 'add-seat' | 'edit-seat' | 'add-ticket-to-seat' | 'change-ticket-seat' | null;
+  currentMode: 'add-seat' | 'edit-seat' | 'add-ticket-to-seat' | 'change-ticket-seat' | ' special' | null;
   setMode: (mode: AdminContextProps['currentMode']) => void;
   setSelectedTicket: (ticketId: Item | null) => void;
   setActiveSection: (sectionId: number) => void;
@@ -53,7 +53,7 @@ interface ExtendedSeat extends Seat {
 }
 
 interface HighlightedSeat {
-  filter: 'show-class' | 'show-itemtype' | 'highlight-group' | 'highlight-order' | null;
+  filter: 'show-class' | 'show-itemtype' | 'highlight-group' | 'highlight-order' | 'special' | null;
   showReserved: boolean;
 }
 
