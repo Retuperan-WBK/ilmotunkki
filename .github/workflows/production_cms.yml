@@ -3,7 +3,7 @@ name: Build and Push Docker Containers
 on:
   release:
     types: 
-      - published # Only trigger on published releases
+      - never # Only trigger on published releases
 
   workflow_dispatch: # Allows manual trigger from GitHub Actions UI
 
