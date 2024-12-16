@@ -29,7 +29,7 @@ const configuration = {
   theme: {
     extend: {
       colors: {
-        primary: getColor(PRIMARY_COLOR,"blue"),
+        primary: getColor(PRIMARY_COLOR,"red"),
         secondary: getColor(SECONDARY_COLOR,"neutral"),
         transparent: colors.transparent,
         success: colors.green,
