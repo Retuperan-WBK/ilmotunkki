@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { fetchAuthenticatedAPI } from '@/lib/api';
 import { Item } from '@/utils/models';
 
+export const dynamic = 'force-dynamic';
 /**
  * **Add Ticket to Seat**
  * URL: /api/admin/item/[uid]/assign-seat

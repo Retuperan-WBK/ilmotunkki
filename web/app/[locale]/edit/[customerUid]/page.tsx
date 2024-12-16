@@ -24,7 +24,7 @@ const getContactForms = async (locale: string) => {
   }
 };
 
-export const getGlobalSettings = async () => {
+const getGlobalSettings = async () => {
   try {
     return fetchAPI<Global>('/global', { cache: 'no-store' });
   } catch (error) {

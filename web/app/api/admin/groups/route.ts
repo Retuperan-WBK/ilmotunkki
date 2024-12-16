@@ -2,6 +2,8 @@ import { fetchAuthenticatedAPI } from "@/lib/api";
 import { AdminGroup } from "@/utils/models";
 import { NextRequest, NextResponse } from "next/server";
 
+export const dynamic = 'force-dynamic';
+
 export const GET = async (req: NextRequest) => {
   try {
     const token = req.cookies.get("adminToken");

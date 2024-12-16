@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { fetchAuthenticatedAPI } from '@/lib/api';
 
 // **Create a Seat**
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest) {
   try {
     const token = req.cookies.get('adminToken');

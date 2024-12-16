@@ -4,6 +4,8 @@ import { fetchAuthenticatedAPI } from '@/lib/api';
 /**
  * Handle PUT request to update a seat by ID
  */
+export const dynamic = 'force-dynamic';
+
 export async function PUT(req: NextRequest) {
   try {
     const token = req.cookies.get('adminToken');
