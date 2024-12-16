@@ -123,6 +123,8 @@ export default function SeatMap() {
     setSelectedSeat(null);
   }
 
+  console.log(sections);
+
   const multiSelectedSeatIds = multiSelectedSeats?.map((seat) => seat.id);
 
   const getSeatStyles = (seat: Seat) => {

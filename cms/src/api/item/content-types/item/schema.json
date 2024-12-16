@@ -32,7 +32,8 @@
     "seat": {
       "type": "relation",
       "relation": "oneToOne",
-      "target": "api::seat.seat"
+      "target": "api::seat.seat",
+      "inversedBy": "item"
     }
   }
 }
