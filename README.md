@@ -34,6 +34,14 @@ Import the base settings and content:
 docker compose exec cms npx strapi import -f rwbk_content.tar.gz
 ```
 
+Export the content:
+
+Write the CONTENT_FILE_NAME without the `.tar.gz` extension.
+
+```
+docker compose exec cms npx strapi export -f CONTENT_FILE_NAME --no-encrypt
+```
+
 Go to [http://localhost:7800/cms/admin](http://localhost:7800/cms/admin), create an account and login. Go to Settings > API Tokens > Add new API Token. Name it something descriptive and set the token type to `full-access`.
 Copy the new token and set it to `STRAPI_TOKEN` in `.env` file.
 
