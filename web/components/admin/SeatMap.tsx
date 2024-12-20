@@ -32,6 +32,7 @@ export default function SeatMap() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragDistance, setDragDistance] = useState(0);
   const [lastMousePosition, setLastMousePosition] = useState({ x: 0, y: 0 });
+  const [legendOpen, setLegendOpen] = useState(true);
 
   const svgRef = useRef<SVGSVGElement>(null);
   const divRef = useRef<HTMLDivElement>(null);
@@ -134,8 +135,8 @@ export default function SeatMap() {
     if (filter.filter === 'show-class') {
       switch (seat.attributes.item_type.data?.attributes.slug) {
         case 'deluxe': backgroundColor = '#f39c12'; break;
-        case 'iluokka': backgroundColor = '#3498db'; break;
-        case 'iiluokka': backgroundColor = '#9b59b6'; break;
+        case 'iluokka': backgroundColor = '#1b8cd7'; break;
+        case 'iiluokka': backgroundColor = '#c220b2'; break;
       }
     }
   
@@ -143,9 +144,9 @@ export default function SeatMap() {
     if (filter.filter === 'show-itemtype' && seat.attributes.item.data) {
       switch (seat.attributes.item.data.attributes.itemType.data.attributes.slug) {
         case 'deluxe': backgroundColor = '#f39c12'; break;
-        case 'iluokka': backgroundColor = '#3498db'; break;
-        case 'iiluokka': backgroundColor = '#9b59b6'; break;
-        case 'opiskelija': backgroundColor = 'blue'; break;
+        case 'iluokka': backgroundColor = '#1b8cd7'; break;
+        case 'iiluokka': backgroundColor = '#c220b2'; break;
+        case 'opiskelija': backgroundColor = '#702200'; break;
       }
     }
   
@@ -300,6 +301,93 @@ export default function SeatMap() {
         <br></br>
         <button className='hover:bg-[#6b6b6b8c]' onClick={() => setPanOffset({x: 0, y: 0})}>Center</button>
       </div>
+
+      {/* Legend */}
+      { filter.filter &&
+      <div className="absolute max-w-[100px] top-32 right-4 flex py-1 px-2 flex-col bg-[#3d3d3d94] z-20 rounded-md cursor-pointer" onClick={() => setLegendOpen(!legendOpen)}>
+        {filter.filter === 'show-class' && 
+        <div>
+          <span>Penkkiluokka</span>
+          {legendOpen &&
+          <>
+            <div className="flex gap-1 items-center rounded-full">
+              <div className="bg-[#f39c12] h-4 w-4"></div>
+              <span >Deluxe</span>
+            </div>
+            <div className="flex gap-1 items-center rounded-full">
+              <div className="bg-[#1b8cd7] h-4 w-4"></div>
+              <span >I-luokka</span>
+            </div>
+            <div className="flex gap-1 items-center rounded-full">
+              <div className="bg-[#c220b2] h-4 w-4"></div>
+              <span >II-luokka</span>
+            </div>
+          </>
+          }
+        </div>
+        }
+        {filter.filter === 'show-itemtype' &&
+        <div>
+          <span>Lippuluokka</span>
+          {legendOpen &&
+          <>
+            <div className="flex gap-1 items-center rounded-full">
+              <div className="bg-[#f39c12] h-4 w-4"></div>
+              <span >Deluxe</span>
+            </div>
+            <div className="flex gap-1 items-center rounded-full">
+              <div className="bg-[#1b8cd7] h-4 w-4"></div>
+              <span >I-luokka</span>
+            </div>
+            <div className="flex gap-1 items-center rounded-full">
+              <div className="bg-[#c220b2] h-4 w-4"></div>
+              <span >II-luokka</span>
+            </div>
+            <div className="flex gap-1 items-center rounded-full">
+              <div className="bg-[#702200] h-4 w-4"></div>
+              <span >Opiskelija</span>
+            </div>
+          </>
+          }
+        </div>
+        }
+        {filter.filter === 'highlight-group' &&
+        <div>
+          <span className='text-semibold'>Ryhmät</span>
+          { legendOpen && 
+          <>
+            <br/>
+            <span className='text-xs'>Väritää paikat sen mukaan mihin ryhmään se kuuluu</span>
+          </>
+          }
+        </div>
+        }
+        {filter.filter === 'highlight-order' &&
+        <div>
+          <span className='text-semibold'>Tilaukset</span>
+          { legendOpen && 
+          <>
+            <br/>
+            <span className='text-xs'>Väritää paikat sen mukaan mihin tilaukseen se kuuluu</span>
+          </>
+          }
+        </div>
+        }
+        {filter.filter === 'special' && 
+        <div>
+          <span>Special</span>
+          { legendOpen && 
+          <>
+            <div className="flex gap-1 items-center">
+            <div className="bg-blue-700 h-4 w-4 rounded-full"></div>
+              <span>Special</span>
+            </div>
+          </>
+          }
+        </div>
+        }
+      </div>
+      }
 
       <svg
         ref={svgRef}
