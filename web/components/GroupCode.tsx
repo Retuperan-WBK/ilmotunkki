@@ -141,11 +141,11 @@ const GroupCode = ({locale, currentCode}: Props) => {
       <div className='mt-8 flex gap-2 w-full flex-col'>
         {confirmedGroupCode === undefined ? (
         <>
-        <div className='mt-2 flex justify-between items-center'>
-          <p className='text-white'>
+        <div className='mt-2 flex justify-between items-center md:flex-row flex-col-reverse'>
+          <p className='text-white md:pt-0 pt-2'>
             {translation.groupcode_no_current}
           </p>
-          <div className="flex gap-2 mt-2">
+          <div className="flex gap-2 mt-2 text-sm sm:text-base">
             <button type='button' className={`btn ${groupMode === "old" ? "bg-primary" : "!bg-secondary-500"}`} onClick={() => setGroupMode((mode) => mode === "old" ? undefined : "old")}>{translation.add_groupcode_button}</button>
             <button type='button' className={`btn ${groupMode === "new" ? "bg-primary" : "!bg-secondary-500"}`} onClick={() => setGroupMode((mode) => mode === "new" ? undefined : "new")}>{translation.create_groupcode_button}</button>
           </div>
@@ -186,7 +186,7 @@ const GroupCode = ({locale, currentCode}: Props) => {
               </button>
             </div>)
           }</>) : (
-            <div className='mt-2 flex justify-between items-center'>
+            <div className='mt-2 justify-between items-center flex'>
               <p className='text-white'>
                 {translation.current_groupcode} {confirmedGroupCode}
               </p>

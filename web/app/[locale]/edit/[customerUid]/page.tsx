@@ -3,6 +3,8 @@ import OrderList from "./OrderList";
 import { ContactForm, Customer, Item, Order, StrapiBaseType } from "@/utils/models";
 import Form from "@/components/ContactForm";
 import { getTranslation } from "@/utils/translationHelper";
+import { getUseGroups } from "@/utils/helpers";
+import GroupCode from "@/components/GroupCode";
 export const dynamic = 'force-dynamic';
 
 type Global = StrapiBaseType<{
@@ -74,6 +76,8 @@ const EditPage = async ({ params: { locale, customerUid }}: Props) => {
     getOrders(customerUid),
     getTranslation(locale),
   ]);
+  const useGroups = getUseGroups(contactForms);
+  const order = orders[0];
   if (!customer) return <p>No customer found</p>
   if (!global) return <p>Error in update settings</p>
   const items = orders.reduce((list, order) => {
@@ -84,6 +88,11 @@ const EditPage = async ({ params: { locale, customerUid }}: Props) => {
       <div className="mb-32 max-w-3xl mx-auto">
         <Form contactForms={contactForms} customer={customer} items={items} locale={locale} />
       </div>
+      {useGroups && order &&
+      <div className='bg-secondary-50 dark:bg-secondary-800 rounded shadow-lg p-4 mx-auto max-w-3xl'>
+        <GroupCode locale={locale} currentCode={order.attributes.group.data?.attributes.name}/>
+      </div>
+      }
       <OrderList translation={translation} orders={orders} locale={locale} />
     </div>
   );
