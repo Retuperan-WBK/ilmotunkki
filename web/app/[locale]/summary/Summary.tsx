@@ -43,7 +43,7 @@ const Summary = ({locale, translation, contactForms}: SummaryProps) => {
       {
       useGroups &&
       <div className='bg-secondary-50 dark:bg-secondary-800 rounded shadow-lg p-4 mb-5'>
-        <GroupCode locale={locale} currentCode={order?.attributes.group.data?.attributes.name}/>
+        <GroupCode locale={locale} order={order}/>
       </div>
       }
       <div className='bg-secondary-50 dark:bg-secondary-800 rounded shadow-lg p-4'>

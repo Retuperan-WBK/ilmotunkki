@@ -90,7 +90,7 @@ const EditPage = async ({ params: { locale, customerUid }}: Props) => {
       </div>
       {useGroups && order &&
       <div className='bg-secondary-50 dark:bg-secondary-800 rounded shadow-lg p-4 mx-auto max-w-3xl'>
-        <GroupCode locale={locale} currentCode={order.attributes.group.data?.attributes.name}/>
+        <GroupCode locale={locale} order={order} />
       </div>
       }
       <OrderList translation={translation} orders={orders} locale={locale} />

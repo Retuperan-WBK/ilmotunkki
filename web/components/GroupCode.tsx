@@ -1,21 +1,20 @@
 "use client";
 
-import { ChangeEvent, useState, useContext, useEffect } from 'react';
-import { AppContext } from '../context/AppContext';
+import { ChangeEvent, useState, useEffect } from 'react';
 import { StrapiError } from '../lib/api';
 import { useTranslation } from "@/context/useTranslation";
+import { Order } from '@/utils/models';
 
 type Props = {
   locale: string;
-  currentCode?: string;
+  order?: Order;
 }
-const GroupCode = ({locale, currentCode}: Props) => {
+const GroupCode = ({locale, order}: Props) => {
   const { translation } = useTranslation(locale);
   const [ groupCodeError, setGroupCodeError ] = useState('');
   const [ groupCodeSuccess, setGroupCodeSuccess ] = useState('');
-  const { order, refreshFields } = useContext(AppContext);
   const [ groupCode, setGroupCode ] = useState('');
-  const [ confirmedGroupCode, setConfirmedGroupCode ] = useState(currentCode);
+  const [ confirmedGroupCode, setConfirmedGroupCode ] = useState(order?.attributes.group.data?.attributes.name);
   const [ groupMode, setGroupMode ] = useState<"old" | "new" | undefined>(undefined);
 
   useEffect(() => {
@@ -27,8 +26,8 @@ const GroupCode = ({locale, currentCode}: Props) => {
   }, [groupCodeError]);
 
   useEffect(() => {
-    setConfirmedGroupCode(currentCode);
-  }, [currentCode]);
+    setConfirmedGroupCode(order?.attributes.group.data?.attributes.name);
+  }, [order?.attributes.group.data?.attributes.name]);
 
   const handleFetchResponse = async (response: Response) => {
     if (!response.ok) {
@@ -57,7 +56,6 @@ const GroupCode = ({locale, currentCode}: Props) => {
         cache: 'no-store'
       })
       await handleFetchResponse(res);
-      refreshFields();
       setGroupCodeError('');
       setGroupCodeSuccess('Ryhmäkoodi luotu onnistuneesti');
       setConfirmedGroupCode(groupCode);
@@ -86,7 +84,6 @@ const GroupCode = ({locale, currentCode}: Props) => {
         cache: 'no-store'
       })
       await handleFetchResponse(res);
-      refreshFields();
       setGroupCodeError('');
       setGroupCodeSuccess('Ryhmäkoodi lisätty onnistuneesti');
       setConfirmedGroupCode(groupCode);
@@ -112,7 +109,6 @@ const GroupCode = ({locale, currentCode}: Props) => {
         cache: 'no-store'
       })
       await handleFetchResponse(res);
-      refreshFields();
       setGroupCodeError('');
       setGroupCodeSuccess('Ryhmäkoodi poistettiin tilauksesta');
       setConfirmedGroupCode(undefined);
