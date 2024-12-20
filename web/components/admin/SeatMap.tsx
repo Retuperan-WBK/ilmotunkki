@@ -124,8 +124,6 @@ export default function SeatMap() {
     setSelectedSeat(null);
   }
 
-  console.log(sections);
-
   const multiSelectedSeatIds = multiSelectedSeats?.map((seat) => seat.id);
 
   const getSeatStyles = (seat: Seat) => {
@@ -403,6 +401,7 @@ export default function SeatMap() {
         {sections.map((section) => (
           <image
             key={section.id}
+            ref={activeSection?.id === section.id ? imageRef : null}
             href={`/api/admin/image?url=${section.attributes.background_image.data.attributes.url}`}
             x="0"
             y="0"

@@ -27,8 +27,6 @@ export async function PUT(req: NextRequest) {
         item_type: body.item_type || null,
       }
     };
-    
-    console.log('Updating seat:', payload);
 
     const response = await fetchAuthenticatedAPI(`/seats/${seatId}`, {
       method: 'PUT',

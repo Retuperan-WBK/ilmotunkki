@@ -65,8 +65,6 @@ const MapDrawer = () => {
     setMode("edit-seat");
   }, []);
 
-  console.log(selectedSeat ? selectedSeat.attributes.item_type.data?.id : null);
-
   return (
     <div className="p-6 pl-2 pr-2 h-full w-full flex flex-col">
       <h1 className="text-xl font-bold mb-4">Kartta</h1>
@@ -85,7 +83,7 @@ const MapDrawer = () => {
           </p>
 
           <h2 className="text-lg font-bold mt-4">Lippuluokat</h2>
-          <p className="text-base flex flex-col ml-4">
+          <div className="text-base flex flex-col ml-4">
             {itemTypes.map((item) => (
               <span key={item.id} className='flex flex-col'>
                 {item.attributes.slug}: {sections.reduce((acc, section) => acc + section.attributes.seats.data.filter(seat => seat.attributes.item_type.data?.id === item.id).length, 0)}{' '}
@@ -98,7 +96,7 @@ const MapDrawer = () => {
                   </div>
               </span>
             ))}
-          </p>
+          </div>
         </div>
 
         {/* Tab Buttons */}

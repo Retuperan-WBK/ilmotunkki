@@ -140,6 +140,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // **Add Seat**
   const addSeat = async (sectionId: number, seatData: Partial<Seat['attributes']>) => {
+    console.log('addSeat', sectionId, seatData);
     await fetch(`/api/admin/seats`, {
       method: 'POST',
       body: JSON.stringify({ sectionId, ...seatData, Row: newSeat.row, Number: newSeat.seatNumber, special: newSeat.special, itemType: newSeat.itemType }),
@@ -377,7 +378,9 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const handleMapClick = (x: number, y: number) => {
-
+    console.log('handleMapClick', x, y);
+    console.log('currentMode', currentMode);
+    console.log('activeSectionId', activeSectionId);
     if (currentMode === 'add-seat' && activeSectionId) {
       addSeat(activeSectionId, { x_cord: x, y_cord: y });
     }
