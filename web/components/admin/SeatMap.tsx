@@ -227,6 +227,16 @@ export default function SeatMap() {
     setActiveTab('tilaukset');
   }
 
+  const handleSetFilter = (filterSetting: 'show-class' | 'show-itemtype' | 'highlight-group' | 'highlight-order' | 'special' | null) => {
+    
+    if(filterSetting === filter.filter) {
+      setFilter({...filter, filter: null});
+      return;
+    }
+
+    setFilter({...filter, filter: filterSetting});
+  }
+
   return (
     <div className="seat-map" ref={divRef} style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden', border: '1px solid #ddd' }}>
       
@@ -243,12 +253,11 @@ export default function SeatMap() {
         <div className="flex-[7] flex flex-col gap-y-2">
           <h3 className="text-sm my-[-8px] font-bold">Suodattimet:</h3>
           <div className="flex gap-4">
-            <button onClick={() => setFilter({...filter, filter: "show-class"})} className={filter.filter === 'show-class' ? 'bg-red-700 rounded-md p-1' : ''}>Penkkiluokka</button>
-            <button onClick={() => setFilter({...filter, filter: "show-itemtype"})} className={filter.filter === 'show-itemtype' ? 'bg-red-700 rounded-md p-1' : ''}>Lippuluokka</button>
-            <button onClick={() => setFilter({...filter, filter: "highlight-group"})} className={filter.filter === 'highlight-group' ? 'bg-red-700 rounded-md p-1' : ''}>Ryhmät</button>
-            <button onClick={() => setFilter({...filter, filter: "highlight-order"})} className={filter.filter === 'highlight-order' ? 'bg-red-700 rounded-md p-1' : ''}>Tilaukset</button>
-            <button onClick={() => setFilter({...filter, filter: "special"})} className={filter.filter === 'special' ? 'bg-red-700 rounded-md p-1' : ''}>Special</button>
-            <button onClick={() => setFilter({...filter, filter: null})} className={filter.filter === null ? 'bg-red-700 rounded-md p-1' : ''}>Ei</button>
+            <button onClick={() => handleSetFilter("show-class")} className={filter.filter === 'show-class' ? 'bg-red-700 rounded-md p-1' : 'p-1'}>Penkkiluokka</button>
+            <button onClick={() => handleSetFilter("show-itemtype")} className={filter.filter === 'show-itemtype' ? 'bg-red-700 rounded-md p-1' : 'p-1'}>Lippuluokka</button>
+            <button onClick={() => handleSetFilter("highlight-group")} className={filter.filter === 'highlight-group' ? 'bg-red-700 rounded-md p-1' : 'p-1'}>Ryhmät</button>
+            <button onClick={() => handleSetFilter("highlight-order")} className={filter.filter === 'highlight-order' ? 'bg-red-700 rounded-md p-1' : 'p-1'}>Tilaukset</button>
+            <button onClick={() => handleSetFilter("special")} className={filter.filter === 'special' ? 'bg-red-700 rounded-md p-1' : 'p-1'}>Special</button>
           </div>
           <div className="flex gap-1">
             <label htmlFor="search" className="text-white">Näytä varattu/vapaa reuna:</label>
