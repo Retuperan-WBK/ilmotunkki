@@ -38,7 +38,13 @@ export default function SeatMap() {
   const divRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<SVGImageElement>(null);
 
-  const zoomLevels = [0.5, 0.7, 0.85, 1, 1.4, 1.8, 2.2, 2.6, 3, 3.4, 3.8, 4.2];
+  const zoomLevels = [
+    0.5, 0.6057, 0.7114, 0.8171, 0.9229, 1.0286, 1.1343, 1.24, 1.3457, 
+    1.4514, 1.5571, 1.6629, 1.7686, 1.8743, 1.98, 2.0857, 2.1914, 
+    2.2971, 2.4029, 2.5086, 2.6143, 2.72, 2.8257, 2.9314, 3.0371, 
+    3.1429, 3.2486, 3.3543, 3.46, 3.5657, 3.6714, 3.7771, 3.8829, 
+    3.9886, 4.0943, 4.2
+  ];
 
   useEffect(() => {
     if (!divRef.current || !svgRef.current) return;
@@ -55,9 +61,9 @@ export default function SeatMap() {
     }
   }, []);
 
-  const handleZoom = (direction: 'in' | 'out') => {
+  const handleZoom = (direction: 'in' | 'out', step: number = 1) => {
     setZoomLevelIndex((prevIndex) => {
-      const newIndex = direction === 'in' ? prevIndex + 1 : prevIndex - 1;
+      const newIndex = direction === 'in' ? prevIndex + step : prevIndex - step;
       return Math.max(0, Math.min(zoomLevels.length - 1, newIndex));
     });
   };
@@ -294,8 +300,8 @@ export default function SeatMap() {
 
       {/* Zoom Controls */}
       <div className="absolute top-32 left-4 flex flex-col bg-[#3d3d3d94] z-20 rounded-md">
-        <button className='hover:bg-[#6b6b6b8c]' onClick={() => handleZoom('in')}>+</button>
-        <button className='hover:bg-[#6b6b6b8c]' onClick={() => handleZoom('out')}>-</button>
+        <button className='hover:bg-[#6b6b6b8c]' onClick={() => handleZoom('in', 3)}>+</button>
+        <button className='hover:bg-[#6b6b6b8c]' onClick={() => handleZoom('out', 3)}>-</button>
         <br></br>
         <button className='hover:bg-[#6b6b6b8c]' onClick={() => setPanOffset({x: 0, y: 0})}>Center</button>
       </div>
