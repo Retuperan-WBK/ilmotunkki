@@ -34,7 +34,12 @@ const MapDrawer = () => {
     if (!multiSelectedSeats.length) return;
 
     updateMultipleSeats(
-      multiSelectedSeats.map((seat) => seat.id)
+      multiSelectedSeats.map((seat) => {
+        return {
+          id: seat.id,
+          special: seat.attributes.special
+        };
+       })
     );
 
     setMultiSelectedSeats([]);

@@ -23,7 +23,6 @@ export async function PUT(req: NextRequest) {
         y_cord: body.y_cord,
         Row: body.Row,
         Number: body.Number,
-        special: body.special || null,
         item_type: body.item_type || null,
       }
     };

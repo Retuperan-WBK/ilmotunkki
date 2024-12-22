@@ -44,7 +44,7 @@ interface AdminContextProps {
   activeTab: 'tilaukset' | 'ryhmat' | 'kartta';
   setMultiSelectedSeats: (seats: Seat[]) => void;
   multiSelectedSeats: Seat[];
-  updateMultipleSeats: (seatIds: number[]) => Promise<void>;
+  updateMultipleSeats: (seats: {id: number, special: string | null}[]) => Promise<void>;
   orderSortOption: 'newest' | 'oldest' | 'largest' | 'smallest';
   setOrderSortOption: (option: 'newest' | 'oldest' | 'largest' | 'smallest') => void;
   orderFilters: { kutsuvieras: boolean, erikoisjarjestely: boolean };
@@ -169,13 +169,13 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }
 
-  const updateMultipleSeats = async (seatIds: number[]) => {
+  const updateMultipleSeats = async (seats: {id: number, special: string | null}[]) => {
     try {
       await Promise.all(
-        seatIds.map((seatId) =>
-          fetch(`/api/admin/seats/${seatId}`, {
+        seats.map((seat) =>
+          fetch(`/api/admin/seats/${seat.id}`, {
             method: 'PUT',
-            body: JSON.stringify({ item_type: newSeat.itemType }),
+            body: JSON.stringify({ item_type: newSeat.itemType, special: seat.special }),
             headers: { 'Content-Type': 'application/json' },
           })
         )
