@@ -40,7 +40,7 @@ interface AdminContextProps {
   setFilter: (filter: HighlightedSeat) => void;
   bottomDrawerOpen: boolean;
   setBottomDrawerOpen: (open: boolean) => void;
-  setActiveTab: (tab: 'tilaukset' | 'ryhmat' | 'kartta') => void;
+  handleSetActiveTab: (tab: 'tilaukset' | 'ryhmat' | 'kartta') => void;
   activeTab: 'tilaukset' | 'ryhmat' | 'kartta';
   setMultiSelectedSeats: (seats: Seat[]) => void;
   multiSelectedSeats: Seat[];
@@ -318,6 +318,12 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     fetchSections();
   }
 
+  const handleSetActiveTab = (tab: 'tilaukset' | 'ryhmat' | 'kartta') => {
+    setMultiSelectedSeats([]);
+    setSelectedSeat(null);
+    setActiveTab(tab);
+  }
+
   useEffect(() => {
     if (!groups) return;
     if (!selectedGroup) return;
@@ -433,7 +439,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setFilter,
         bottomDrawerOpen,
         setBottomDrawerOpen,
-        setActiveTab,
+        handleSetActiveTab,
         activeTab,
         setMultiSelectedSeats,
         multiSelectedSeats,

@@ -8,7 +8,7 @@ import MapDrawer from './MapDrawer';
 import { useAdminContext } from './AdminContext';
 
 export default function SeatDashboard() {
-  const { setMode, setSelectedGroup, setSelectedOrder, setSelectedTicket, setSelectedSeat, activeTab, setActiveTab } = useAdminContext();
+  const { setMode, setSelectedGroup, setSelectedOrder, setSelectedTicket, setSelectedSeat, activeTab, handleSetActiveTab } = useAdminContext();
 
   const handleChangeTab = (tab: 'tilaukset' | 'ryhmat' | 'kartta') => {
     setMode(null);
@@ -16,7 +16,7 @@ export default function SeatDashboard() {
     setSelectedOrder(null);
     setSelectedTicket(null);
     setSelectedSeat(null);
-    setActiveTab(tab);
+    handleSetActiveTab(tab);
   }
 
   return (

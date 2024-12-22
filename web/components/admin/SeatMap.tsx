@@ -22,7 +22,7 @@ export default function SeatMap() {
     groups,
     setSelectedGroup,
     setSelectedOrder,
-    setActiveTab,
+    handleSetActiveTab,
     multiSelectedSeats,
     setSelectedSeat
   } = useAdminContext();
@@ -222,14 +222,14 @@ export default function SeatMap() {
     const group = groups.find((g) => g.id === groupId);
     if (!group) return;
     setSelectedGroup(group);
-    setActiveTab('ryhmat');
+    handleSetActiveTab('ryhmat');
   }
 
   const handleOpenOrder = (orderId: number) => {
     const order = orders.find((o) => o.id === orderId);
     if (!order) return;
     setSelectedOrder(order);
-    setActiveTab('tilaukset');
+    handleSetActiveTab('tilaukset');
   }
 
   const handleSetFilter = (filterSetting: 'show-class' | 'show-itemtype' | 'highlight-group' | 'highlight-order' | 'special' | null) => {
