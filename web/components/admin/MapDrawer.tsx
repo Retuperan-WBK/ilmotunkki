@@ -26,6 +26,9 @@ const MapDrawer = () => {
 
   const handleTabChange = (mode: 'add-seat' | 'edit-seat' | 'multi-select') => {
     setMode(mode);
+    if (mode === 'multi-select') {
+      setSelectedSeat(null);
+    }
     setMultiSelectedSeats([]);
   };
 
