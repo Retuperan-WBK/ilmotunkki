@@ -188,22 +188,9 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const addTicketToSeat = async (ticketId: number, seatId: number) => {
     try {
-
       // Check if the seat is not already occupied
       if (!activeSection) {
         console.error('Section not found');
-        return;
-      }
-
-      const seat = activeSection.attributes.seats.data.find((seat) => seat.id === seatId);
-      
-      if (!seat) {
-        console.error('Seat not found');
-        return;
-      }
-
-      if (seat.attributes.item.data) {
-        alert(`Seat R:${seat.attributes.Row} N:${seat.attributes.Number} is already occupied`);
         return;
       }
 
@@ -270,19 +257,6 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // **Change Ticket from Seat to Another**
   const changeTicketSeat = async (ticketId: number, newSeatId: number) => {
     try {
-
-      // Check if the seat is not already occupied
-      const seat = activeSection?.attributes.seats.data.find((seat) => seat.id === newSeatId);
-      if (!seat) {
-        console.error('Seat not found');
-        return;
-      }
-
-      if (seat.attributes.item.data) {
-        alert(`Seat R:${seat.attributes.Row} N:${seat.attributes.Number} is already occupied`);
-        return;
-      }
-
       const response = await fetch(`/api/admin/items/${ticketId}`, {
         method: 'PUT',
         body: JSON.stringify({ seatId: newSeatId }),
@@ -359,6 +333,15 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         break;
       case 'add-ticket-to-seat':
         if (!selectedTicket) return;
+        if (seat.attributes.item.data) {
+          alert(`Seat R:${seat.attributes.Row} N:${seat.attributes.Number} is already occupied`);
+          return;
+        }
+        if (seat.attributes.special) {
+          if (!confirm(`Seat R:${seat.attributes.Row} N:${seat.attributes.Number} has a special note: \n\n ${seat.attributes.special}. \n\n Do you want to continue?`)) {
+            return;
+          }
+        }
         addTicketToSeat(selectedTicket?.id, seat.id);
         setSelectedTicket(null);
         setCurrentMode(null);
@@ -366,6 +349,15 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         break;
       case 'change-ticket-seat':
         if (!selectedTicket) return;
+        if (seat.attributes.item.data) {
+          alert(`Seat R:${seat.attributes.Row} N:${seat.attributes.Number} is already occupied`);
+          return;
+        }
+        if (seat.attributes.special) {
+          if (!confirm(`Seat R:${seat.attributes.Row} N:${seat.attributes.Number} has a special note: \n\n ${seat.attributes.special}. \n\n Do you want to continue?`)) {
+            return;
+          }
+        }
         changeTicketSeat(selectedTicket?.id, seat.id);
         setSelectedTicket(null);
         setCurrentMode(null);
