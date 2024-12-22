@@ -140,7 +140,6 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // **Add Seat**
   const addSeat = async (sectionId: number, seatData: Partial<Seat['attributes']>) => {
-    console.log('addSeat', sectionId, seatData);
     await fetch(`/api/admin/seats`, {
       method: 'POST',
       body: JSON.stringify({ sectionId, ...seatData, Row: newSeat.row, Number: newSeat.seatNumber, special: newSeat.special, itemType: newSeat.itemType }),
@@ -162,10 +161,12 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const deleteSeat = async (seatId: number) => {
-    await fetch(`/api/admin/seats/${seatId}`, {
-      method: 'DELETE',
-    });
-    await reFetch();
+    if (await confirm(`Are you sure you want to delete seat ${selectedSeat?.attributes.section.data.attributes.Name} R:${selectedSeat?.attributes.Row} N:${selectedSeat?.attributes.Number}`)) {
+      await fetch(`/api/admin/seats/${seatId}`, {
+        method: 'DELETE',
+      });
+      await reFetch();
+    }
   }
 
   const updateMultipleSeats = async (seatIds: number[]) => {
