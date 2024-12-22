@@ -24,6 +24,7 @@ export async function PUT(req: NextRequest) {
         Row: body.Row,
         Number: body.Number,
         item_type: body.item_type || null,
+        special: body.special || null,
       }
     };
 

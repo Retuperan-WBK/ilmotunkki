@@ -154,7 +154,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const updateSeat = async (seatId: number, seatData: Partial<Seat['attributes']>,) => {
     await fetch(`/api/admin/seats/${seatId}`, {
       method: 'PUT',
-      body: JSON.stringify({ ...seatData, item_type: selectedSeat?.itemTypeId ? selectedSeat.itemTypeId : seatData.item_type?.data?.id }),
+      body: JSON.stringify({ ...seatData, item_type: selectedSeat?.itemTypeId ? selectedSeat.itemTypeId : seatData.item_type?.data?.id, special: selectedSeat?.attributes.special }),
       headers: { 'Content-Type': 'application/json' },
     });
     await reFetch();
