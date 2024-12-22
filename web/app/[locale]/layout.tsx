@@ -6,7 +6,7 @@ import Timer from '../../components/Timer';
 import '../../styles/global.css';
 import AppProvider from '../../context/AppContext';
 import { StrapiBaseType, StrapiImage, StrapiResponse } from "@/utils/models";
-import { fetchAPI, getStrapiMedia } from "@/lib/api";
+import { fetchAPI } from "@/lib/api";
 import { Metadata } from 'next';
 
 type PropType = {
@@ -21,7 +21,9 @@ export const dynamic = 'force-dynamic';
 const RootLayout = async ({ children, params }: PropType) => {
   return (
     <html lang={params.locale} className='dark w-full h-full'>
-      <head />
+      <head>
+        <link rel="icon" href="https://rwbk.fi/favicon.ico" />
+      </head>
       <body className="bg-secondary-200 dark:bg-secondary-900 p-2 text-secondary-700 dark:text-secondary-100">
         <AppProvider>
           <Header locale={params.locale}>
@@ -55,7 +57,7 @@ export const generateMetadata = async (): Promise<Metadata> => {
     title: data.attributes.title,
     description: data.attributes.description,
     icons: {
-      icon: getStrapiMedia(data.attributes.favicon),
+      icon: undefined,
     },
     metadataBase: new URL(data.attributes.url),
     openGraph: {

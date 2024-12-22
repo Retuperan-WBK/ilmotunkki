@@ -55,7 +55,12 @@ const getPublicStrapiURL = (path = "") => {
   }${path}`;
 }
 
-export const getStrapiMedia = (media: Media) => {
+export const getStrapiMedia = (media: Media | string) => {
+
+  if (typeof media === "string") {
+    return getPublicStrapiURL(media);
+  }
+
   const { url } = media.data.attributes;
   const imageUrl = url.startsWith("/") ? getPublicStrapiURL(url) : url;
   return imageUrl;
