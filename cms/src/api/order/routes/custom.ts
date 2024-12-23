@@ -15,5 +15,10 @@ export default {
       path: "/orders/signups",
       handler: "order.signups",
     },
+    {
+      method: "POST",
+      path: "/orders/sendTickets/:id",
+      handler: "order.sendTickets",
+    }
   ],
 };

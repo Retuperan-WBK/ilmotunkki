@@ -13,7 +13,9 @@ const OrdersDrawer = () => {
     orderSortOption, 
     setOrderSortOption, 
     orderFilters, 
-    setOrderFilters } = useAdminContext();
+    handleSendTickets,
+    setOrderFilters
+  } = useAdminContext();
   const [search, setSearch] = useState('');
 
   const getOrderStatusColor = (placedCount: number, totalCount: number) => {
@@ -61,6 +63,10 @@ const OrdersDrawer = () => {
   if (selectedOrder) {
     // Render selected order details
     const totalCount = selectedOrder.attributes.items?.data.length || 0;
+    const placed = selectedOrder.attributes.items?.data.filter(
+      (item) => item.attributes.seat.data
+    ).length;
+    const unplaced = totalCount - placed;
     const tickets = selectedOrder.attributes.items?.data || [];
 
     return (
@@ -87,16 +93,27 @@ const OrdersDrawer = () => {
           <p className="text-sm mt-2 cursor-pointer">
             Email: <span onClick={() => navigator.clipboard.writeText(selectedOrder.attributes.customer?.data.attributes.email)} className="cursor-pointer hover:underline">{selectedOrder.attributes.customer?.data.attributes.email}</span>
           </p>
-          <div className="flex items-center mt-4">
-            <div
-              className={`w-4 h-4 rounded-full ${getOrderStatusColor(
-                tickets.filter((item) => item.attributes.seat.data).length,
-                totalCount
-              )} mr-2`}
-            ></div>
-            <p className="text-md">
-              {tickets.filter((item) => item.attributes.seat.data).length}/{totalCount} paikkaa
-            </p>
+          <div className="flex items-center justify-between mt-4">
+            <div className="flex items-center gap-1">
+              <div
+                className={`w-4 h-4 rounded-full ${getOrderStatusColor(
+                  placed,
+                  totalCount
+                )} mr-2`}
+              ></div>
+              <p className="text-md">
+                {placed}/{totalCount} paikkaa
+              </p>
+            </div>
+            {unplaced === 0 && (selectedOrder.attributes.tickets_sent === true ?
+            <button className="bg-gray-500 text-white p-1 rounded-md cursor-not-allowed
+            " disabled>
+              Liput Lähetetty
+            </button> :
+            <button onClick={() => handleSendTickets(selectedOrder, selectedOrder.attributes.group.data?.attributes.name)} className="bg-green-500 text-white p-1 rounded-md">
+              Lähetä liput
+            </button>)
+            }
           </div>
           <div className="border-y-2 border-gray-400">
             {selectedOrder.attributes.customer.data.attributes.special_arragements &&
@@ -115,7 +132,7 @@ const OrdersDrawer = () => {
             }
           </div>
           <div className="mb-16">
-            <TicketList tickets={tickets} />
+            <TicketList tickets={tickets} tickets_sent={selectedOrder.attributes.tickets_sent} />
           </div>
         </div>
       </div>
@@ -254,7 +271,12 @@ const OrdersDrawer = () => {
               key={order.id}
               className="flex flex-col bg-[#868686] rounded-md p-4 mr-1 mb-4 cursor-pointer"
               onClick={() => setSelectedOrder(order)}
-            >
+            > 
+            { order.attributes.tickets_sent === true && 
+            <div className="bg-green-500 text-white p-1 -m-2 mb-0 rounded-md">
+              Liput Lähetetty
+            </div>
+            }
               <div className="flex justify-between items-center">
                 <p className="text-md font-bold">
                   {order.attributes.customer?.data.attributes.firstName}{' '}

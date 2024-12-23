@@ -117,6 +117,7 @@ export type Order = StrapiBaseType<{
   uid: string;
   group: StrapiResponseUndefined<Group>;
   kutsuvieras: boolean;
+  tickets_sent: boolean;
 }>;
 
 export type Customer = StrapiBaseType<{

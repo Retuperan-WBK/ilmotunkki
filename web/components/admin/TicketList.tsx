@@ -3,7 +3,7 @@
 import { Item } from "@/utils/models";
 import { useAdminContext } from "./AdminContext";
 
-const TicketList = ({tickets} : {tickets: Item[]}) => {
+const TicketList = ({tickets, tickets_sent} : {tickets: Item[], tickets_sent?: boolean}) => {
 
   const { selectedTicket, setSelectedTicket, setMode, removeTicketFromSeat} = useAdminContext();
 
@@ -45,17 +45,29 @@ const TicketList = ({tickets} : {tickets: Item[]}) => {
   };
 
   const handleSetTicketToSeat = (ticket: Item) => {
+    if (tickets_sent) {
+      alert('Nämä liput on jo lähetetty, et voi muokata tätä tilausta');
+      return;
+    }
     setMode('add-ticket-to-seat');
     setSelectedTicket(ticket);
   }
 
   const handleRemoveTicketFromSeat = (ticket: Item) => {
+    if (tickets_sent) {
+      alert('Nämä liput on jo lähetetty, et voi muokata tätä tilausta');
+      return;
+    }
     if (confirm(`Haluatko varmasti poistaa lipun paikalta ${getTicketSeatNumber(ticket)}?`)) {
       removeTicketFromSeat(ticket.id);
     }
   }
 
   const handleMoveTicketToSeat = (ticket: Item) => {
+    if (tickets_sent) {
+      alert('Nämä liput on jo lähetetty, et voi muokata tätä tilausta');
+      return;
+    }
     setMode('change-ticket-seat');
     setSelectedTicket(ticket);
   }
@@ -84,9 +96,12 @@ const TicketList = ({tickets} : {tickets: Item[]}) => {
             <p className="text-sm">{getTicketSeatNumber(ticket)}</p>
           </div>
           <div className="flex flex-col items-center flex-[4]">
+            {tickets_sent ? 
+              null :
             <button
               className="text-white px-2 py-1 rounded-md text-sm flex-[2]"
               style={selectedTicket && selectedTicket.id === ticket.id ? { backgroundColor: "green" } : { backgroundColor: 'gray' }}
+              disabled={tickets_sent}
               onClick={() => 
               {
                 if (selectedTicket && selectedTicket.id === ticket.id) {
@@ -102,9 +117,13 @@ const TicketList = ({tickets} : {tickets: Item[]}) => {
             >
               {selectedTicket && selectedTicket.id === ticket.id ? "Peruuta" : ticket.attributes.seat.data ? "Siirrä" : "Plassaa"}
             </button>
-            <p className="text-xs flex-[1] mt-2 mb-[-12px] hover:underline cursor-pointer" onClick={() => handleRemoveTicketFromSeat(ticket)}>
-              Poista plassi
-            </p>
+            }
+            {tickets_sent ? 
+              null :
+              <p className="text-xs flex-[1] mt-2 mb-[-12px] hover:underline cursor-pointer" onClick={() => handleRemoveTicketFromSeat(ticket)}>
+                Poista plassi
+              </p> 
+            }
           </div>
         </div>
       ))}

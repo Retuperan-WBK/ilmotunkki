@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Order, AdminGroup, Section, Seat, ItemType, Item } from '@/utils/models';
-import { handleAddTicketToSeat_State, handleChangeTicketSeat_State, handleRemoveTicketFromSeat_State, UpdatedItem } from './UnHolyFunctions';
+import { handleAddTicketToSeat_State, handleChangeTicketSeat_State, handleRemoveTicketFromSeat_State, handleSetOrderTicketsSent_State, UpdatedItem } from './UnHolyFunctions';
 
 interface AdminContextProps {
   orders: Order[];
@@ -49,6 +49,7 @@ interface AdminContextProps {
   setOrderSortOption: (option: 'newest' | 'oldest' | 'largest' | 'smallest') => void;
   orderFilters: { kutsuvieras: boolean, erikoisjarjestely: boolean };
   setOrderFilters: (filters: { kutsuvieras: boolean, erikoisjarjestely: boolean }) => void;
+  handleSendTickets: (order: Order, groupName?: string) => void;
 }
 
 const AdminContext = createContext<AdminContextProps | undefined>(undefined);
@@ -85,10 +86,6 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [selectedSeat, setSelectedSeat] = useState<ExtendedSeat | null>(null);
   const [newSeat, setNewSeat] = useState<NewSeat>({ row: '1', seatNumber: '1', special: '', itemType: 0 });
   const [filter, setFilter] = useState<HighlightedSeat>({ filter: null, showReserved: true });
-
-  // console.log('groups', groups);
-  // console.log('orders', orders);
-  // console.log('sections', sections);
 
   // OrderDrawer and GroupDrawer
   const [selectedTicket, setSelectedTicket] = useState<Item | null>(null);
@@ -298,6 +295,50 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setActiveTab(tab);
   }
 
+  const handleSendTickets = async (order: Order, groupName?: string) => {
+
+    // Make sure that all tickets have a seat
+    if (order.attributes.items.data.some((item) => item.attributes.seat.data)) {
+      if (!confirm(`Haluatko varmasti lähettää liput? \n\n 
+        Tilaus: ${order.attributes.customer.data.attributes.firstName} ${order.attributes.customer.data.attributes.lastName}\n
+        Ryhmä: ${groupName || "N/A"} \n
+        Liput: ${order.attributes.items.data.map((item) => `${item.attributes.itemType.data.attributes.slug} - ${item.attributes.seat.data?.attributes.section.data.attributes.Name} Rivi:${item.attributes.seat.data?.attributes.Row} Paikka:${item.attributes.seat.data?.attributes.Number}
+          `).join('\n')}
+        `)) {
+        return;
+      }
+      const response = await fetch(`/api/admin/orders/sendTickets/${order.id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      //Response data should be {response: true}
+
+      const data = await response.json();
+      console.log('data', data);
+      
+      if (!data.response) {
+        alert('Lippujen lähettäminen epäonnistui');
+        return;
+      } 
+
+      console.log('Tickets sent successfully');
+
+      const {
+        updatedOrders,
+        updatedGroups,
+        updatedSections
+      } = await handleSetOrderTicketsSent_State(orders, groups, sections, order.id);
+
+      setOrders(updatedOrders as Order[]);
+      setGroups(updatedGroups as AdminGroup[]);
+      setSections(updatedSections as Section[]);
+
+    } else {
+      alert('Kaikilla lipuilla ei ole paikkaa. Tarkista että kaikilla lipuilla on paikka ennen lippujen lähettämistä');
+    }
+  }
+
   useEffect(() => {
     if (!groups) return;
     if (!selectedGroup) return;
@@ -440,6 +481,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setOrderSortOption,
         orderFilters,
         setOrderFilters,
+        handleSendTickets,
       }}
     >
       {children}

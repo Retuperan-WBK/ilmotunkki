@@ -92,5 +92,25 @@ export default factories.createCoreController('api::order.order', {
     strapi.log.info(`Order updated with information ${JSON.stringify(info)}`);
     const { data, meta } = await super.update(ctx);
     return { data, meta };
+  },
+  async sendTickets(ctx) {
+    const {id} = ctx.params;
+    const entity = await strapi.query('api::order.order').findOne({
+      where: {
+        id,
+      },
+    });
+
+    console.log('entity:', entity);
+
+    // Prevent API calls from sending tickets more than once
+    if (entity && entity.tickets_sent != true) {
+      ctx.request.body.data.tickets_sent = true;
+    }
+    const info = {...ctx.request.body,...ctx.request.params}
+    strapi.log.info(`Order updated with information ${JSON.stringify(info)}`);
+    await super.update(ctx);
+    // Return data: success or failure message
+    return true;
   }
 });

@@ -14,6 +14,7 @@ const GroupsDrawer = () => {
     orderFilters,
     setOrderFilters,
     orderSortOption,
+    handleSendTickets,
   } = useAdminContext();
   const [search, setSearch] = useState("");
 
@@ -82,6 +83,8 @@ const GroupsDrawer = () => {
           {orders.map((order) => {
             const tickets = order.attributes.items?.data || [];
             const totalCount = tickets.length || 0;
+            const placedCount = tickets.filter((item) => item.attributes.seat.data).length;
+            const unplacedCount = totalCount - placedCount;
             return (
               <div
                 key={order.id}
@@ -93,12 +96,23 @@ const GroupsDrawer = () => {
                     {order.attributes.customer?.data.attributes.lastName}
                   </p>
                   <p className="text-md">
-                    {tickets.filter((item) => item.attributes.seat.data).length}/{totalCount} paikkaa
+                    {placedCount}/{totalCount} paikkaa
                   </p>
                 </div>
-                <p className="text-sm mt-2 cursor-pointer">
-                  Email: <span onClick={() => navigator.clipboard.writeText(order.attributes.customer?.data.attributes.email)} className="cursor-pointer hover:underline">{order.attributes.customer?.data.attributes.email}</span>
-                </p>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm mt-2 cursor-pointer">
+                    Email: <span onClick={() => navigator.clipboard.writeText(order.attributes.customer?.data.attributes.email)} className="cursor-pointer hover:underline">{order.attributes.customer?.data.attributes.email}</span>
+                  </p>
+                  {unplacedCount === 0 && (order.attributes.tickets_sent === true ?
+                  <button className="bg-gray-500 text-white p-1 rounded-md cursor-not-allowed
+                  " disabled>
+                    Liput Lähetetty
+                  </button> :
+                  <button onClick={() => handleSendTickets(order, selectedGroup.attributes.name)} className="bg-green-500 text-white p-1 rounded-md">
+                    Lähetä liput
+                  </button>)
+                  }
+                </div>
                 <div className="flex items-center gap-2 w-full">
                   <div className="w-full border-gray-400 border-y-2">
                   {order.attributes.customer.data.attributes.special_arragements &&
@@ -117,7 +131,7 @@ const GroupsDrawer = () => {
                   }
                   </div>
                 </div>
-                <TicketList tickets={tickets} />
+                <TicketList tickets={tickets} tickets_sent={order.attributes.tickets_sent}/>
               </div>
             );
           })}
@@ -279,6 +293,7 @@ const GroupsDrawer = () => {
             (order) => order.attributes.customer?.data.attributes.special_arragements
           );
           const hasInvite = orders.some((order) => order.attributes.kutsuvieras);
+          const all_orders_sent = orders.every((order) => order.attributes.tickets_sent === true);
 
 
           return (
@@ -287,6 +302,11 @@ const GroupsDrawer = () => {
                 className="flex flex-col bg-[#868686] rounded-md p-4 mr-1 mb-4 cursor-pointer"
                 onClick={() => setSelectedGroup(group)}
               >
+              { all_orders_sent && 
+              <div className="bg-green-500 text-white p-1 -m-2 mb-0 rounded-md">
+                Liput Lähetetty
+              </div>
+              }
               <div className="flex justify-between items-center">
                 <p className="text-md font-bold">{group.attributes.name}</p>
                 <p className="text-md">

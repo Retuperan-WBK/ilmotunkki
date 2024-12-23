@@ -477,3 +477,88 @@ export const handleChangeTicketSeat_State = (
     updatedSections
   };
 };
+
+export const handleSetOrderTicketsSent_State = (
+  orders: Order[],
+  groups: AdminGroup[],
+  sections: Section[],
+  orderId: number,
+) => {
+  
+  // 1️⃣ Update Orders: orders -> order
+  const updatedOrders = orders.map(order => 
+    order.id === orderId 
+      ? { 
+          ...order, 
+          attributes: { 
+            ...order.attributes, 
+            tickets_sent: true 
+          } 
+        } 
+      : order
+  );
+
+  // 2️⃣ Update Groups: groups -> orders -> order
+  const updatedGroups = groups.map(group => ({
+    ...group,
+    attributes: {
+      ...group.attributes,
+      orders: {
+        data: group.attributes.orders.data.map(order => 
+          order.id === orderId 
+            ? { 
+                ...order, 
+                attributes: { 
+                  ...order.attributes, 
+                  tickets_sent: true 
+                } 
+              } 
+            : order
+        )
+      }
+    }
+  }));
+
+  // 3️⃣ Update Sections: sections -> seats -> item -> order
+  const updatedSections = sections.map(section => ({
+    ...section,
+    attributes: {
+      ...section.attributes,
+      seats: {
+        data: section.attributes.seats.data.map(seat => 
+          seat.attributes.item?.data?.attributes.order.data.id === orderId 
+            ? { 
+                ...seat, 
+                attributes: { 
+                  ...seat.attributes, 
+                  item: { 
+                    data: {
+                      id: seat.attributes.item.data.id,
+                      attributes: {
+                        ...seat.attributes.item.data.attributes,
+                        order: {
+                          data: {
+                            id: orderId,
+                            attributes: {
+                              ...seat.attributes.item.data.attributes.order.data.attributes,
+                              tickets_sent: true
+                            }
+                          }
+                        }
+                      }
+                    } 
+                  } 
+                } 
+              } 
+            : seat
+        )
+      }
+    }
+  }));
+
+  return {
+    updatedOrders,
+    updatedGroups,
+    updatedSections
+  };
+}
