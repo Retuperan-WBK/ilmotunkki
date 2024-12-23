@@ -48,6 +48,7 @@ const appContextDefault: Required<AppContextType> = {
       updatedAt: '',
       transactionId: '',
       kutsuvieras: false,
+      tickets_sent: false,
       group: {
         data: undefined
       },
