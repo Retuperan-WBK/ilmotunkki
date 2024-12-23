@@ -272,8 +272,15 @@ const GroupsDrawer = () => {
         })}
 
         <h2 className="text-md font-bold mt-6 mb-4">Plassatut</h2>
+        {/* Sort so that groups with ticket sent are last */}
         {groups_without_unplaced_tickets.filter((group) => { 
           return group.attributes.name.toLowerCase().includes(search.toLowerCase());
+        }).sort((a, b) => {
+          const a_sent = a.attributes.orders?.data.every((order) => order.attributes.tickets_sent === true);
+          const b_sent = b.attributes.orders?.data.every((order) => order.attributes.tickets_sent === true);
+          if (a_sent && !b_sent) return 1;
+          if (!a_sent && b_sent) return -1;
+          return 0;
         }).map((group) => {
           const orders = group.attributes.orders?.data || [];
           const totalTickets = orders.reduce(

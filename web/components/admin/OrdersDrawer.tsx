@@ -260,10 +260,13 @@ const OrdersDrawer = () => {
         })}
 
         <h2 className="text-md font-bold mt-6">Plassatut</h2>
+        {/* Sort so that orders with ticket sent are last */}
         {placedOrders.filter((order) => { 
           const fullName = `${order.attributes.customer?.data.attributes.firstName} ${order.attributes.customer?.data.attributes.lastName}`;
           return fullName.toLowerCase().includes(search.toLowerCase());
-        }).map((order) => {
+        })
+        .sort((a, b) => a.attributes.tickets_sent === b.attributes.tickets_sent ? 0 : a.attributes.tickets_sent ? 1 : -1)
+        .map((order) => {
           const totalCount = order.attributes.items?.data.length || 0;
 
           return (
