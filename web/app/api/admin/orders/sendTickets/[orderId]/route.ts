@@ -29,8 +29,6 @@ export async function POST(
       }, {}, token.value
     );
 
-    console.log('response:', response);
-
     return NextResponse.json({response: response}, { status: 200 });
   } catch (error) {
     console.error('Error in sendTickets route:', error);

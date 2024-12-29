@@ -101,8 +101,6 @@ export default factories.createCoreController('api::order.order', {
       },
     });
 
-    console.log('entity:', entity);
-
     // Prevent API calls from sending tickets more than once
     if (entity && entity.tickets_sent != true) {
       ctx.request.body.data.tickets_sent = true;

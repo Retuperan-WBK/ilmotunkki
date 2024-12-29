@@ -315,14 +315,12 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       //Response data should be {response: true}
 
       const data = await response.json();
-      console.log('data', data);
       
       if (!data.response) {
         alert('Lippujen lähettäminen epäonnistui');
         return;
       } 
 
-      console.log('Tickets sent successfully');
 
       const {
         updatedOrders,
@@ -418,9 +416,6 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const handleMapClick = (x: number, y: number) => {
-    console.log('handleMapClick', x, y);
-    console.log('currentMode', currentMode);
-    console.log('activeSectionId', activeSectionId);
     if (currentMode === 'add-seat' && activeSectionId) {
       addSeat(activeSectionId, { x_cord: x, y_cord: y });
     }
