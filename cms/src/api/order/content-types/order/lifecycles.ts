@@ -212,7 +212,7 @@ export default {
       return;
     }
 
-    if (order.status !== 'ok' && data.status === 'ok') {
+    if (order.status != 'ok' && data.status === 'ok') {
       await sendConfirmationEmail(order);
     }
 
