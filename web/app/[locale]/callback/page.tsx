@@ -7,6 +7,7 @@ import { updateOrderState } from '@/utils/helpers';
 import CallbackResetHandler from './CallbackResetHandler';
 import { getTranslation } from '@/utils/translationHelper';
 import Link from 'next/link';
+import ReactMarkdown from 'react-markdown';
 export const dynamic = 'force-dynamic';
 type CheckoutStatus = 'new' | 'ok' | 'fail' | 'pending' | 'delayed';
 
@@ -65,6 +66,11 @@ const CallbackPage = async ({params: {locale}, searchParams}: Props) => {
     <div className='container text-primary-900 dark:text-primary-100 max-w-3xl bg-secondary-50 dark:bg-secondary-800 mx-auto rounded shadow-md p-2 pt-4 sm:p-8'>
       <CallbackResetHandler isValid={isValid} paymentStatus={paymentStatus}/>
       <p>{content.attributes.onSuccess}</p>
+      <ReactMarkdown
+        className="prose dark:prose-invert prose-li:my-0.5 prose-ul:my-0.5 prose-secondary mt-0 mb-4"
+        >
+        {content.attributes.onSuccess}
+      </ReactMarkdown>  
     </div>
   );
 }
