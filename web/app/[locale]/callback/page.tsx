@@ -53,21 +53,41 @@ const CallbackPage = async ({params: {locale}, searchParams}: Props) => {
   }
   const paymentStatus = params['checkout-status'] as CheckoutStatus;
   const content = await getContent(locale);
-  if(!content) return <div>Error on rendering callback page</div>
+  if(!content) {
+    return (
+    <div className='container text-primary-900 dark:text-primary-100 max-w-3xl bg-secondary-50 dark:bg-secondary-800 mx-auto rounded shadow-md p-2 pt-4 sm:p-8'> 
+      Error on rendering callback page
+    </div>)
+  }
   
-  if (!isValid) return <div> 
-    {content.attributes.onError} <ErrorLink locale={locale} translation={translation}/>
+  if (!isValid) {
+    return (
+    <div className='container text-primary-900 dark:text-primary-100 max-w-3xl bg-secondary-50 dark:bg-secondary-800 mx-auto rounded shadow-md p-2 pt-4 sm:p-8'> 
+      <ReactMarkdown
+        className="prose dark:prose-invert prose-li:my-0.5 prose-ul:my-0.5 prose-secondary mt-0 mb-2"
+        >
+        {content.attributes.onError}
+      </ReactMarkdown> 
+      <ErrorLink locale={locale} translation={translation}/>
     </div>
-  else if (paymentStatus !== 'ok') return <div>
-    {content.attributes.onCancel} <ErrorLink locale={locale} translation={translation}/>
-  </div>
+    )}
+  else if (paymentStatus !== 'ok') {
+    return (
+    <div className='container text-primary-900 dark:text-primary-100 max-w-3xl bg-secondary-50 dark:bg-secondary-800 mx-auto rounded shadow-md p-2 pt-4 sm:p-8'>
+      <ReactMarkdown
+        className="prose dark:prose-invert prose-li:my-0.5 prose-ul:my-0.5 prose-secondary mt-0 mb-2"
+        >
+        {content.attributes.onCancel}
+      </ReactMarkdown>
+      <ErrorLink locale={locale} translation={translation}/>
+    </div>
+  )}
   
   return (
     <div className='container text-primary-900 dark:text-primary-100 max-w-3xl bg-secondary-50 dark:bg-secondary-800 mx-auto rounded shadow-md p-2 pt-4 sm:p-8'>
       <CallbackResetHandler isValid={isValid} paymentStatus={paymentStatus}/>
-      <p>{content.attributes.onSuccess}</p>
       <ReactMarkdown
-        className="prose dark:prose-invert prose-li:my-0.5 prose-ul:my-0.5 prose-secondary mt-0 mb-4"
+        className="prose dark:prose-invert prose-li:my-0.5 prose-ul:my-0.5 prose-secondary mt-0 mb-2"
         >
         {content.attributes.onSuccess}
       </ReactMarkdown>  
