@@ -72,9 +72,12 @@ const sendConfirmationEmail = async (order: any) => {
     })
   ]);
 
-  // Generate the ticket list
+  // Generate localized ticket list
   const ticketList = tickets
-    .map(ticket => `- ${ticket.itemType.slug}`)
+    .map((ticket) => {
+      const ticketType = translation[ticket.itemType.slug] || ticket.itemType.slug;
+      return `- ${ticketType}`;
+    })
     .join('\n');
 
   // Fill template placeholders
@@ -152,10 +155,14 @@ const sendTicketEmail = async (order: any) => {
 
   // Generate ticket list with seat details
   const ticketList = tickets
-    .map(
-      (ticket) =>
-        `${ticket.itemType.slug} - ${ticket.seat?.section?.Name || 'Unknown'}, Rivi ${ticket.seat?.Row || 'N/A'}, Paikka ${ticket.seat?.Number || 'N/A'}`
-    )
+    .map((ticket) => {
+      const ticketType = translation[ticket.itemType.slug] || ticket.itemType.slug;
+      const section = ticket.seat?.section?.Name || translation.UnknownSection;
+      const row = ticket.seat?.Row || translation.UnknownRow;
+      const number = ticket.seat?.Number || translation.UnknownNumber;
+
+      return `${ticketType} - ${section}, ${translation.row} ${row}, ${translation.seat} ${number}`;
+    })
     .join('\n');
 
   // Fill template placeholders
