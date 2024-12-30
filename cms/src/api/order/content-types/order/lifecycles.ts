@@ -23,6 +23,7 @@ type Field = {
   fieldName: string,
 }
 
+const activeEmailSends = new Set();
 
 const fillTemplatePatterns = (text: string, form: Field[], data: Record<string,string>,translation: Record<string,string>) => {
   form.forEach(field => {
@@ -212,13 +213,36 @@ export default {
       return;
     }
 
-    if (order.status != 'ok' && data.status === 'ok') {
-      console.log(`Order ${id} status ${order.status} -> ${data.status}`);
-      await sendConfirmationEmail(order);
+    if (order.status !== 'ok' && data.status === 'ok') {
+      if (!activeEmailSends.has(id)) {
+        activeEmailSends.add(id);
+        console.log(`Order ${id} status ${order.status} -> ${data.status}, sending confirmation email...`);
+        try {
+          await sendConfirmationEmail(order);
+        } catch (err) {
+          console.error(`Failed to send confirmation email for order ${id}:`, err);
+        } finally {
+          activeEmailSends.delete(id);
+        }
+      } else {
+        console.log(`Confirmation email for order ${id} is already being sent.`);
+      }
     }
 
     if (!order.tickets_sent && data.tickets_sent === true) {
-      await sendTicketEmail(order);
+      if (!activeEmailSends.has(id)) {
+        activeEmailSends.add(id);
+        console.log(`Sending tickets for order ${id}...`);
+        try {
+          await sendTicketEmail(order);
+        } catch (err) {
+          console.error(`Failed to send ticket email for order ${id}:`, err);
+        } finally {
+          activeEmailSends.delete(id);
+        }
+      } else {
+        console.log(`Ticket email for order ${id} is already being sent.`);
+      }
     }
   },
 };
