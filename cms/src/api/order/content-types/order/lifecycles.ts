@@ -63,7 +63,12 @@ const sendConfirmationEmail = async (order: any) => {
         contactForm: true
       }
     }),
-    strapi.query('api::translation.translation').findOne({}),
+    strapi.query('api::translation.translation').findOne({
+      where: {
+        locale: customer.locale,
+      },
+      populate: ['translations'],
+    }),
     strapi.query('api::item.item').findMany({
       where: {
         order: order.id,
@@ -72,10 +77,16 @@ const sendConfirmationEmail = async (order: any) => {
     })
   ]);
 
+  // Convert translations array to an object
+  const translations = translation.translations.reduce((acc, translation) => {
+    acc[translation.key] = translation.value;
+    return acc;
+  }, {});
+
   // Generate localized ticket list
   const ticketList = tickets
     .map((ticket) => {
-      const ticketType = translation[ticket.itemType.slug] || ticket.itemType.slug;
+      const ticketType = translations[ticket.itemType.slug] || ticket.itemType.slug;
       return `- ${ticketType}`;
     })
     .join('\n');
@@ -144,7 +155,12 @@ const sendTicketEmail = async (order: any) => {
         contactForm: true,
       },
     }),
-    strapi.query('api::translation.translation').findOne({}),
+    strapi.query('api::translation.translation').findOne({
+      where: {
+        locale: customer.locale,
+      },
+      populate: ['translations'],
+    }),
     strapi.query('api::item.item').findMany({
       where: {
         order: order.id,
@@ -153,15 +169,21 @@ const sendTicketEmail = async (order: any) => {
     }),
   ]);
 
+  // Convert translations array to an object
+  const translations = translation.translations.reduce((acc, translation) => {
+    acc[translation.key] = translation.value;
+    return acc;
+  }, {});
+
   // Generate ticket list with seat details
   const ticketList = tickets
     .map((ticket) => {
-      const ticketType = translation[ticket.itemType.slug] || ticket.itemType.slug;
-      const section = ticket.seat?.section?.Name || translation.UnknownSection;
-      const row = ticket.seat?.Row || translation.UnknownRow;
-      const number = ticket.seat?.Number || translation.UnknownNumber;
+      const ticketType = translations[ticket.itemType.slug] || ticket.itemType.slug;
+      const section = ticket.seat?.section?.Name || translations.unknown;
+      const row = ticket.seat?.Row || translations.unknown;
+      const number = ticket.seat?.Number || translations.unknown;
 
-      return `${ticketType} - ${section}, ${translation.row} ${row}, ${translation.seat} ${number}`;
+      return `${ticketType} - ${section}, ${translations.row} ${row}, ${translations.seat} ${number}`;
     })
     .join('\n');
 
