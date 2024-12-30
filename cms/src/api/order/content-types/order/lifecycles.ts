@@ -213,6 +213,7 @@ export default {
     }
 
     if (order.status != 'ok' && data.status === 'ok') {
+      console.log(`Order ${id} status ${order.status} -> ${data.status}`);
       await sendConfirmationEmail(order);
     }
 
