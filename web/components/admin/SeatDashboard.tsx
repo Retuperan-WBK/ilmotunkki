@@ -84,7 +84,7 @@ export default function SeatDashboard() {
         </div>
         <div className="flex items-center justify-center h-full w-full gap-4 pr-2">
           <div className='flex flex-1 items-center gap-4'>
-            <h3 className="text-base">Mydyyt liput:</h3>
+            <h3 className="text-base">Myydyt liput:</h3>
             <div>
               <p className='text-sm'>DeLuxe: {deluxe}</p>
               <p className='text-sm'>I-Luokka {firstClass}</p>
@@ -98,7 +98,7 @@ export default function SeatDashboard() {
         </div>
       </div>
 
-      {/* Main Content Section */}s
+      {/* Main Content Section */}
       <div className="bg-[#3D3D3D] h-full w-full rounded-md flex">
         {/* Tilaukset Sidebar */}
         <div className="h-full w-[20%] min-w-[400px] border-r-2 border-gray-500">

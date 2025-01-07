@@ -95,9 +95,11 @@ const OrdersDrawer = () => {
               {selectedOrder.attributes.customer?.data.attributes.lastName}
             </p>
             {selectedOrder.attributes.group.data &&
-            <p className="text-md truncate cursor-pointer hover:underline" onClick={() => selectedOrder.attributes.group.data && handleOpenGroup(selectedOrder.attributes.group.data.id)}>
-              Ryhmä: {selectedOrder.attributes.group?.data?.attributes.name || 'N/A'}
-            </p>
+            <div>
+              <p className="text-md truncate cursor-pointer hover:underline" onClick={() => selectedOrder.attributes.group.data && handleOpenGroup(selectedOrder.attributes.group.data.id)}>
+                Ryhmä: {selectedOrder.attributes.group?.data?.attributes.name || 'N/A'}
+              </p>
+            </div>
             }
           </div>
           <p className="text-sm mt-2 cursor-pointer">
@@ -229,9 +231,11 @@ const OrdersDrawer = () => {
                   {order.attributes.customer?.data.attributes.lastName}
                 </p>
                 {order.attributes.group.data &&
-                <p className="text-md truncate cursor-pointer hover:underline" onClick={() => order.attributes.group.data && handleOpenGroup(order.attributes.group.data.id)}>
-                  Ryhmä: {order.attributes.group?.data?.attributes.name || 'N/A'}
-                </p>
+                <div>
+                  <p className="text-md truncate cursor-pointer hover:underline" onClick={() => order.attributes.group.data && handleOpenGroup(order.attributes.group.data.id)}>
+                    Ryhmä: {order.attributes.group?.data?.attributes.name || 'N/A'}
+                  </p>
+                </div>
                 }
               </div>
               <div className="flex items-center mt-4 gap-4">
@@ -288,9 +292,11 @@ const OrdersDrawer = () => {
                   {order.attributes.customer?.data.attributes.lastName}
                 </p>
                 {order.attributes.group.data &&
-                <p className="text-md truncate cursor-pointer hover:underline" onClick={() => order.attributes.group.data && handleOpenGroup(order.attributes.group.data.id)}>
-                  Ryhmä: {order.attributes.group?.data?.attributes.name || 'N/A'}
-                </p>
+                <div>
+                  <p className="text-md truncate cursor-pointer hover:underline" onClick={() => order.attributes.group.data && handleOpenGroup(order.attributes.group.data.id)}>
+                    Ryhmä: {order.attributes.group?.data?.attributes.name || 'N/A'}
+                  </p>
+                </div>
                 }
               </div>
               <div className="flex items-center mt-4 gap-4">
