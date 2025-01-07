@@ -161,7 +161,7 @@ const GroupsDrawer = () => {
   return (
     <div className="p-6 pl-2 pr-0 h-full w-full flex flex-col">
       <div className="flex items-center flex-col mb-4">
-        <div className="flex gap-4">
+        <div className="flex gap-4 justify-start w-full ml-2">
           <h1 className="text-2xl font-bold">Ryhmät</h1>
           <input
               type="text"
@@ -242,14 +242,16 @@ const GroupsDrawer = () => {
                 className="flex flex-col bg-[#868686] rounded-md p-4 mr-1 mb-4 cursor-pointer"
                 onClick={() => setSelectedGroup(group)}
               >
-              <div className="flex justify-between items-center">
+              <div className="flex-col justify-between items-center">
                 <p className="text-md font-bold">{group.attributes.name}</p>
-                <p className="text-md">
-                  {orders.length} tilausta
-                </p>
-                <p className="text-md">
-                  {placedTickets}/{totalTickets} paikkaa
-                </p>
+                <div className="flex gap-x-12 items-center">
+                  <p className="text-md">
+                    {orders.length} tilausta
+                  </p>
+                  <p className="text-md">
+                    {placedTickets}/{totalTickets} paikkaa
+                  </p>
+                </div>
               </div>
               <div className="flex items-center mt-4 gap-4">
                 <div
@@ -314,16 +316,18 @@ const GroupsDrawer = () => {
                 Liput Lähetetty
               </div>
               }
-              <div className="flex justify-between items-center">
+              <div className="flex-col justify-between mt-2 items-center">
                 <p className="text-md font-bold">{group.attributes.name}</p>
-                <p className="text-md">
-                  {orders.length} tilausta
-                </p>
-                <p className="text-md">
-                  {placedTickets}/{totalTickets} paikkaa
-                </p>
+                <div className="flex gap-x-12 items-center">
+                  <p className="text-md">
+                    {orders.length} tilausta
+                  </p>
+                  <p className="text-md">
+                    {placedTickets}/{totalTickets} paikkaa
+                  </p>
+                </div>
               </div>
-              <div className="flex items-center mt-4 gap-4">
+              <div className="flex items-center mt-2 gap-4">
                 <div
                   className={`w-4 h-4 rounded-full ${getOrderStatusColor(
                     placedTickets,
