@@ -14,6 +14,7 @@ export default function SeatDashboard() {
     let deluxe = 0;
     let firstClass = 0;
     let secondClass = 0;
+    let student = 0;
     let totalTickets = 0;
     let totalPlaced = 0;
 
@@ -25,7 +26,9 @@ export default function SeatDashboard() {
           firstClass += 1;
         } else if (item.attributes.itemType.data.attributes.slug === 'iiluokka') {
           secondClass += 1;
-        } 
+        } else if (item.attributes.itemType.data.attributes.slug === 'opiskelija') {
+          student += 1;
+        }
       });
     });
     
@@ -34,10 +37,10 @@ export default function SeatDashboard() {
       totalPlaced += order.attributes.items.data.filter((item) => item.attributes.seat.data).length;
     });
 
-    return { deluxe, firstClass, secondClass, totalTickets, totalPlaced };
+    return { deluxe, firstClass, secondClass, student, totalTickets, totalPlaced };
   };
 
-  const { deluxe, firstClass, secondClass, totalTickets, totalPlaced } = calculateTickets();
+  const { deluxe, firstClass, secondClass, student, totalTickets, totalPlaced } = calculateTickets();
 
   const handleChangeTab = (tab: 'tilaukset' | 'ryhmat' | 'kartta') => {
     setMode(null);
@@ -84,12 +87,12 @@ export default function SeatDashboard() {
         </div>
         <div className="flex items-center justify-center h-full w-full gap-4 pr-2">
           <div className='flex flex-1 items-center gap-4'>
-            <h3 className="text-base">Myydyt liput:</h3>
+            <h3 className="text-base">Myydyt liput: {totalTickets}</h3>
             <div>
               <p className='text-sm'>DeLuxe: {deluxe}</p>
               <p className='text-sm'>I-Luokka {firstClass}</p>
               <p className='text-sm'>II-Luokka {secondClass}</p>
-              <p className='text-sm'>Yht: {totalTickets}</p>
+              <p className='text-sm'>Opiskelija: {student}</p>
             </div>
           </div>
           <div className='flex-col flex-1 items-center gap-4'>
