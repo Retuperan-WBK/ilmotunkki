@@ -162,22 +162,14 @@ const GroupsDrawer = () => {
     <div className="p-6 pl-2 pr-0 h-full w-full flex flex-col">
       <div className="flex items-center flex-col mb-4">
         <div className="flex gap-4 justify-start w-full ml-2">
-          <h1 className="text-2xl font-bold">Ryhmät</h1>
+          <h1 className="text-2xl font-bold mr-4">Ryhmät ({groups.length})</h1>
           <input
               type="text"
               placeholder="Hae nimellä"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-1/2 p-1 rounded-sm text-sm text-black"
+              className="w-[40%] p-1 rounded-sm text-sm text-black"
             />
-            { search &&
-            <p
-              className="bg-[#868686] rounded-md hover:underline cursor-pointer p-1"
-              onClick={() => setSearch('')}
-            >
-              Tyhjennä
-            </p>
-            }
         </div>
         {/* Sort and Filter Section */}
         <div className="flex gap-4 items-center my-2">
@@ -213,7 +205,7 @@ const GroupsDrawer = () => {
       </div>
 
       <div className="flex-1 overflow-y-auto mb-16">
-        <h2 className="text-md font-bold mb-4">Plassaamattomat</h2>
+        <h2 className="text-md font-bold mb-4">Plassaamattomat ({groups_with_unplaced_tickets.length})</h2>
         {groups_with_unplaced_tickets.filter((group) => { 
           return group.attributes.name.toLowerCase().includes(search.toLowerCase());
         }).map((group) => {
@@ -273,7 +265,7 @@ const GroupsDrawer = () => {
           );
         })}
 
-        <h2 className="text-md font-bold mt-6 mb-4">Plassatut</h2>
+        <h2 className="text-md font-bold mt-6 mb-4">Plassatut ({groups_without_unplaced_tickets.length})</h2>
         {/* Sort so that groups with ticket sent are last */}
         {groups_without_unplaced_tickets.filter((group) => { 
           return group.attributes.name.toLowerCase().includes(search.toLowerCase());

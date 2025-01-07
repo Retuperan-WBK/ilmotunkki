@@ -164,8 +164,8 @@ const OrdersDrawer = () => {
   return (
     <div className="p-6 pl-2 pr-0 h-full w-full flex flex-col">
       <div className="flex items-center flex-col">
-        <div className="flex gap-4 w-full ml-2">
-          <h1 className="text-2xl font-bold">Tilaukset</h1>
+        <div className="flex gap-1 w-full ml-2">
+          <h1 className="text-2xl font-bold mr-4">Tilaukset ({orders.length})</h1>
           <input
               type="text"
               placeholder="Hae nimellä"
@@ -173,14 +173,6 @@ const OrdersDrawer = () => {
               onChange={(e) => setSearch(e.target.value)}
               className="w-1/2 p-1 rounded-sm text-sm text-black"
             />
-            {search &&
-            <p
-              className="bg-[#868686] rounded-md hover:underline cursor-pointer p-1"
-              onClick={() => setSearch('')}
-            >
-              Tyhjennä
-            </p>
-          }
         </div>
         {/* Sort and Filter Section */}
         <div className="flex gap-4 items-center my-2">
@@ -216,7 +208,7 @@ const OrdersDrawer = () => {
       </div>
 
       <div className="py-4 flex-1 overflow-y-auto mb-16">
-        <h2 className="text-md font-bold">Plassaamattomat</h2>
+        <h2 className="text-md font-bold">Plassaamattomat ({unplacedOrders.length})</h2>
         {unplacedOrders.filter((order) => { 
           const fullName = `${order.attributes.customer?.data.attributes.firstName} ${order.attributes.customer?.data.attributes.lastName}`;
           return fullName.toLowerCase().includes(search.toLowerCase());
@@ -269,7 +261,7 @@ const OrdersDrawer = () => {
           );
         })}
 
-        <h2 className="text-md font-bold mt-6">Plassatut</h2>
+        <h2 className="text-md font-bold mt-6">Plassatut ({placedOrders.length})</h2>
         {/* Sort so that orders with ticket sent are last */}
         {placedOrders.filter((order) => { 
           const fullName = `${order.attributes.customer?.data.attributes.firstName} ${order.attributes.customer?.data.attributes.lastName}`;
