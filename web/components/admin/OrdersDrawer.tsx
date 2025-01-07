@@ -164,7 +164,7 @@ const OrdersDrawer = () => {
   return (
     <div className="p-6 pl-2 pr-0 h-full w-full flex flex-col">
       <div className="flex items-center flex-col">
-        <div className="flex gap-4">
+        <div className="flex gap-4 w-full ml-2">
           <h1 className="text-2xl font-bold">Tilaukset</h1>
           <input
               type="text"
