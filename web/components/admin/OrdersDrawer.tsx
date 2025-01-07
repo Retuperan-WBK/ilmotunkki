@@ -14,7 +14,10 @@ const OrdersDrawer = () => {
     setOrderSortOption, 
     orderFilters, 
     handleSendTickets,
-    setOrderFilters
+    setOrderFilters,
+    groups,
+    setSelectedGroup,
+    handleSetActiveTab
   } = useAdminContext();
   const [search, setSearch] = useState('');
 
@@ -32,6 +35,13 @@ const OrdersDrawer = () => {
     const newFilters = { ...orderFilters, [filterName]: !orderFilters[filterName] };
     setOrderFilters(newFilters);
   };
+
+  const handleOpenGroup = (groupId: number) => {
+    const group = groups.find((g) => g.id === groupId);
+    if (!group) return;
+    setSelectedGroup(group);
+    handleSetActiveTab('ryhmat');
+  }
 
   const sortOrders = (orders: Order[]) => {
     switch (orderSortOption) {
@@ -79,13 +89,13 @@ const OrdersDrawer = () => {
         </button>
         <h1 className="text-xl font-bold mb-4">Tilauksen Tiedot</h1>
         <div className="flex w-full flex-1 flex-col bg-[#868686] border-4 border-[#868686] rounded-md p-2 overflow-y-auto">
-          <div className="flex justify-between items-center">
-            <p className="text-md font-bold">
+          <div className="flex justify-between items-start flex-col">
+            <p className="text-md font-bold truncate">
               {selectedOrder.attributes.customer?.data.attributes.firstName}{' '}
               {selectedOrder.attributes.customer?.data.attributes.lastName}
             </p>
             {selectedOrder.attributes.group.data &&
-            <p className="text-md">
+            <p className="text-md truncate cursor-pointer hover:underline" onClick={() => selectedOrder.attributes.group.data && handleOpenGroup(selectedOrder.attributes.group.data.id)}>
               Ryhmä: {selectedOrder.attributes.group?.data?.attributes.name || 'N/A'}
             </p>
             }
@@ -221,13 +231,13 @@ const OrdersDrawer = () => {
               className="flex flex-col bg-[#868686] rounded-md p-4 mr-1 mb-4 cursor-pointer"
               onClick={() => setSelectedOrder(order)}
             >
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between flex-col">
                 <p className="text-md font-bold">
                   {order.attributes.customer?.data.attributes.firstName}{' '}
                   {order.attributes.customer?.data.attributes.lastName}
                 </p>
                 {order.attributes.group.data &&
-                <p className="text-md">
+                <p className="text-md truncate cursor-pointer hover:underline" onClick={() => order.attributes.group.data && handleOpenGroup(order.attributes.group.data.id)}>
                   Ryhmä: {order.attributes.group?.data?.attributes.name || 'N/A'}
                 </p>
                 }
@@ -280,13 +290,13 @@ const OrdersDrawer = () => {
               Liput Lähetetty
             </div>
             }
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between flex-col">
                 <p className="text-md font-bold">
                   {order.attributes.customer?.data.attributes.firstName}{' '}
                   {order.attributes.customer?.data.attributes.lastName}
                 </p>
                 {order.attributes.group.data &&
-                <p className="text-md">
+                <p className="text-md truncate cursor-pointer hover:underline" onClick={() => order.attributes.group.data && handleOpenGroup(order.attributes.group.data.id)}>
                   Ryhmä: {order.attributes.group?.data?.attributes.name || 'N/A'}
                 </p>
                 }
