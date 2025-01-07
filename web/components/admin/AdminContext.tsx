@@ -28,7 +28,7 @@ interface AdminContextProps {
   fetchOrders: () => Promise<void>;
   fetchGroups: () => Promise<void>;
   fetchSections: () => Promise<void>;
-  handleMapClick: (x: number, y: number) => void;
+  handleMapClick: (x: number, y: number, ctrl: boolean) => void;
   handleSeatClick: (seat: Seat) => void;
   newSeat: NewSeat;
   setNewSeat: (newSeat: NewSeat) => void;
@@ -158,7 +158,9 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const deleteSeat = async (seatId: number) => {
-    if (await confirm(`Are you sure you want to delete seat ${selectedSeat?.attributes.section.data.attributes.Name} R:${selectedSeat?.attributes.Row} N:${selectedSeat?.attributes.Number}`)) {
+    console.log(selectedSeat);
+
+    if (await confirm(`Are you sure you want to delete seat id: ${seatId}`)) {
       await fetch(`/api/admin/seats/${seatId}`, {
         method: 'DELETE',
       });
@@ -415,8 +417,8 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  const handleMapClick = (x: number, y: number) => {
-    if (currentMode === 'add-seat' && activeSectionId) {
+  const handleMapClick = (x: number, y: number, ctrl: boolean) => {
+    if (currentMode === 'add-seat' && activeSectionId && ctrl) {
       addSeat(activeSectionId, { x_cord: x, y_cord: y });
     }
   };

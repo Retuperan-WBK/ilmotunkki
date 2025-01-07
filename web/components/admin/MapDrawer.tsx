@@ -134,6 +134,8 @@ const MapDrawer = () => {
           <div className="flex flex-col bg-[#545454] p-4 ">
             <h2 className="text-lg font-bold">Lisää istuin</h2>
 
+            <p className='text-sm'> Lisää istuin pitämällä Shift pohjassa ja klikkaamalla karttaa</p>
+
             <label className="mt-2 text-sm">Rivi</label>
             <input
               type="text"

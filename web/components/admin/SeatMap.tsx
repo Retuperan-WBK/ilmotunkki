@@ -108,7 +108,11 @@ export default function SeatMap() {
     const relativeX = x * originalWidth;
     const relativeY = y * originalHeight;
 
-    handleMapClick(relativeX, relativeY);
+    // Check if shift key is pressed to add seat
+
+    const shiftKey = e.shiftKey;
+
+    handleMapClick(relativeX, relativeY, shiftKey || false);
   };
 
   const generateColor = (id: number): string => {
