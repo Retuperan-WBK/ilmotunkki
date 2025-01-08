@@ -95,11 +95,9 @@ const OrdersDrawer = () => {
               {selectedOrder.attributes.customer?.data.attributes.lastName}
             </p>
             {selectedOrder.attributes.group.data &&
-            <div>
-              <p className="text-md truncate cursor-pointer hover:underline" onClick={() => selectedOrder.attributes.group.data && handleOpenGroup(selectedOrder.attributes.group.data.id)}>
-                Ryhmä: {selectedOrder.attributes.group?.data?.attributes.name || 'N/A'}
-              </p>
-            </div>
+            <p className="text-md truncate cursor-pointer hover:underline w-fit" onClick={() => selectedOrder.attributes.group.data && handleOpenGroup(selectedOrder.attributes.group.data.id)}>
+              Ryhmä: {selectedOrder.attributes.group?.data?.attributes.name || 'N/A'}
+            </p>
             }
           </div>
           <p className="text-sm mt-2 cursor-pointer">
