@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAdminContext } from "./AdminContext";
 import TicketList from "./TicketList";
 import DisabledSvg from "./DisabledSvg";
@@ -17,6 +17,29 @@ const GroupsDrawer = () => {
     handleSendTickets,
   } = useAdminContext();
   const [search, setSearch] = useState("");
+  const scrollableDivRef = useRef<HTMLDivElement>(null);
+  const [listScrollPosition, setListScrollPosition] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (scrollableDivRef.current) {
+        setListScrollPosition(scrollableDivRef.current.scrollTop);
+      }
+    };
+
+    const div = scrollableDivRef.current;
+    if (div) {
+      div.addEventListener('scroll', handleScroll);
+      div.scrollTop = listScrollPosition; // Set initial scroll position
+    }
+    
+    return () => {
+      if (div) {
+        div.removeEventListener('scroll', handleScroll);
+      }
+    };
+
+  }, [listScrollPosition, setListScrollPosition, selectedGroup]);
 
   const getOrderStatusColor = (placedCount: number, totalCount: number) => {
     if (placedCount === 0) return "bg-red-500"; // All unplaced
@@ -74,7 +97,7 @@ const GroupsDrawer = () => {
         >
           ← Takaisin ryhmiin
         </button>
-        <h1 className="text-xl font-bold mb-4">Ryhmä: {selectedGroup.attributes.name}</h1>
+        <h1 className="text-xl font-bold mb-4 truncate max-w-full">Ryhmä: {selectedGroup.attributes.name}</h1>
 
         <div className="flex flex-col flex-1 bg-[#868686] border-4 border-[#868686] rounded-md p-2 overflow-y-auto w-full mb-16">
           <p className="text-md font-bold mb-4">
@@ -204,7 +227,7 @@ const GroupsDrawer = () => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto mb-16">
+      <div className="flex-1 overflow-y-auto mb-16" ref={scrollableDivRef}>
         <h2 className="text-md font-bold mb-4">Plassaamattomat ({groups_with_unplaced_tickets.length})</h2>
         {groups_with_unplaced_tickets.filter((group) => { 
           return group.attributes.name.toLowerCase().includes(search.toLowerCase());
@@ -235,7 +258,7 @@ const GroupsDrawer = () => {
                 onClick={() => setSelectedGroup(group)}
               >
               <div className="flex-col justify-between items-center">
-                <p className="text-md font-bold">{group.attributes.name}</p>
+                <p className="text-md font-bold truncate max-w-full">{group.attributes.name}</p>
                 <div className="flex gap-x-12 items-center">
                   <p className="text-md">
                     {orders.length} tilausta
@@ -309,7 +332,7 @@ const GroupsDrawer = () => {
               </div>
               }
               <div className="flex-col justify-between mt-2 items-center">
-                <p className="text-md font-bold">{group.attributes.name}</p>
+                <p className="text-md font-bold truncate max-w-full">{group.attributes.name}</p>
                 <div className="flex gap-x-12 items-center">
                   <p className="text-md">
                     {orders.length} tilausta

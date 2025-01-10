@@ -118,12 +118,9 @@ const TicketList = ({tickets, tickets_sent} : {tickets: Item[], tickets_sent?: b
               {selectedTicket && selectedTicket.id === ticket.id ? "Peruuta" : ticket.attributes.seat.data ? "Siirrä" : "Plassaa"}
             </button>
             }
-            {tickets_sent ? 
-              null :
-              <p className="text-xs flex-[1] mt-2 mb-[-12px] hover:underline cursor-pointer" onClick={() => handleRemoveTicketFromSeat(ticket)}>
-                Poista plassi
-              </p> 
-            }
+            <p style={{ visibility: tickets_sent || !ticket.attributes.seat.data ? "hidden" : "visible" }} className="text-xs flex-[1] mt-2 mb-[-12px] hover:underline cursor-pointer" onClick={() => handleRemoveTicketFromSeat(ticket)}>
+              Poista plassi
+            </p>
           </div>
         </div>
       ))}

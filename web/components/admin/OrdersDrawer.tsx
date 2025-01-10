@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAdminContext } from "./AdminContext";
 import TicketList from "./TicketList";
 import InviteSvg from "./InviteSvg";
@@ -17,9 +17,32 @@ const OrdersDrawer = () => {
     setOrderFilters,
     groups,
     setSelectedGroup,
-    handleSetActiveTab
+    handleSetActiveTab,
   } = useAdminContext();
   const [search, setSearch] = useState('');
+  const scrollableDivRef = useRef<HTMLDivElement>(null);
+  const [listScrollPosition, setListScrollPosition] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (scrollableDivRef.current) {
+        setListScrollPosition(scrollableDivRef.current.scrollTop);
+      }
+    };
+
+    const div = scrollableDivRef.current;
+    if (div) {
+      div.addEventListener('scroll', handleScroll);
+      div.scrollTop = listScrollPosition; // Set initial scroll position
+    }
+    
+    return () => {
+      if (div) {
+        div.removeEventListener('scroll', handleScroll);
+      }
+    };
+
+  }, [listScrollPosition, setListScrollPosition, selectedOrder]);
 
   const getOrderStatusColor = (placedCount: number, totalCount: number) => {
     if (placedCount === 0) return 'bg-red-500'; // All unplaced
@@ -95,7 +118,7 @@ const OrdersDrawer = () => {
               {selectedOrder.attributes.customer?.data.attributes.lastName}
             </p>
             {selectedOrder.attributes.group.data &&
-            <p className="text-md truncate cursor-pointer hover:underline w-fit" onClick={() => selectedOrder.attributes.group.data && handleOpenGroup(selectedOrder.attributes.group.data.id)}>
+            <p className="text-md truncate cursor-pointer hover:underline w-fit max-w-[90%]" onClick={() => selectedOrder.attributes.group.data && handleOpenGroup(selectedOrder.attributes.group.data.id)}>
               Ryhmä: {selectedOrder.attributes.group?.data?.attributes.name || 'N/A'}
             </p>
             }
@@ -207,7 +230,7 @@ const OrdersDrawer = () => {
         </div>
       </div>
 
-      <div className="py-4 flex-1 overflow-y-auto mb-16">
+      <div className="py-4 flex-1 overflow-y-auto mb-16" ref={scrollableDivRef}>
         <h2 className="text-md font-bold">Plassaamattomat ({unplacedOrders.length})</h2>
         {unplacedOrders.filter((order) => { 
           const fullName = `${order.attributes.customer?.data.attributes.firstName} ${order.attributes.customer?.data.attributes.lastName}`;
@@ -229,11 +252,9 @@ const OrdersDrawer = () => {
                   {order.attributes.customer?.data.attributes.lastName}
                 </p>
                 {order.attributes.group.data &&
-                <div>
-                  <p className="text-md truncate cursor-pointer hover:underline" onClick={() => order.attributes.group.data && handleOpenGroup(order.attributes.group.data.id)}>
-                    Ryhmä: {order.attributes.group?.data?.attributes.name || 'N/A'}
-                  </p>
-                </div>
+                <p className="text-md truncate cursor-pointer hover:underline w-fit max-w-[90%]" onClick={() => order.attributes.group.data && handleOpenGroup(order.attributes.group.data.id)}>
+                  Ryhmä: {order.attributes.group?.data?.attributes.name || 'N/A'}
+                </p>
                 }
               </div>
               <div className="flex items-center mt-4 gap-4">
@@ -290,11 +311,9 @@ const OrdersDrawer = () => {
                   {order.attributes.customer?.data.attributes.lastName}
                 </p>
                 {order.attributes.group.data &&
-                <div>
-                  <p className="text-md truncate cursor-pointer hover:underline" onClick={() => order.attributes.group.data && handleOpenGroup(order.attributes.group.data.id)}>
-                    Ryhmä: {order.attributes.group?.data?.attributes.name || 'N/A'}
-                  </p>
-                </div>
+                <p className="text-md truncate cursor-pointer hover:underline w-fit max-w-[90%]" onClick={() => order.attributes.group.data && handleOpenGroup(order.attributes.group.data.id)}>
+                  Ryhmä: {order.attributes.group?.data?.attributes.name || 'N/A'}
+                </p>
                 }
               </div>
               <div className="flex items-center mt-4 gap-4">
