@@ -37,13 +37,8 @@ export const GET = async (req: NextRequest) => {
 
     // Filter out orders that are not 'ok' or 'admin-new' status from each group
     const groupsFiltered = filteredGroups.map((group) => {
-      return {
-        ...group,
-        attributes: {
-          ...group.attributes,
-          orders: group.attributes.orders?.data.filter((order) => order.attributes.status === "ok" || order.attributes.status === "admin-new"),
-        },
-      };
+      const ordersFiltered = group.attributes.orders?.data.filter((order) => order.attributes.status === "ok" || order.attributes.status === "admin-new");
+      return { ...group, attributes: { ...group.attributes, orders: { data: ordersFiltered } } } as AdminGroup;
     });
 
     return NextResponse.json(groupsFiltered, { status: 200 });
