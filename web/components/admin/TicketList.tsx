@@ -5,7 +5,7 @@ import { useAdminContext } from "./AdminContext";
 
 const TicketList = ({tickets, tickets_sent} : {tickets: Item[], tickets_sent?: boolean}) => {
 
-  const { selectedTicket, setSelectedTicket, setMode, removeTicketFromSeat} = useAdminContext();
+  const { selectedTicket, setSelectedTicket, setMode, removeTicketFromSeat, removeMultipleTicketsFromSeat} = useAdminContext();
 
   const getTicketStatusColor = (ticket: Item) => {
     if (ticket.attributes.seat.data) return "bg-green-500"; // Placed
@@ -52,6 +52,21 @@ const TicketList = ({tickets, tickets_sent} : {tickets: Item[], tickets_sent?: b
     setMode('add-ticket-to-seat');
     setSelectedTicket(ticket);
   }
+
+  const handleRemoveAllTicketsFromSeat = () => {
+
+    if (tickets_sent) {
+      alert('Nämä liput on jo lähetetty, et voi muokata tätä tilausta');
+      return;
+    }
+
+    if (confirm('Haluatko varmasti poistaa plassin kaikista tilauksen lipuista?')) {
+      const ticketIdsWithSeat = tickets.filter(ticket => ticket.attributes.seat.data).map(ticket => ticket.id);
+
+      removeMultipleTicketsFromSeat(ticketIdsWithSeat);
+    }
+  }
+
 
   const handleRemoveTicketFromSeat = (ticket: Item) => {
     if (tickets_sent) {
@@ -124,6 +139,14 @@ const TicketList = ({tickets, tickets_sent} : {tickets: Item[], tickets_sent?: b
           </div>
         </div>
       ))}
+      {tickets_sent ? null :
+      <p
+        className="text-sm bg-opacity-80 text-white p-1 rounded-md mt-2 cursor-pointer inline hover:underline"
+        onClick={handleRemoveAllTicketsFromSeat}
+      >
+        Poista kaikki tilauksen plassit
+      </p>
+      }
     </div>
   );
 }

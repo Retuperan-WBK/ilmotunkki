@@ -50,6 +50,7 @@ interface AdminContextProps {
   orderFilters: { kutsuvieras: boolean, erikoisjarjestely: boolean };
   setOrderFilters: (filters: { kutsuvieras: boolean, erikoisjarjestely: boolean }) => void;
   handleSendTickets: (order: Order, groupName?: string) => void;
+  removeMultipleTicketsFromSeat: (ticketIds: number[]) => void;
 }
 
 const AdminContext = createContext<AdminContextProps | undefined>(undefined);
@@ -252,6 +253,22 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       console.error('Error in removeTicketFromSeat:', error);
     }
   };
+
+  const removeMultipleTicketsFromSeat = async (ticketIds: number[]) => {
+    try {
+      await Promise.all(
+        ticketIds.map((ticketId) =>
+          fetch(`/api/admin/items/${ticketId}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+          })
+        )
+      );
+      await reFetch();
+    } catch (error) {
+      console.error('Error in removeMultipleTicketsFromSeat:', error);
+    }
+  }
   
   // **Change Ticket from Seat to Another**
   const changeTicketSeat = async (ticketId: number, newSeatId: number) => {
@@ -479,6 +496,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         orderFilters,
         setOrderFilters,
         handleSendTickets,
+        removeMultipleTicketsFromSeat,
       }}
     >
       {children}
