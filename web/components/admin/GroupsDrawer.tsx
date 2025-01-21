@@ -15,7 +15,6 @@ const GroupsDrawer = () => {
     setOrderFilters,
     orderSortOption,
     handleSendTickets,
-    removeMultipleTicketsFromSeat
   } = useAdminContext();
   const [search, setSearch] = useState("");
   const scrollableDivRef = useRef<HTMLDivElement>(null);
@@ -56,26 +55,6 @@ const GroupsDrawer = () => {
     const newFilters = { ...orderFilters, [filterName]: !orderFilters[filterName] };
     setOrderFilters(newFilters);
   };
-
-  const allTicketsSent = groups.every((group) => group.attributes.orders?.data.every((order) => order.attributes.tickets_sent === true));
-
-  const handleRemoveAllTicketsFromSeat = () => {
-    if (confirm('Haluatko varmasti poistaa plassin kaikista ryhmän lipuista?')) {
-      const ticketIdsWithSeat = groups
-        .filter((group) => group.attributes.orders?.data.some((order) => order.attributes.items?.data.some((item) => item.attributes.seat.data)))
-        .map((group) => group.attributes.orders?.data)
-        .flat()
-        .filter((order) => order.attributes.tickets_sent != true)
-        .map((order) => order.attributes.items?.data)
-        .flat()
-        .filter((item) => item.attributes.seat.data)
-        .map((item) => item.id);
-
-      console.log(ticketIdsWithSeat);
-
-      removeMultipleTicketsFromSeat(ticketIdsWithSeat);
-    }
-  }
 
   const filteredGroups = groups.filter((group) => {
     const hasSpecialArrangement = group.attributes.orders.data.some(
@@ -179,14 +158,6 @@ const GroupsDrawer = () => {
               </div>
             );
           })}
-          {allTicketsSent ? null :
-          <p
-            className="text-sm bg-opacity-80 text-white p-1 rounded-md cursor-pointer inline hover:underline"
-            onClick={handleRemoveAllTicketsFromSeat}
-          >
-          Poista kaikki ryhmän plassit
-          </p>
-          }
         </div>
       </div>
     );
