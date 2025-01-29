@@ -48,21 +48,22 @@ const Form = ({locale, contactForms, customer, items, onSubmit=() => Promise.res
           onSubmit={handleSubmit}>
       {contactForm.map(field => (
         field.type === 'checkbox' ?
-        <div className="mb-8" key={field.fieldName}>
-          <label className='block p-1'>
+        <div className="mb-8 flex items-center" key={field.fieldName}>
+          <label className='block p-1 flex-1'>
           {field.label}{field.required && '*'}
           {field.description && <p className='text-sm text-gray-500'>{field.description}</p>}
           </label>
-          <input
-            className='tx-input mt-2 h-4 w-4 accent-primary-500'
-            style={{ position: 'relative', top: '-40px' }}
-            type={field.type}
-            id={field.fieldName}
-            name={field.fieldName}
-            defaultChecked={field.type === 'checkbox' ? !!getFieldValue(field.fieldName) : undefined}
-            defaultValue={field.type !== 'checkbox' ? getFieldValue(field.fieldName) : undefined}
-            required={field.required}
-          />
+          <div className='flex-1'>
+            <input
+              className='tx-input mt-2 accent-primary-500 !w-4 !h-4'
+              type={field.type}
+              id={field.fieldName}
+              name={field.fieldName}
+              defaultChecked={field.type === 'checkbox' ? !!getFieldValue(field.fieldName) : undefined}
+              defaultValue={field.type !== 'checkbox' ? getFieldValue(field.fieldName) : undefined}
+              required={field.required}
+            />
+          </div>
         </div>
         :
         <div className="mb-8" key={field.fieldName}>
