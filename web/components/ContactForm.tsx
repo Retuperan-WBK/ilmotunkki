@@ -47,12 +47,15 @@ const Form = ({locale, contactForms, customer, items, onSubmit=() => Promise.res
     <form className='mb-6 text-secondary-800 dark:text-secondary-100' 
           onSubmit={handleSubmit}>
       {contactForm.map(field => (
+        field.type === 'checkbox' ?
         <div className="mb-8" key={field.fieldName}>
           <label className='block p-1'>
           {field.label}{field.required && '*'}
           {field.description && <p className='text-sm text-gray-500'>{field.description}</p>}
+          </label>
           <input
-            className='tx-input mt-2'
+            className='tx-input mt-2 h-4 w-4 accent-primary-500'
+            style={{ position: 'relative', top: '-40px' }}
             type={field.type}
             id={field.fieldName}
             name={field.fieldName}
@@ -60,9 +63,22 @@ const Form = ({locale, contactForms, customer, items, onSubmit=() => Promise.res
             defaultValue={field.type !== 'checkbox' ? getFieldValue(field.fieldName) : undefined}
             required={field.required}
           />
-        </label>
         </div>
-
+        :
+        <div className="mb-8" key={field.fieldName}>
+          <label className='block p-1'>
+          {field.label}{field.required && '*'}
+          {field.description && <p className='text-sm text-gray-500'>{field.description}</p>}
+          </label>
+          <input
+            className='tx-input mt-2'
+            type={field.type}
+            id={field.fieldName}
+            name={field.fieldName}
+            defaultValue={getFieldValue(field.fieldName)}
+            required={field.required}
+          />
+        </div>
       ))}
       <div className='float-right'>
         <button className='btn h-12'>{translation.send}</button>
