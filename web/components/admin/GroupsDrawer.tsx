@@ -239,7 +239,7 @@ const GroupsDrawer = () => {
               ))}
             </select>
           </div>
-          <div className="flex">
+          <div className="flex gap-2 pr-2">
             <label onClick={() => toggleFilter('kutsuvieras')} className={orderFilters.kutsuvieras ? 'bg-red-700 rounded-md p-[2px]' : 'p-[2px]'}>
               Kutsuvieras
             </label>
