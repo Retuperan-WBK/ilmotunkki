@@ -47,14 +47,27 @@ const GroupsDrawer = () => {
     return "bg-yellow-500"; // Some unplaced
   };
 
+  const [selectedTicketType, setSelectedTicketType] = useState<string>('');
+  const ticketTypes = ['deluxe', 'iluokka', 'iiluokka', 'opiskelija'];
+
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setOrderSortOption(e.target.value as 'newest' | 'oldest' | 'largest' | 'smallest');
   };
 
-  const toggleFilter = (filterName: 'kutsuvieras' | 'erikoisjarjestely') => {
-    const newFilters = { ...orderFilters, [filterName]: !orderFilters[filterName] };
+  const toggleFilter = (filterName: 'kutsuvieras' | 'erikoisjarjestely' | 'noGroup' | 'none', ticketType?: string) => {
+    let newFilters = {...orderFilters};
+    if (filterName != 'none') {
+      newFilters = { ...orderFilters, [filterName]: !orderFilters[filterName]};
+    } if (ticketType !== undefined) {
+      newFilters = { ...orderFilters, ticketType };
+    }
     setOrderFilters(newFilters);
   };
+
+  const handleSelectTicketType = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedTicketType(e.target.value);
+    toggleFilter('none', e.target.value);
+  }
 
   const filteredGroups = groups.filter((group) => {
     const hasSpecialArrangement = group.attributes.orders.data.some(
@@ -66,6 +79,12 @@ const GroupsDrawer = () => {
 
     if (orderFilters.kutsuvieras && !isGuest) return false;
     if (orderFilters.erikoisjarjestely && !hasSpecialArrangement) return false;
+
+    if (selectedTicketType) {
+      const orders = group.attributes.orders.data;
+      const hasTicketType = orders.some((order) => order.attributes.items.data.some((item) => item.attributes.itemType.data.attributes.slug === selectedTicketType));
+      if (!hasTicketType) return false;
+    }
 
     return true;
   });
@@ -97,7 +116,7 @@ const GroupsDrawer = () => {
         >
           ← Takaisin ryhmiin
         </button>
-        <h1 className="text-xl font-bold mb-4 truncate max-w-full">Ryhmä: {selectedGroup.attributes.name}</h1>
+        <h1 className="text-xl font-bold mb-4 truncate max-w-full select-text">Ryhmä: {selectedGroup.attributes.name}</h1>
 
         <div className="flex flex-col flex-1 bg-[#868686] border-4 border-[#868686] rounded-md p-2 overflow-y-auto w-full mb-16">
           <p className="text-md font-bold mb-4">
@@ -114,7 +133,7 @@ const GroupsDrawer = () => {
                 className="flex flex-col bg-[#5e5e5e] rounded-md py-4 px-2 mb-4"
               >
                 <div className="flex justify-between items-center">
-                  <p className="text-md font-bold">
+                  <p className="text-md font-bold select-text">
                     {order.attributes.customer?.data.attributes.firstName}{" "}
                     {order.attributes.customer?.data.attributes.lastName}
                   </p>
@@ -123,7 +142,7 @@ const GroupsDrawer = () => {
                   </p>
                 </div>
                 <div className="flex items-center justify-between">
-                  <p className="text-sm mt-2 cursor-pointer">
+                  <p className="text-sm mt-2 cursor-pointer select-text">
                     Email: <span onClick={() => navigator.clipboard.writeText(order.attributes.customer?.data.attributes.email)} className="cursor-pointer hover:underline">{order.attributes.customer?.data.attributes.email}</span>
                   </p>
                   {unplacedCount === 0 && (order.attributes.tickets_sent === true ?
@@ -196,34 +215,38 @@ const GroupsDrawer = () => {
         </div>
         {/* Sort and Filter Section */}
         <div className="flex gap-4 items-center my-2">
-          <select 
-            value={orderSortOption} 
-            onChange={handleSortChange} 
-            className="p-2 bg-[#868686] rounded-md"
-          >
-            <option value="newest">Uusin ensin</option>
-            <option value="oldest">Vanhin ensin</option>
-            <option value="largest">Suurin ensin</option>
-            <option value="smallest">Pienin ensin</option>
-          </select>
-
-          <label>
-            <input 
-              type="checkbox" 
-              checked={orderFilters.kutsuvieras} 
-              onChange={() => toggleFilter('kutsuvieras')} 
-            />
-            Kutsuvieras
-          </label>
-
-          <label>
-            <input 
-              type="checkbox" 
-              checked={orderFilters.erikoisjarjestely} 
-              onChange={() => toggleFilter('erikoisjarjestely')} 
-            />
-            Erikoisjärjestely
-          </label>
+          <div className="flex-col">
+            <select 
+              value={orderSortOption}
+              onChange={handleSortChange} 
+              className="p-1 bg-[#868686] rounded-md mb-1"
+            >
+              <option value="newest">Uusin ensin</option>
+              <option value="oldest">Vanhin ensin</option>
+              <option value="largest">Suurin ensin</option>
+              <option value="smallest">Pienin ensin</option>
+            </select>
+            <select 
+              value={selectedTicketType} 
+              onChange={handleSelectTicketType}
+              className="p-1 bg-[#868686] rounded-md"
+            >
+              <option value="">Kaikki lipputyypit</option>
+              {ticketTypes.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex">
+            <label onClick={() => toggleFilter('kutsuvieras')} className={orderFilters.kutsuvieras ? 'bg-red-700 rounded-md p-[2px]' : 'p-[2px]'}>
+              Kutsuvieras
+            </label>
+            <label onClick={() => toggleFilter('erikoisjarjestely')} className={orderFilters.erikoisjarjestely ? 'bg-red-700 rounded-md p-[2px]' : 'p-[2px]'}>
+              Erikoisjärjestely
+            </label>
+          </div>
         </div>
       </div>
 

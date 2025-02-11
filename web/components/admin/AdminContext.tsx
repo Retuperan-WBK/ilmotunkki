@@ -47,8 +47,8 @@ interface AdminContextProps {
   updateMultipleSeats: (seats: {id: number, special: string | null}[]) => Promise<void>;
   orderSortOption: 'newest' | 'oldest' | 'largest' | 'smallest';
   setOrderSortOption: (option: 'newest' | 'oldest' | 'largest' | 'smallest') => void;
-  orderFilters: { kutsuvieras: boolean, erikoisjarjestely: boolean };
-  setOrderFilters: (filters: { kutsuvieras: boolean, erikoisjarjestely: boolean }) => void;
+  orderFilters: { kutsuvieras: boolean, erikoisjarjestely: boolean, ticketType: string, noGroup: boolean};
+  setOrderFilters: (filters: { kutsuvieras: boolean, erikoisjarjestely: boolean, ticketType: string, noGroup: boolean}) => void;
   handleSendTickets: (order: Order, groupName?: string) => void;
   removeMultipleTicketsFromSeat: (ticketIds: number[]) => void;
 }
@@ -81,7 +81,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [itemTypes, setItemTypes] = useState<ItemType[]>([]);
 
   const [orderSortOption, setOrderSortOption] = useState<'newest' | 'oldest' | 'largest' | 'smallest'>('newest');
-  const [orderFilters, setOrderFilters] = useState<{ kutsuvieras: boolean, erikoisjarjestely: boolean }>({ kutsuvieras: false, erikoisjarjestely: false });
+  const [orderFilters, setOrderFilters] = useState<{ kutsuvieras: boolean, erikoisjarjestely: boolean, ticketType: string, noGroup: boolean}>({ kutsuvieras: false, erikoisjarjestely: false, ticketType: '', noGroup: false });
 
   // MapDrawer
   const [selectedSeat, setSelectedSeat] = useState<ExtendedSeat | null>(null);
@@ -311,6 +311,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const handleSetActiveTab = (tab: 'tilaukset' | 'ryhmat' | 'kartta') => {
     setMultiSelectedSeats([]);
     setSelectedSeat(null);
+    setOrderFilters({ kutsuvieras: false, erikoisjarjestely: false, ticketType: '', noGroup: false });
     setActiveTab(tab);
   }
 

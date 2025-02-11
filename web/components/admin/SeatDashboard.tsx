@@ -85,7 +85,7 @@ export default function SeatDashboard() {
             Kartta
           </button>
         </div>
-        <div className="flex items-center justify-center h-full w-full gap-4 pr-2">
+        <div className="flex items-center justify-center h-full w-full gap-4 pr-2 select-text">
           <div className='flex flex-1 items-center gap-4'>
             <h3 className="text-base">Myydyt liput: {totalTickets}</h3>
             <div>

@@ -63,7 +63,7 @@ export default function AdminDashboard() {
 
   if (user) {
     return (
-      <div className="flex flex-col w-screen h-screen">
+      <div className="flex flex-col w-screen h-screen select-none">
         <AdminProvider>
           <SeatDashboard /> {/* Renders the new SeatDashboard component */}
         </AdminProvider>
