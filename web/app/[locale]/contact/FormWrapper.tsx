@@ -35,6 +35,7 @@ const FormWrapper = ({locale, contactForms}: Props) => {
         customer={customer}
         locale={locale}
         onSubmit={handleSubmit}
+        text="next"
       />
       <div>
         <Link href={`/${locale}/`}>

@@ -12,9 +12,10 @@ type Props = {
   customer: Customer;
   items: Item[];
   onSubmit?: () => void | Promise<void>;
+  text?: "next" | "send";
 }
 
-const Form = ({locale, contactForms, customer, items, onSubmit=() => Promise.resolve()}: Props) => {
+const Form = ({locale, contactForms, customer, items, onSubmit=() => Promise.resolve(), text }: Props) => {
   const { translation } = useTranslation(locale);
   const contactForm = getContactForm(contactForms || [], items);
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -82,7 +83,7 @@ const Form = ({locale, contactForms, customer, items, onSubmit=() => Promise.res
         </div>
       ))}
       <div className='float-right'>
-        <button className='btn h-12'>{translation.send}</button>
+        <button className='btn h-12'>{text === 'next' ? translation.next : translation.send}</button>
       </div>
     </form>
   );
