@@ -188,6 +188,10 @@ export default function SeatMap() {
         borderColor = 'red';
       } else {
         borderColor = 'mediumseagreen';
+      } 
+
+      if (seat.attributes.item.data &&  seat.attributes.item.data.attributes.order.data.attributes.tickets_sent) {
+        borderColor = 'darkblue';
       }
     }
     
@@ -473,7 +477,7 @@ export default function SeatMap() {
                 r="4"
                 fill={styles.backgroundColor}
                 stroke={styles.borderColor}
-                strokeWidth={filter.showReserved ? 1 : 0.1}
+                strokeWidth={filter.showReserved ? 1.2 : 0.1}
                 style={{ cursor: 'pointer'}}
                 onClick={(e) => {
                   e.stopPropagation();

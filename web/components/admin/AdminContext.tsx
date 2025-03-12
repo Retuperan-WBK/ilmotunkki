@@ -50,6 +50,7 @@ interface AdminContextProps {
   orderFilters: { kutsuvieras: boolean, erikoisjarjestely: boolean, ticketType: string, noGroup: boolean};
   setOrderFilters: (filters: { kutsuvieras: boolean, erikoisjarjestely: boolean, ticketType: string, noGroup: boolean}) => void;
   handleSendTickets: (order: Order, groupName?: string) => void;
+  handleSendTicketsManually: (order: Order, groupName?: string) => void;
   removeMultipleTicketsFromSeat: (ticketIds: number[]) => void;
 }
 
@@ -319,7 +320,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     // Make sure that all tickets have a seat
     if (order.attributes.items.data.some((item) => item.attributes.seat.data)) {
-      if (!confirm(`Haluatko varmasti lähettää liput? \n\n 
+      if (!confirm(`\bHaluatko varmasti lähettää liput?\b\n\n 
         Tilaus: ${order.attributes.customer.data.attributes.firstName} ${order.attributes.customer.data.attributes.lastName}\n
         Ryhmä: ${groupName || "N/A"} \n
         Liput: ${order.attributes.items.data.map((item) => `${item.attributes.itemType.data.attributes.slug} - ${item.attributes.seat.data?.attributes.section.data.attributes.Name} Rivi:${item.attributes.seat.data?.attributes.Row} Paikka:${item.attributes.seat.data?.attributes.Number}
@@ -354,6 +355,48 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     } else {
       alert('Kaikilla lipuilla ei ole paikkaa. Tarkista että kaikilla lipuilla on paikka ennen lippujen lähettämistä');
+    }
+  }
+
+  const handleSendTicketsManually = async (order: Order, groupName?: string) => {
+
+    // Make sure that all tickets have a seat
+    if (order.attributes.items.data.some((item) => item.attributes.seat.data)) {
+      if (!confirm(`\bHaluatko asettaa liput lähetetyksi?\b\n\n 
+        Tilaus: ${order.attributes.customer.data.attributes.firstName} ${order.attributes.customer.data.attributes.lastName}\n
+        Ryhmä: ${groupName || "N/A"} \n
+        Liput: ${order.attributes.items.data.map((item) => `${item.attributes.itemType.data.attributes.slug} - ${item.attributes.seat.data?.attributes.section.data.attributes.Name} Rivi:${item.attributes.seat.data?.attributes.Row} Paikka:${item.attributes.seat.data?.attributes.Number}
+          `).join('\n')}
+        `)) {
+        return;
+      }
+      const response = await fetch(`/api/admin/orders/sendTicketsManually/${order.id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      //Response data should be {response: true}
+
+      const data = await response.json();
+      
+      if (!data.response) {
+        alert('Liput on asetettu lähetetyksi');
+        return;
+      } 
+
+
+      const {
+        updatedOrders,
+        updatedGroups,
+        updatedSections
+      } = await handleSetOrderTicketsSent_State(orders, groups, sections, order.id);
+
+      setOrders(updatedOrders as Order[]);
+      setGroups(updatedGroups as AdminGroup[]);
+      setSections(updatedSections as Section[]);
+
+    } else {
+      alert('Kaikilla lipuilla ei ole paikkaa. Tarkista että kaikilla lipuilla on paikka ennen lippujen asettamista lähetetyksi');
     }
   }
 
@@ -498,6 +541,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setOrderFilters,
         handleSendTickets,
         removeMultipleTicketsFromSeat,
+        handleSendTicketsManually,
       }}
     >
       {children}

@@ -14,6 +14,7 @@ const OrdersDrawer = () => {
     setOrderSortOption, 
     orderFilters, 
     handleSendTickets,
+    handleSendTicketsManually,
     setOrderFilters,
     groups,
     setSelectedGroup,
@@ -159,10 +160,16 @@ const OrdersDrawer = () => {
             <button className="bg-gray-500 text-white p-1 rounded-md cursor-not-allowed
             " disabled>
               Liput Lähetetty
-            </button> :
-            <button onClick={() => handleSendTickets(selectedOrder, selectedOrder.attributes.group.data?.attributes.name)} className="bg-green-500 text-white p-1 rounded-md">
-              Lähetä liput
-            </button>)
+            </button> : (
+              <div className="flex gap-2">
+                <button onClick={() => handleSendTicketsManually(selectedOrder)} className="bg-blue-500 text-white p-1 rounded-md">
+                  Aseta liput lähetetyksi
+                </button>
+                <button onClick={() => handleSendTickets(selectedOrder, selectedOrder.attributes.group.data?.attributes.name)} className="bg-green-500 text-white p-1 rounded-md">
+                  Lähetä liput
+                </button>
+              </div>
+            ))
             }
           </div>
           <div className="border-y-2 border-gray-400">

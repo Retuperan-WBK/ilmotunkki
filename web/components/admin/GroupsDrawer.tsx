@@ -15,6 +15,7 @@ const GroupsDrawer = () => {
     setOrderFilters,
     orderSortOption,
     handleSendTickets,
+    handleSendTicketsManually,
   } = useAdminContext();
   const [search, setSearch] = useState("");
   const scrollableDivRef = useRef<HTMLDivElement>(null);
@@ -150,9 +151,15 @@ const GroupsDrawer = () => {
                   " disabled>
                     Liput Lähetetty
                   </button> :
-                  <button onClick={() => handleSendTickets(order, selectedGroup.attributes.name)} className="bg-green-500 text-white p-1 rounded-md">
-                    Lähetä liput
-                  </button>)
+                  (
+                  <div className="flex gap-1">
+                    <button onClick={() => handleSendTicketsManually(order, selectedGroup.attributes.name)} className="bg-blue-500 text-white p-1 rounded-md">
+                      Aseta liput lähetetyksi
+                    </button>
+                    <button onClick={() => handleSendTickets(order, selectedGroup.attributes.name)} className="bg-green-500 text-white p-1 rounded-md">
+                      Lähetä liput
+                    </button>
+                  </div>))
                   }
                 </div>
                 <div className="flex items-center gap-2 w-full">

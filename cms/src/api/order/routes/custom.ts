@@ -19,6 +19,11 @@ export default {
       method: "POST",
       path: "/orders/sendTickets/:id",
       handler: "order.sendTickets",
+    },
+    {
+      method: "POST",
+      path: "/orders/sendTicketsManually/:id",
+      handler: "order.sendTicketsManually",
     }
   ],
 };

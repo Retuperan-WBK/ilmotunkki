@@ -24,6 +24,7 @@ type Field = {
 }
 
 const activeEmailSends = new Set();
+export const SkipSendingTickets = new Set();
 
 const fillTemplatePatterns = (text: string, form: Field[], data: Record<string,string>,translation: Record<string,string>) => {
   form.forEach(field => {
@@ -259,7 +260,13 @@ export default {
     }
 
     if (!order.tickets_sent && data.tickets_sent === true) {
-      if (!activeEmailSends.has(id)) {
+      if (SkipSendingTickets.has(id)) {
+        console.log(`Skipping ticket email for order ${id}...`);
+        setTimeout(() => {
+          SkipSendingTickets.delete(id);
+          console.log(`Removed order ${id} from skip list.`);
+        }, 10000);
+      } else if (!activeEmailSends.has(id)) {
         activeEmailSends.add(id);
         console.log(`Sending tickets for order ${id}...`);
         try {
