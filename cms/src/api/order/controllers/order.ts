@@ -4,6 +4,7 @@
 
 import { factories } from '@strapi/strapi'
 import { SkipSendingTickets } from '../content-types/order/lifecycles';
+import { buildTicketsPdfForOrder } from '../../../utils/ticket-pdf';
 
 export default factories.createCoreController('api::order.order', {
   async findByUid(ctx) {
@@ -111,6 +112,21 @@ export default factories.createCoreController('api::order.order', {
     await super.update(ctx);
     // Return data: success or failure message
     return true;
+  },
+  async ticketsPdf(ctx) {
+    const {id} = ctx.params;
+    try {
+      const pdf = await buildTicketsPdfForOrder(id);
+      if (!pdf) {
+        return ctx.notFound('No ticket template configured');
+      }
+      ctx.set('Content-Type', 'application/pdf');
+      ctx.set('Content-Disposition', `inline; filename="order-${id}-tickets.pdf"`);
+      ctx.body = pdf;
+    } catch (error) {
+      strapi.log.error(`Failed to generate ticket PDF for order ${id}: ${error}`);
+      return ctx.internalServerError('Failed to generate ticket PDF');
+    }
   },
   async sendTicketsManually(ctx) {
 

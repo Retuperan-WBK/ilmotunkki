@@ -156,21 +156,31 @@ const OrdersDrawer = () => {
                 {placed}/{totalCount} paikkaa
               </p>
             </div>
-            {unplaced === 0 && (selectedOrder.attributes.tickets_sent === true ?
-            <button className="bg-gray-500 text-white p-1 rounded-md cursor-not-allowed
-            " disabled>
-              Liput Lähetetty
-            </button> : (
-              <div className="flex gap-2">
-                <button onClick={() => handleSendTicketsManually(selectedOrder)} className="bg-blue-500 text-white p-1 rounded-md">
-                  Aseta liput lähetetyksi
-                </button>
-                <button onClick={() => handleSendTickets(selectedOrder, selectedOrder.attributes.group.data?.attributes.name)} className="bg-green-500 text-white p-1 rounded-md">
-                  Lähetä liput
-                </button>
-              </div>
-            ))
-            }
+            <div className="flex items-center gap-2">
+              <a
+                href={`/api/admin/orders/ticketsPdf/${selectedOrder.id}`}
+                target="_blank"
+                rel="noreferrer"
+                className="bg-purple-600 text-white p-1 rounded-md"
+              >
+                Liput (PDF)
+              </a>
+              {unplaced === 0 && (selectedOrder.attributes.tickets_sent === true ?
+              <button className="bg-gray-500 text-white p-1 rounded-md cursor-not-allowed
+              " disabled>
+                Liput Lähetetty
+              </button> : (
+                <div className="flex gap-2">
+                  <button onClick={() => handleSendTicketsManually(selectedOrder)} className="bg-blue-500 text-white p-1 rounded-md">
+                    Aseta liput lähetetyksi
+                  </button>
+                  <button onClick={() => handleSendTickets(selectedOrder, selectedOrder.attributes.group.data?.attributes.name)} className="bg-green-500 text-white p-1 rounded-md">
+                    Lähetä liput
+                  </button>
+                </div>
+              ))
+              }
+            </div>
           </div>
           <div className="border-y-2 border-gray-400">
             {selectedOrder.attributes.customer.data.attributes.special_arragements &&

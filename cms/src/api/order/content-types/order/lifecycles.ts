@@ -1,5 +1,6 @@
 import Mail from 'nodemailer/lib/mailer';
 import {v4} from 'uuid';
+import { buildTicketsPdfForOrder } from '../../../../utils/ticket-pdf';
 type Event = {
   model: any,
   where: any,
@@ -200,11 +201,26 @@ const sendTicketEmail = async (order: any) => {
     .replace('{customerUid}', customer.uid)
     .replace('{ticketList}', ticketList); // Replace ticket list placeholder
 
+  // Attach PDF tickets when a ticket template has been configured.
+  // A failed PDF generation must not block the email itself.
+  let attachments: Mail.Options['attachments'];
+  try {
+    const pdf = await buildTicketsPdfForOrder(order.id);
+    if (pdf) {
+      attachments = [{ filename: 'tickets.pdf', content: pdf, contentType: 'application/pdf' }];
+    } else {
+      console.log(`No ticket template configured, sending tickets for order ${order.id} without PDF`);
+    }
+  } catch (error) {
+    console.error(`Failed to generate ticket PDF for order ${order.id}`, error);
+  }
+
   const mailOptions: Mail.Options = {
     to: customer.email,
     from: template.from,
     subject: template.subject,
     text: text,
+    attachments,
   };
 
   try {

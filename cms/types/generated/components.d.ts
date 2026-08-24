@@ -28,6 +28,25 @@ export interface GlobalSponsor extends Schema.Component {
   };
 }
 
+export interface TicketTextField extends Schema.Component {
+  collectionName: 'components_ticket_text_fields';
+  info: {
+    displayName: 'TextField';
+    icon: 'pencil';
+    description: '';
+  };
+  attributes: {
+    text: Attribute.String & Attribute.Required;
+    x: Attribute.Float & Attribute.Required;
+    y: Attribute.Float & Attribute.Required;
+    fontSize: Attribute.Float & Attribute.DefaultTo<12>;
+    color: Attribute.String & Attribute.DefaultTo<'#000000'>;
+    bold: Attribute.Boolean & Attribute.DefaultTo<false>;
+    align: Attribute.Enumeration<['left', 'center', 'right']> &
+      Attribute.DefaultTo<'left'>;
+  };
+}
+
 export interface TranslationTranslationField extends Schema.Component {
   collectionName: 'components_translation_translation_fields';
   info: {
@@ -45,6 +64,7 @@ declare module '@strapi/types' {
     export interface Components {
       'contact-form.form-field': ContactFormFormField;
       'global.sponsor': GlobalSponsor;
+      'ticket.text-field': TicketTextField;
       'translation.translation-field': TranslationTranslationField;
     }
   }

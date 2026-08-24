@@ -1,0 +1,40 @@
+{
+  "collectionName": "components_ticket_text_fields",
+  "info": {
+    "displayName": "TextField",
+    "icon": "pencil",
+    "description": "A line of text drawn on the ticket at the given position (millimeters from the top-left corner). Supports placeholders: {eventName} {eventDate} {venue} {ticketType} {section} {row} {seat} {firstName} {lastName} {email} {orderNumber} {groupName} {ticketNumber} {ticketCount}"
+  },
+  "options": {},
+  "attributes": {
+    "text": {
+      "type": "string",
+      "required": true
+    },
+    "x": {
+      "type": "float",
+      "required": true
+    },
+    "y": {
+      "type": "float",
+      "required": true
+    },
+    "fontSize": {
+      "type": "float",
+      "default": 12
+    },
+    "color": {
+      "type": "string",
+      "default": "#000000"
+    },
+    "bold": {
+      "type": "boolean",
+      "default": false
+    },
+    "align": {
+      "type": "enumeration",
+      "enum": ["left", "center", "right"],
+      "default": "left"
+    }
+  }
+}
