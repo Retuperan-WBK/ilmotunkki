@@ -138,10 +138,12 @@ What fields can be currently collected for a customer. You should collect at lea
 
 ### Email
 
-Email templates that are sent after a succesful purchase. Currently only confirmation type is implemented. You can insert values from the contactForm with `{fieldName}`. Additionally if you want to send the edit link to the user you can include `https://example.org/edit/{customerUid}` into the template to send the edit link.
+Email templates that are sent after a succesful purchase. You can insert values from the contactForm with `{fieldName}`. Additionally if you want to send the edit link to the user you can include `https://example.org/edit/{customerUid}` into the template to send the edit link.
 Each locale has their own template, and the customer receives the email in their set language.
 
-- type: 'confirmation'
+- type:
+  - 'confirmation': Sent when the purchase completes.
+  - 'tickets': Sent when the admin presses "Lähetä liput" for an order after placing its seats. `{ticketList}` is replaced with a list of the tickets and their seats. If a [TicketTemplate](#tickettemplate) is configured, the PDF tickets are attached to this email as `tickets.pdf`.
 - from: Who is the sender. Make sure that the account you use has access to the alias set here.
 
 ### Giftcard
@@ -249,6 +251,27 @@ NOT IN USE. Should maybe remove or integrate to payment pipeline
 ### Terms and Conditions
 
 Terms and conditions of the page. **You must set these so that they correspond to your association.** Remember to set all locales
+
+### TicketTemplate
+
+Layout and content of the PDF tickets that are attached to the `tickets` email and shown by the "Liput (PDF)" preview button in the admin seat dashboard. **If this single type has no entry, ticket emails are sent without a PDF attachment.** Remember to fill in the selected locales.
+
+One PDF is generated per order with one page per ticket. Text content supports these placeholders: `{eventName}`, `{eventDate}`, `{venue}`, `{ticketType}`, `{section}`, `{row}`, `{seat}`, `{firstName}`, `{lastName}`, `{email}`, `{orderNumber}`, `{groupName}`, `{ticketNumber}`, `{ticketCount}`.
+
+- eventName, eventDate, venue: Shown in the built-in layout header and available as placeholders. eventDate is free text so you can write for example "12.9.2026 klo 19".
+- infoText: Free text block at the bottom of the built-in layout, for example arrival instructions.
+- accentColor: Hex color (for example `#1f2937`) used by the built-in layout.
+- backgroundImage: Optional PNG/JPEG drawn to fill the whole page, under the text. Design the full ticket in your favourite tool, upload it here, and place the texts on top of it with `fields`.
+- fields: Optional list of positioned text lines. **When at least one field is defined, the built-in layout is skipped** and only these fields are drawn. Each field has:
+  - text: The content, placeholders supported. For example `{section} · Rivi {row} · Paikka {seat}`
+  - x, y: Position in **millimeters** from the top-left corner of the page
+  - fontSize, color, bold
+  - align: How the text relates to the x position: starts at it (left), is centered on it (center) or ends at it (right)
+- pageWidthMm, pageHeightMm: Page size in millimeters, defaults to A4 (210 × 297). Set these to match your background image's aspect ratio.
+
+Use the "Liput (PDF)" button of any order in the admin view to preview the result while adjusting field positions.
+
+Note: like `sendTickets`, the `ticketsPdf` order route must be enabled for the admin's role in Settings > Users & Permissions > Roles.
 
 ### Translation
 

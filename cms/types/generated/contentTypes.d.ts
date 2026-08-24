@@ -1534,6 +1534,100 @@ export interface ApiTermsAndConditionTermsAndCondition
   };
 }
 
+export interface ApiTicketTemplateTicketTemplate extends Schema.SingleType {
+  collectionName: 'ticket_templates';
+  info: {
+    singularName: 'ticket-template';
+    pluralName: 'ticket-templates';
+    displayName: 'TicketTemplate';
+    description: '';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
+  attributes: {
+    eventName: Attribute.String &
+      Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    eventDate: Attribute.String &
+      Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    venue: Attribute.String &
+      Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    infoText: Attribute.Text &
+      Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    accentColor: Attribute.String &
+      Attribute.SetPluginOptions<{
+        i18n: {
+          localized: false;
+        };
+      }>;
+    backgroundImage: Attribute.Media &
+      Attribute.SetPluginOptions<{
+        i18n: {
+          localized: false;
+        };
+      }>;
+    fields: Attribute.Component<'ticket.text-field', true> &
+      Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    pageWidthMm: Attribute.Float &
+      Attribute.SetPluginOptions<{
+        i18n: {
+          localized: false;
+        };
+      }>;
+    pageHeightMm: Attribute.Float &
+      Attribute.SetPluginOptions<{
+        i18n: {
+          localized: false;
+        };
+      }>;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::ticket-template.ticket-template',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      'api::ticket-template.ticket-template',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    localizations: Attribute.Relation<
+      'api::ticket-template.ticket-template',
+      'oneToMany',
+      'api::ticket-template.ticket-template'
+    >;
+    locale: Attribute.String;
+  };
+}
+
 export interface ApiTranslationTranslation extends Schema.SingleType {
   collectionName: 'translations';
   info: {
@@ -1614,6 +1708,7 @@ declare module '@strapi/types' {
       'api::seat.seat': ApiSeatSeat;
       'api::section.section': ApiSectionSection;
       'api::terms-and-condition.terms-and-condition': ApiTermsAndConditionTermsAndCondition;
+      'api::ticket-template.ticket-template': ApiTicketTemplateTicketTemplate;
       'api::translation.translation': ApiTranslationTranslation;
     }
   }

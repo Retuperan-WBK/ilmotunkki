@@ -21,6 +21,11 @@ export default {
       handler: "order.sendTickets",
     },
     {
+      method: "GET",
+      path: "/orders/ticketsPdf/:id",
+      handler: "order.ticketsPdf",
+    },
+    {
       method: "POST",
       path: "/orders/sendTicketsManually/:id",
       handler: "order.sendTicketsManually",
