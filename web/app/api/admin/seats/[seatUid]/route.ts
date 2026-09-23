@@ -60,6 +60,7 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json(response);
   } catch (error) {
     console.error('Error deleting seat:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const e = error as { status?: number; message?: string };
+    return NextResponse.json({ error: e?.message ?? 'Internal server error' }, { status: e?.status ?? 500 });
   }
 }

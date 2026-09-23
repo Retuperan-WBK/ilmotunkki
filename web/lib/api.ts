@@ -103,6 +103,7 @@ export const fetchAuthenticatedAPI = async <T>(
 ): Promise<T> => {
   // Merge default options and user options
   const mergedOptions: RequestInit = {
+    cache: "no-store",
     headers: {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${jwt}`

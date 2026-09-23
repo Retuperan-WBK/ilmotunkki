@@ -54,12 +54,12 @@ const sendConfirmationEmail = async (order: any) => {
     strapi.query('api::email.email').findOne({
       where: {
         type: 'confirmation',
-        locale: customer.locale,
+        locale: customer.locale || 'fi',
       }
     }),
     strapi.query('api::contact-form.contact-form').findOne({
       where: {
-        locale: customer.locale,
+        locale: customer.locale || 'fi',
       },
       populate: {
         contactForm: true
@@ -67,7 +67,7 @@ const sendConfirmationEmail = async (order: any) => {
     }),
     strapi.query('api::translation.translation').findOne({
       where: {
-        locale: customer.locale,
+        locale: customer.locale || 'fi',
       },
       populate: ['translations'],
     }),
@@ -146,12 +146,12 @@ const sendTicketEmail = async (order: any) => {
     strapi.query('api::email.email').findOne({
       where: {
         type: 'tickets',
-        locale: customer.locale,
+        locale: customer.locale || 'fi',
       },
     }),
     strapi.query('api::contact-form.contact-form').findOne({
       where: {
-        locale: customer.locale,
+        locale: customer.locale || 'fi',
       },
       populate: {
         contactForm: true,
@@ -159,7 +159,7 @@ const sendTicketEmail = async (order: any) => {
     }),
     strapi.query('api::translation.translation').findOne({
       where: {
-        locale: customer.locale,
+        locale: customer.locale || 'fi',
       },
       populate: ['translations'],
     }),
