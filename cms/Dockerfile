@@ -1,4 +1,4 @@
-FROM node:18.13.0
+FROM node:18-bookworm
 # Installing libvips-dev for sharp Compatability
 RUN apt-get update && apt-get install libvips-dev -y
 ARG NODE_ENV=production
