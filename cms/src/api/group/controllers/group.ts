@@ -2,9 +2,24 @@
 
 import { factories } from '@strapi/strapi';
 
+// Group codes may only contain numbers and letters from the Finnish/Swedish alphabet.
+const GROUP_CODE_PATTERN = /^[A-ZÅÄÖ0-9]+$/;
+
+const normalizeGroupCode = (value: unknown): string | null => {
+  if (typeof value !== 'string') return null;
+  const normalized = value.trim().toUpperCase();
+  if (!GROUP_CODE_PATTERN.test(normalized)) return null;
+  return normalized;
+};
+
 export default factories.createCoreController('api::group.group', ({ strapi }) => ({
   async createNew(ctx) {
-    const { code, orderUid } = ctx.request.body;
+    const code = normalizeGroupCode(ctx.request.body?.code);
+    const { orderUid } = ctx.request.body;
+
+    if (!code) {
+      return ctx.badRequest('INVALID');
+    }
 
     // Check if the group code already exists
     const existingGroup = await strapi.db.query('api::group.group').findOne({ where: { name: code } });
@@ -30,7 +45,12 @@ export default factories.createCoreController('api::group.group', ({ strapi }) =
   },
 
   async addToOrder(ctx) {
-    const { code, orderUid } = ctx.request.body;
+    const code = normalizeGroupCode(ctx.request.body?.code);
+    const { orderUid } = ctx.request.body;
+
+    if (!code) {
+      return ctx.badRequest('INVALID');
+    }
 
     // Find the group by code
     const group = await strapi.db.query('api::group.group').findOne({

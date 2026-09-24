@@ -52,7 +52,7 @@ export default function AdminDashboard() {
     };
 
     fetchUser();
-  }, []);
+  }, [router]);
 
 
   if (loading) return (
@@ -63,7 +63,7 @@ export default function AdminDashboard() {
 
   if (user) {
     return (
-      <div className="flex flex-col w-screen h-screen select-none">
+      <div className="flex min-h-screen w-full flex-col select-none lg:h-screen lg:min-h-0">
         <AdminProvider>
           <SeatDashboard /> {/* Renders the new SeatDashboard component */}
         </AdminProvider>

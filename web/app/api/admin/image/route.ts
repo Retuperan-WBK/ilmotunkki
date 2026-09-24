@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
     const fullImageUrl = `${process.env.STRAPI_API_URL}${imageUrl}`;
 
     // Fetch the image from the Strapi server
-    const imageResponse = await fetch(fullImageUrl);
+    const imageResponse = await fetch(fullImageUrl, { cache: 'no-store' });
 
     if (!imageResponse.ok) {
       return NextResponse.json({ error: 'Failed to fetch image from Strapi' }, { status: 500 });

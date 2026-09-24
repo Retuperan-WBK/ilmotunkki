@@ -3,6 +3,7 @@ import { useAdminContext } from "./AdminContext";
 import TicketList from "./TicketList";
 import InviteSvg from "./InviteSvg";
 import DisabledSvg from "./DisabledSvg";
+import CopyableEmail from "./CopyableEmail";
 import { Order } from "@/utils/models";
 
 const OrdersDrawer = () => {
@@ -22,29 +23,12 @@ const OrdersDrawer = () => {
   } = useAdminContext();
   const [search, setSearch] = useState('');
   const scrollableDivRef = useRef<HTMLDivElement>(null);
-  const [listScrollPosition, setListScrollPosition] = useState(0);
+  const listScrollPosition = useRef(0);
   const [selectedTicketType, setSelectedTicketType] = useState('');
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (scrollableDivRef.current) {
-        setListScrollPosition(scrollableDivRef.current.scrollTop);
-      }
-    };
-
-    const div = scrollableDivRef.current;
-    if (div) {
-      div.addEventListener('scroll', handleScroll);
-      div.scrollTop = listScrollPosition; // Set initial scroll position
-    }
-    
-    return () => {
-      if (div) {
-        div.removeEventListener('scroll', handleScroll);
-      }
-    };
-
-  }, [listScrollPosition, setListScrollPosition, selectedOrder]);
+    if (scrollableDivRef.current) scrollableDivRef.current.scrollTop = listScrollPosition.current;
+  }, [selectedOrder]);
 
   const getOrderStatusColor = (placedCount: number, totalCount: number) => {
     if (placedCount === 0) return 'bg-red-500'; // All unplaced
@@ -91,7 +75,7 @@ const OrdersDrawer = () => {
   };
 
   const filteredOrders = orders.filter((order) => {
-    const hasSpecialArrangement = order.attributes.customer.data.attributes.special_arragements || false;
+    const hasSpecialArrangement = order.attributes.customer.data?.attributes.special_arragements || false;
     const isGuest = order.attributes.kutsuvieras || false;
     const hasGroup = order.attributes.group.data ? true : false;
 
@@ -121,30 +105,28 @@ const OrdersDrawer = () => {
     const tickets = selectedOrder.attributes.items?.data || [];
 
     return (
-      <div className="py-4 px-2 flex flex-col items-start w-full h-full">
+      <div className="flex h-full min-h-0 w-full flex-col p-4">
         <button
-          className="mb-4 underline"
+          className="mb-3 self-start rounded-lg px-2 py-1 text-sm font-medium text-sky-300 hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400"
           onClick={() => setSelectedOrder(null)}
         >
           ← Takaisin tilauksiin
         </button>
-        <h1 className="text-xl font-bold mb-4">Tilauksen Tiedot</h1>
-        <div className="flex w-full flex-1 flex-col bg-[#868686] border-4 border-[#868686] rounded-md p-2 overflow-y-auto">
+        <h1 className="mb-3 text-xl font-bold">Tilauksen tiedot</h1>
+        <div className="flex min-h-0 w-full flex-1 flex-col overflow-y-auto rounded-xl border border-white/10 bg-[#223149] p-4">
           <div className="flex justify-between items-start flex-col">
-            <p className="text-md font-bold truncate select-text">
+            <p className="truncate text-lg font-bold text-white select-text">
               {selectedOrder.attributes.customer?.data.attributes.firstName}{' '}
               {selectedOrder.attributes.customer?.data.attributes.lastName}
             </p>
             {selectedOrder.attributes.group.data &&
-            <p className="text-md truncate cursor-pointer hover:underline w-fit max-w-[90%] select-text" onClick={() => selectedOrder.attributes.group.data && handleOpenGroup(selectedOrder.attributes.group.data.id)}>
+            <p className="w-fit max-w-[90%] cursor-pointer truncate text-sm text-sky-300 hover:underline select-text" onClick={() => selectedOrder.attributes.group.data && handleOpenGroup(selectedOrder.attributes.group.data.id)}>
               Ryhmä: {selectedOrder.attributes.group?.data?.attributes.name || 'N/A'}
             </p>
             }
           </div>
-          <p className="text-sm mt-2 cursor-pointer select-text">
-            Email: <span onClick={() => navigator.clipboard.writeText(selectedOrder.attributes.customer?.data.attributes.email)} className="cursor-pointer hover:underline">{selectedOrder.attributes.customer?.data.attributes.email}</span>
-          </p>
-          <div className="flex items-center justify-between mt-4">
+          <CopyableEmail className="mt-2 break-all" email={selectedOrder.attributes.customer?.data.attributes.email} />
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-1">
               <div
                 className={`w-4 h-4 rounded-full ${getOrderStatusColor(
@@ -161,20 +143,20 @@ const OrdersDrawer = () => {
                 href={`/api/admin/orders/ticketsPdf/${selectedOrder.id}`}
                 target="_blank"
                 rel="noreferrer"
-                className="bg-purple-600 text-white p-1 rounded-md"
+                className="rounded-lg bg-violet-500/20 px-2 py-1.5 text-sm font-medium text-violet-100 hover:bg-violet-500/30"
               >
                 Liput (PDF)
               </a>
               {unplaced === 0 && (selectedOrder.attributes.tickets_sent === true ?
-              <button className="bg-gray-500 text-white p-1 rounded-md cursor-not-allowed
+              <button className="rounded-lg bg-emerald-500/20 px-2 py-1.5 text-sm text-emerald-100 cursor-not-allowed
               " disabled>
                 Liput Lähetetty
               </button> : (
                 <div className="flex gap-2">
-                  <button onClick={() => handleSendTicketsManually(selectedOrder)} className="bg-blue-500 text-white p-1 rounded-md">
+                  <button onClick={() => handleSendTicketsManually(selectedOrder)} className="rounded-lg bg-sky-500/20 px-2 py-1.5 text-xs font-semibold text-sky-100 hover:bg-sky-500/30">
                     Aseta liput lähetetyksi
                   </button>
-                  <button onClick={() => handleSendTickets(selectedOrder, selectedOrder.attributes.group.data?.attributes.name)} className="bg-green-500 text-white p-1 rounded-md">
+                  <button onClick={() => handleSendTickets(selectedOrder, selectedOrder.attributes.group.data?.attributes.name)} className="rounded-lg bg-emerald-500 px-2 py-1.5 text-xs font-semibold text-[#102134] hover:bg-emerald-400">
                     Lähetä liput
                   </button>
                 </div>
@@ -182,7 +164,7 @@ const OrdersDrawer = () => {
               }
             </div>
           </div>
-          <div className="border-y-2 border-gray-400">
+          <div className="mt-3 border-y border-white/10">
             {selectedOrder.attributes.customer.data.attributes.special_arragements &&
             <div className="flex items-center py-2">
               <div className="flex-[1]">
@@ -198,7 +180,7 @@ const OrdersDrawer = () => {
             </div>
             }
           </div>
-          <div className="mb-16">
+          <div className="pb-4">
             <TicketList tickets={tickets} tickets_sent={selectedOrder.attributes.tickets_sent} />
           </div>
         </div>
@@ -209,6 +191,7 @@ const OrdersDrawer = () => {
   const placedOrders = sortedOrders.filter(
     (order) =>
       order.attributes.items &&
+      order.attributes.items.data.length > 0 &&
       order.attributes.items.data.every((item) => item.attributes.seat.data) // All items placed
   );
 
@@ -218,31 +201,38 @@ const OrdersDrawer = () => {
       order.attributes.items.data.some((item) => !item.attributes.seat.data) // Items without seats
   );
 
+  const matchesSearch = (order: Order) =>
+    `${order.attributes.customer?.data?.attributes.firstName || ''} ${order.attributes.customer?.data?.attributes.lastName || ''}`.toLowerCase().includes(search.trim().toLowerCase());
+  const visibleUnplacedOrders = unplacedOrders.filter(matchesSearch);
+  const visiblePlacedOrders = placedOrders.filter(matchesSearch);
+
   const handleSelectTicketType = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedTicketType(e.target.value);
     toggleFilter('none', e.target.value);
   }
 
   return (
-    <div className="p-6 pl-2 pr-0 h-full w-full flex flex-col">
-      <div className="flex items-center flex-col">
-        <div className="flex gap-1 w-full ml-2">
-          <h1 className="text-2xl font-bold mr-4">Tilaukset ({orders.length})</h1>
+    <div className="flex h-full min-h-0 w-full flex-col">
+      <div className="shrink-0 border-b border-white/10 p-4">
+        <div className="flex items-center justify-between gap-2">
+          <h1 className="text-xl font-bold text-white">Tilaukset <span className="text-sm font-normal text-slate-400">{orders.length}</span></h1>
+        </div>
+        <div className="mt-3">
           <input
               type="text"
-              placeholder="Hae nimellä"
+              aria-label="Hae tilauksia nimellä"
+              placeholder="Hae asiakkaan nimellä…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-1/2 p-1 rounded-sm text-sm text-black"
+              className="w-full rounded-lg border border-white/15 bg-[#101a2b] px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-white/40 focus:outline-none"
             />
         </div>
-        {/* Sort and Filter Section */}
-        <div className="flex gap-4 items-center my-2">
-          <div className="flex-col">
+        <div className="mt-3 flex gap-2">
             <select 
+              aria-label="Järjestä tilaukset"
               value={orderSortOption}
               onChange={handleSortChange} 
-              className="p-1 bg-[#868686] rounded-md mb-1"
+              className="min-w-0 flex-1 rounded-lg border border-white/10 bg-[#26374f] px-2 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-sky-400"
             >
               <option value="newest">Uusin ensin</option>
               <option value="oldest">Vanhin ensin</option>
@@ -250,9 +240,10 @@ const OrdersDrawer = () => {
               <option value="smallest">Pienin ensin</option>
             </select>
             <select 
+              aria-label="Suodata lipputyypin mukaan"
               value={selectedTicketType} 
               onChange={handleSelectTicketType}
-              className="p-1 bg-[#868686] rounded-md"
+              className="min-w-0 flex-1 rounded-lg border border-white/10 bg-[#26374f] px-2 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-sky-400"
             >
               <option value="">Kaikki lipputyypit</option>
               {ticketTypes.map((type) => (
@@ -261,31 +252,25 @@ const OrdersDrawer = () => {
                 </option>
               ))}
             </select>
-          </div>
-          <div className="flex flex-col -mt-2">
-            <div className="flex gap-1">
-            <label onClick={() => toggleFilter('kutsuvieras')} className={orderFilters.kutsuvieras ? 'bg-red-700 rounded-md p-[2px]' : 'p-[2px]'}>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-1.5">
+            <button type="button" aria-pressed={orderFilters.kutsuvieras} onClick={() => toggleFilter('kutsuvieras')} className={`rounded-full border px-2.5 py-1 text-xs ${orderFilters.kutsuvieras ? 'border-white/40 bg-white/10 text-white' : 'border-white/15 text-slate-300 hover:bg-white/10'}`}>
               Kutsuvieras
-            </label>
-            <label onClick={() => toggleFilter('erikoisjarjestely')} className={orderFilters.erikoisjarjestely ? 'bg-red-700 rounded-md p-[2px]' : 'p-[2px]'}>
+            </button>
+            <button type="button" aria-pressed={orderFilters.erikoisjarjestely} onClick={() => toggleFilter('erikoisjarjestely')} className={`rounded-full border px-2.5 py-1 text-xs ${orderFilters.erikoisjarjestely ? 'border-white/40 bg-white/10 text-white' : 'border-white/15 text-slate-300 hover:bg-white/10'}`}>
               Erikoisjärjestely
-            </label>
-            </div>
-            <div className="flex gap-1 mt-1">
-            <label onClick={() => toggleFilter('noGroup')} className={orderFilters.noGroup ? 'bg-red-700 rounded-md p-[2px]' : 'p-[2px]'}>
+            </button>
+            <button type="button" aria-pressed={orderFilters.noGroup} onClick={() => toggleFilter('noGroup')} className={`rounded-full border px-2.5 py-1 text-xs ${orderFilters.noGroup ? 'border-white/40 bg-white/10 text-white' : 'border-white/15 text-slate-300 hover:bg-white/10'}`}>
               Ei ryhmää
-            </label>
-            </div>
-          </div>
+            </button>
+            {(search || selectedTicketType || orderFilters.kutsuvieras || orderFilters.erikoisjarjestely || orderFilters.noGroup) &&
+              <button type="button" onClick={() => { setSearch(''); setSelectedTicketType(''); setOrderFilters({ kutsuvieras: false, erikoisjarjestely: false, noGroup: false, ticketType: '' }); }} className="px-2 text-xs text-sky-300 hover:underline">Tyhjennä</button>}
         </div>
       </div>
 
-      <div className="py-4 pt-0 flex-1 overflow-y-auto mb-16" ref={scrollableDivRef}>
-        <h2 className="text-md font-bold">Plassaamattomat ({unplacedOrders.length})</h2>
-        {unplacedOrders.filter((order) => { 
-          const fullName = `${order.attributes.customer?.data.attributes.firstName} ${order.attributes.customer?.data.attributes.lastName}`;
-          return fullName.toLowerCase().includes(search.toLowerCase());
-        }).map((order) => {
+      <div className="min-h-0 flex-1 overflow-y-auto p-4" ref={scrollableDivRef} onScroll={event => { listScrollPosition.current = event.currentTarget.scrollTop; }}>
+        <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-amber-200">Plassaamattomat ({visibleUnplacedOrders.length})</h2>
+        {visibleUnplacedOrders.map((order) => {
           const totalCount = order.attributes.items?.data.length || 0;
           const placedCount =
             order.attributes.items?.data.filter((item) => item.attributes.seat.data).length || 0;
@@ -293,7 +278,10 @@ const OrdersDrawer = () => {
           return (
             <div
               key={order.id}
-              className="flex flex-col bg-[#868686] rounded-md p-4 mr-1 mb-4 cursor-pointer"
+              role="button" tabIndex={0}
+              aria-label={`Avaa tilaus: ${order.attributes.customer.data?.attributes.firstName} ${order.attributes.customer.data?.attributes.lastName}`}
+              onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); setSelectedOrder(order); } }}
+              className="mb-2 flex cursor-pointer flex-col rounded-xl border border-white/10 bg-[#223149] p-3 transition-colors hover:border-white/25 hover:bg-[#293c57] focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400"
               onClick={() => setSelectedOrder(order)}
             >
               <div className="flex justify-between flex-col">
@@ -302,9 +290,9 @@ const OrdersDrawer = () => {
                   {order.attributes.customer?.data.attributes.lastName}
                 </p>
                 {order.attributes.group.data &&
-                <p className="text-md truncate cursor-pointer hover:underline w-fit max-w-[90%]" onClick={() => order.attributes.group.data && handleOpenGroup(order.attributes.group.data.id)}>
+                <button type="button" className="w-fit max-w-[90%] truncate text-left text-sm text-sky-300 hover:underline" onClick={event => { event.stopPropagation(); if (order.attributes.group.data) handleOpenGroup(order.attributes.group.data.id); }}>
                   Ryhmä: {order.attributes.group?.data?.attributes.name || 'N/A'}
-                </p>
+                </button>
                 }
               </div>
               <div className="flex items-center mt-4 gap-4">
@@ -334,24 +322,25 @@ const OrdersDrawer = () => {
           );
         })}
 
-        <h2 className="text-md font-bold mt-6">Plassatut ({placedOrders.length})</h2>
+        {visibleUnplacedOrders.length === 0 && <p className="rounded-xl border border-dashed border-white/15 p-4 text-sm text-slate-400">Ei hakua vastaavia tilauksia.</p>}
+        <h2 className="mb-3 mt-6 text-xs font-semibold uppercase tracking-widest text-emerald-200">Plassatut ({visiblePlacedOrders.length})</h2>
         {/* Sort so that orders with ticket sent are last */}
-        {placedOrders.filter((order) => { 
-          const fullName = `${order.attributes.customer?.data.attributes.firstName} ${order.attributes.customer?.data.attributes.lastName}`;
-          return fullName.toLowerCase().includes(search.toLowerCase());
-        })
+        {visiblePlacedOrders
         .sort((a, b) => a.attributes.tickets_sent === b.attributes.tickets_sent ? 0 : a.attributes.tickets_sent ? 1 : -1)
         .map((order) => {
           const totalCount = order.attributes.items?.data.length || 0;
 
           return (
             <div
-              key={order.id}
-              className="flex flex-col bg-[#868686] rounded-md p-4 mr-1 mb-4 cursor-pointer"
+                key={order.id}
+                role="button" tabIndex={0}
+                aria-label={`Avaa tilaus: ${order.attributes.customer.data?.attributes.firstName} ${order.attributes.customer.data?.attributes.lastName}`}
+                onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); setSelectedOrder(order); } }}
+                className="mb-2 flex cursor-pointer flex-col rounded-xl border border-white/10 bg-[#223149] p-3 transition-colors hover:border-white/25 hover:bg-[#293c57] focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400"
               onClick={() => setSelectedOrder(order)}
             > 
             { order.attributes.tickets_sent === true && 
-            <div className="bg-green-500 text-white p-1 -m-2 mb-0 rounded-md">
+            <div className="mb-2 w-fit rounded-full bg-emerald-500/20 px-2 py-1 text-xs text-emerald-200">
               Liput Lähetetty
             </div>
             }
@@ -361,9 +350,9 @@ const OrdersDrawer = () => {
                   {order.attributes.customer?.data.attributes.lastName}
                 </p>
                 {order.attributes.group.data &&
-                <p className="text-md truncate cursor-pointer hover:underline w-fit max-w-[90%]" onClick={() => order.attributes.group.data && handleOpenGroup(order.attributes.group.data.id)}>
+                <button type="button" className="w-fit max-w-[90%] truncate text-left text-sm text-sky-300 hover:underline" onClick={event => { event.stopPropagation(); if (order.attributes.group.data) handleOpenGroup(order.attributes.group.data.id); }}>
                   Ryhmä: {order.attributes.group?.data?.attributes.name || 'N/A'}
-                </p>
+                </button>
                 }
               </div>
               <div className="flex items-center mt-4 gap-4">
@@ -392,6 +381,7 @@ const OrdersDrawer = () => {
             </div>
           );
         })}
+        {visiblePlacedOrders.length === 0 && <p className="rounded-xl border border-dashed border-white/15 p-4 text-sm text-slate-400">Ei hakua vastaavia tilauksia.</p>}
       </div>
     </div>
   );

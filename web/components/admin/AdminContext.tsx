@@ -1,8 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { Order, AdminGroup, Section, Seat, ItemType, Item } from '@/utils/models';
 import { handleAddTicketToSeat_State, handleChangeTicketSeat_State, handleRemoveTicketFromSeat_State, handleSetOrderTicketsSent_State, UpdatedItem } from './UnHolyFunctions';
+import ConfirmDialog, { ConfirmOptions } from './ConfirmDialog';
 
 interface AdminContextProps {
   orders: Order[];
@@ -21,7 +22,8 @@ interface AdminContextProps {
   setSelectedGroup: (group: AdminGroup | null) => void;
   addSeat: (sectionId: number, seatData: Partial<Seat['attributes']>) => Promise<void>;
   updateSeat: (seatId: number, seatData: Partial<Seat['attributes']>) => Promise<void>;
-  deleteSeat: (seatId: number) => Promise<void>;
+  deleteSeat: (seatId: number) => Promise<boolean>;
+  confirmAction: (options: ConfirmOptions) => Promise<boolean>;
   addTicketToSeat: (ticketId: number, seatId: number) => Promise<void>;
   removeTicketFromSeat: (ticketId: number) => Promise<void>;
   changeTicketSeat: (ticketId: number, newSeatId: number) => Promise<void>;
@@ -32,7 +34,7 @@ interface AdminContextProps {
   handleSeatClick: (seat: Seat) => void;
   newSeat: NewSeat;
   setNewSeat: (newSeat: NewSeat) => void;
-  selectedSeat: Seat | null;
+  selectedSeat: ExtendedSeat | null;
   setSelectedSeat: (seat: ExtendedSeat | null) => void;
   itemTypes: ItemType[];
   fetchItemTypes: () => Promise<void>;
@@ -72,6 +74,18 @@ interface HighlightedSeat {
   showReserved: boolean;
 }
 
+const formatOrderTicketDetails = (order: Order, groupName?: string) => [
+  `Tilaus: ${order.attributes.customer.data?.attributes.firstName || ''} ${order.attributes.customer.data?.attributes.lastName || ''}`,
+  `Ryhmä: ${groupName || order.attributes.group.data?.attributes.name || 'Ei ryhmää'}`,
+  'Liput:',
+  ...order.attributes.items.data.map(item => {
+    const seat = item.attributes.seat.data;
+    return seat
+      ? `${item.attributes.itemType.data.attributes.slug} — ${seat.attributes.section.data?.attributes.Name || ''}, rivi ${seat.attributes.Row}, paikka ${seat.attributes.Number}`
+      : `${item.attributes.itemType.data.attributes.slug} — ei paikkaa`;
+  }),
+].join('\n');
+
 export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [groups, setGroups] = useState<AdminGroup[]>([]);
@@ -103,6 +117,26 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // BottomDrawer
   const [bottomDrawerOpen, setBottomDrawerOpen] = useState(false);
   const [multiSelectedSeats, setMultiSelectedSeats] = useState<Seat[]>([]);
+  const [confirmOptions, setConfirmOptions] = useState<ConfirmOptions | null>(null);
+  const confirmResolver = useRef<((confirmed: boolean) => void) | null>(null);
+
+  const confirmAction = useCallback((options: ConfirmOptions) => new Promise<boolean>(resolve => {
+    confirmResolver.current?.(false);
+    confirmResolver.current = resolve;
+    setConfirmOptions(options);
+  }), []);
+
+  const resolveConfirm = useCallback((confirmed: boolean) => {
+    const resolve = confirmResolver.current;
+    confirmResolver.current = null;
+    setConfirmOptions(null);
+    resolve?.(confirmed);
+  }, []);
+
+  useEffect(() => () => {
+    confirmResolver.current?.(false);
+    confirmResolver.current = null;
+  }, []);
 
   // Fetch all orders
   const fetchOrders = async () => {
@@ -126,19 +160,17 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   // Fetch all sections (with seats populated)
-  const fetchSections = async () => {
+  const fetchSections = useCallback(async () => {
     const res = await fetch("/api/admin/sections");
     const data = await res.json();
     setSections(data);
 
-    // Automatically set the active section to the first one if none is set
-    if (!activeSectionId && data.length > 0) {
-      setActiveSectionId(data[0].id);
-    }
-  };
+    setActiveSectionId(current => current ?? data[0]?.id ?? null);
+  }, []);
 
   // **Add Seat**
   const addSeat = async (sectionId: number, seatData: Partial<Seat['attributes']>) => {
+    if (!newSeat.itemType) return;
     await fetch(`/api/admin/seats`, {
       method: 'POST',
       body: JSON.stringify({ sectionId, ...seatData, Row: newSeat.row, Number: newSeat.seatNumber, special: newSeat.special, itemType: newSeat.itemType }),
@@ -153,21 +185,22 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const updateSeat = async (seatId: number, seatData: Partial<Seat['attributes']>,) => {
     await fetch(`/api/admin/seats/${seatId}`, {
       method: 'PUT',
-      body: JSON.stringify({ ...seatData, item_type: selectedSeat?.itemTypeId ? selectedSeat.itemTypeId : seatData.item_type?.data?.id, special: selectedSeat?.attributes.special }),
+      body: JSON.stringify({ ...seatData, item_type: selectedSeat?.itemTypeId !== undefined ? (selectedSeat.itemTypeId || null) : (seatData.item_type?.data?.id ?? selectedSeat?.attributes.item_type.data?.id ?? null), special: selectedSeat?.attributes.special }),
       headers: { 'Content-Type': 'application/json' },
     });
     await reFetch();
   };
 
   const deleteSeat = async (seatId: number) => {
-    console.log(selectedSeat);
-
-    if (await confirm(`Are you sure you want to delete seat id: ${seatId}`)) {
-      await fetch(`/api/admin/seats/${seatId}`, {
-        method: 'DELETE',
-      });
-      await reFetch();
-    }
+    if (!await confirmAction({
+      title: 'Poista istuin?',
+      message: `Istuin ${selectedSeat?.attributes.Row || ''} / ${selectedSeat?.attributes.Number || seatId} poistetaan kartalta.`,
+      confirmLabel: 'Poista istuin',
+      tone: 'danger',
+    })) return false;
+    await fetch(`/api/admin/seats/${seatId}`, { method: 'DELETE' });
+    await reFetch();
+    return true;
   }
 
   const updateMultipleSeats = async (seats: {id: number, special: string | null}[]) => {
@@ -320,12 +353,12 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     // Make sure that all tickets have a seat
     if (order.attributes.items.data.some((item) => item.attributes.seat.data)) {
-      if (!confirm(`\bHaluatko varmasti lähettää liput?\b\n\n 
-        Tilaus: ${order.attributes.customer.data.attributes.firstName} ${order.attributes.customer.data.attributes.lastName}\n
-        Ryhmä: ${groupName || "N/A"} \n
-        Liput: ${order.attributes.items.data.map((item) => `${item.attributes.itemType.data.attributes.slug} - ${item.attributes.seat.data?.attributes.section.data.attributes.Name} Rivi:${item.attributes.seat.data?.attributes.Row} Paikka:${item.attributes.seat.data?.attributes.Number}
-          `).join('\n')}
-        `)) {
+      if (!await confirmAction({
+        title: 'Lähetä liput?',
+        message: 'Liput lähetetään asiakkaalle sähköpostitse.',
+        details: formatOrderTicketDetails(order, groupName),
+        confirmLabel: 'Lähetä liput',
+      })) {
         return;
       }
       const response = await fetch(`/api/admin/orders/sendTickets/${order.id}`, {
@@ -362,12 +395,12 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     // Make sure that all tickets have a seat
     if (order.attributes.items.data.some((item) => item.attributes.seat.data)) {
-      if (!confirm(`\bHaluatko asettaa liput lähetetyksi?\b\n\n 
-        Tilaus: ${order.attributes.customer.data.attributes.firstName} ${order.attributes.customer.data.attributes.lastName}\n
-        Ryhmä: ${groupName || "N/A"} \n
-        Liput: ${order.attributes.items.data.map((item) => `${item.attributes.itemType.data.attributes.slug} - ${item.attributes.seat.data?.attributes.section.data.attributes.Name} Rivi:${item.attributes.seat.data?.attributes.Row} Paikka:${item.attributes.seat.data?.attributes.Number}
-          `).join('\n')}
-        `)) {
+      if (!await confirmAction({
+        title: 'Merkitse liput lähetetyiksi?',
+        message: 'Liput merkitään lähetetyiksi ilman sähköpostin lähettämistä.',
+        details: formatOrderTicketDetails(order, groupName),
+        confirmLabel: 'Merkitse lähetetyiksi',
+      })) {
         return;
       }
       const response = await fetch(`/api/admin/orders/sendTicketsManually/${order.id}`, {
@@ -405,21 +438,14 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (!selectedGroup) return;
 
     setSelectedGroup(groups.find((group) => group.id === selectedGroup.id) || null);
-  }, [groups]);
+  }, [groups, selectedGroup]);
 
   useEffect(() => {
     if (!orders) return;
     if (!selectedOrder) return;
 
     setSelectedOrder(orders.find((order) => order.id === selectedOrder.id) || null);
-  }, [orders]);
-
-  useEffect(() => {
-    if (!sections) return;
-    if (!activeSectionId) return;
-
-    setActiveSectionId(activeSectionId);
-  }, [sections]);
+  }, [orders, selectedOrder]);
 
   const setActiveSection = (sectionId: number) => {
     setActiveSectionId(sectionId);
@@ -427,7 +453,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const activeSection = sections.find((section) => section.id === activeSectionId) || null;
 
-  const handleSeatClick = (seat: Seat) => {
+  const handleSeatClick = async (seat: Seat) => {
 
     switch (currentMode) {
       case 'edit-seat':
@@ -439,8 +465,13 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           alert(`Seat R:${seat.attributes.Row} N:${seat.attributes.Number} is already occupied`);
           return;
         }
-        if (seat.attributes.special) {
-          if (!confirm(`Seat R:${seat.attributes.Row} N:${seat.attributes.Number} has a special note: \n\n ${seat.attributes.special}. \n\n Do you want to continue?`)) {
+        if (seat.attributes.special?.trim()) {
+          if (!await confirmAction({
+            title: 'Paikalla on erityishuomio',
+            message: `Rivi ${seat.attributes.Row}, paikka ${seat.attributes.Number}. Haluatko jatkaa plassausta?`,
+            details: seat.attributes.special,
+            confirmLabel: 'Jatka plassausta',
+          })) {
             return;
           }
         }
@@ -455,8 +486,13 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           alert(`Seat R:${seat.attributes.Row} N:${seat.attributes.Number} is already occupied`);
           return;
         }
-        if (seat.attributes.special) {
-          if (!confirm(`Seat R:${seat.attributes.Row} N:${seat.attributes.Number} has a special note: \n\n ${seat.attributes.special}. \n\n Do you want to continue?`)) {
+        if (seat.attributes.special?.trim()) {
+          if (!await confirmAction({
+            title: 'Paikalla on erityishuomio',
+            message: `Rivi ${seat.attributes.Row}, paikka ${seat.attributes.Number}. Haluatko jatkaa siirtoa?`,
+            details: seat.attributes.special,
+            confirmLabel: 'Jatka siirtoa',
+          })) {
             return;
           }
         }
@@ -490,7 +526,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     fetchGroups();
     fetchSections();
     fetchItemTypes();
-  }, []);
+  }, [fetchSections]);
 
   return (
     <AdminContext.Provider
@@ -506,6 +542,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         addSeat,
         updateSeat,
         deleteSeat,
+        confirmAction,
         addTicketToSeat,
         removeTicketFromSeat,
         changeTicketSeat,
@@ -545,6 +582,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }}
     >
       {children}
+      {confirmOptions && <ConfirmDialog options={confirmOptions} resolve={resolveConfirm} />}
     </AdminContext.Provider>
   );
 };

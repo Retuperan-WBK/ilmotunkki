@@ -1540,7 +1540,7 @@ export interface ApiTicketTemplateTicketTemplate extends Schema.SingleType {
     singularName: 'ticket-template';
     pluralName: 'ticket-templates';
     displayName: 'TicketTemplate';
-    description: '';
+    description: 'Layout and content of the PDF tickets attached to the ticket email. If no entry exists, ticket emails are sent without a PDF.';
   };
   options: {
     draftAndPublish: false;

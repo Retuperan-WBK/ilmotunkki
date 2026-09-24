@@ -3,5 +3,8 @@
 .git/
 build/
 node_modules/
+.env*
+*.tar.gz
+seed-demo-orders.sql
 data/
 dist/

@@ -3,5 +3,7 @@
 .git/
 build/
 node_modules/
+.next/
+.env*
 data/
 dist/

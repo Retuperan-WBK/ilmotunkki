@@ -1,8 +1,8 @@
 'use client';
 
 import '../../styles/global.css'; // Import global styles if needed
+import '../../styles/admin.css';
 import AppProvider from '../../context/AppContext'; // Context provider
-import DisableTrackpadPinchZoom from '@/components/admin/DisableTrackpadPinchZoom';
 
 type PropType = {
   children: React.ReactNode;
@@ -10,16 +10,15 @@ type PropType = {
 
 const AdminLayout = ({ children }: PropType) => {
   return (
-    <html lang='fi' className='dark w-screen h-screen overflow-hidden touch-action-none'>
+    <html lang='fi' className='dark min-h-screen'>
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>RWBK Liput - Plassitunkki</title>
         <link rel="icon" href="https://rwbk.fi/favicon.ico" />
       </head>
-      <body className="bg-secondary-200 dark:bg-secondary-900 text-secondary-700 dark:text-secondary-100 w-screen h-screen">
+      <body className="admin-panel min-h-screen bg-[#101010] text-slate-100">
         <AppProvider>
-          <DisableTrackpadPinchZoom />
-          <main className='flex flex-col mx-auto w-screen h-screen'>
+          <main className='mx-auto min-h-screen w-full lg:h-screen'>
             {children}
           </main>
         </AppProvider>

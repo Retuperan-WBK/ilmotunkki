@@ -8,19 +8,19 @@ const nextConfig = {
       {
         protocol: 'http',
         hostname: 'localhost',
+        port: '1337',
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'cms',
+        port: '1337',
+        pathname: '/uploads/**',
       },
       {
         protocol: 'https',
         hostname: '*.paytrail.com',
       },
-      {
-        protocol: 'http',
-        hostname: '**',
-      },
-      {
-        protocol: 'https',
-        hostname: '**',
-      }
     ],
   },
   eslint: {
@@ -30,4 +30,3 @@ const nextConfig = {
 }
 
 module.exports = nextConfig;
- 

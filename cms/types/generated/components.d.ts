@@ -33,7 +33,7 @@ export interface TicketTextField extends Schema.Component {
   info: {
     displayName: 'TextField';
     icon: 'pencil';
-    description: '';
+    description: 'A line of text drawn on the ticket at the given position (millimeters from the top-left corner). Supports placeholders: {eventName} {eventDate} {venue} {ticketType} {section} {row} {seat} {firstName} {lastName} {email} {orderNumber} {groupName} {ticketNumber} {ticketCount}';
   };
   attributes: {
     text: Attribute.String & Attribute.Required;

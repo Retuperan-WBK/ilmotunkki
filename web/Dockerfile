@@ -1,4 +1,4 @@
-FROM node:20.6.1 as builder
+FROM node:20.20.2-bookworm AS builder
 
 WORKDIR /app
 
@@ -7,7 +7,7 @@ COPY ./package-lock.json .
 
 ENV PATH /app/node_modules/.bin:$PATH
 
-RUN npm install
+RUN npm ci
 
 COPY ./ .
 
@@ -19,7 +19,7 @@ ENV SECONDARY_COLOR=${SECONDARY_COLOR}
 
 RUN npm run build
 
-FROM node:20.6.1-alpine AS runner
+FROM node:20.20.2-bookworm-slim AS runner
 
 WORKDIR /app
 

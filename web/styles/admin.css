@@ -1,0 +1,45 @@
+/* The admin workspace uses the same charcoal and red palette as uusi.rwbk.fi.
+   Scoped here so the public signup pages keep their own theme. */
+.admin-panel {
+  --admin-bg: #1b1b1b;
+  --admin-surface: #242424;
+  --admin-raised: #303030;
+  --admin-red: #961816;
+  --admin-red-bright: #ee2725;
+  background: var(--admin-bg);
+}
+
+.admin-panel [class~="bg-[#0c1523]"],
+.admin-panel [class~="bg-[#101a28]"],
+.admin-panel [class~="bg-[#101a2b]"],
+.admin-panel [class~="bg-[#0e1929]"] { background-color: var(--admin-bg); }
+
+.admin-panel [class~="bg-[#111d2e]"],
+.admin-panel [class~="bg-[#172337]"],
+.admin-panel [class~="bg-[#162337]"],
+.admin-panel [class~="bg-[#182639]"] { background-color: var(--admin-surface); }
+
+.admin-panel [class~="bg-[#223149]"],
+.admin-panel [class~="bg-[#26374f]"] { background-color: var(--admin-raised); }
+.admin-panel [class*="hover:bg-[#293c57]"]:hover { background-color: #3b3b3b; }
+
+.admin-panel [class~="bg-[#142235]/95"],
+.admin-panel [class~="bg-[#142235]/85"],
+.admin-panel [class~="bg-[#172337]/95"] { background-color: rgb(36 36 36 / 95%); }
+
+.admin-panel [class*="bg-sky-500/20"],
+.admin-panel [class*="bg-blue-500"] { background-color: rgb(150 24 22 / 32%); }
+.admin-panel [class*="bg-sky-500/30"]:hover { background-color: rgb(150 24 22 / 48%); }
+.admin-panel [class*="border-sky-"],
+.admin-panel [class*="ring-sky-"] { border-color: rgb(238 39 37 / 55%); --tw-ring-color: rgb(238 39 37 / 50%); }
+.admin-panel [class*="text-sky-"] { color: #ff8b83; }
+.admin-panel [class*="hover:text-sky-"]:hover { color: #ffaaa3; }
+.admin-panel [class*="accent-sky-"] { accent-color: var(--admin-red-bright); }
+.admin-panel :focus-visible { outline-color: var(--admin-red-bright); }
+.admin-panel input:focus,
+.admin-panel select:focus { border-color: var(--admin-red-bright); }
+
+.admin-confirm-dialog::backdrop {
+  background: rgb(0 0 0 / 72%);
+  backdrop-filter: blur(2px);
+}

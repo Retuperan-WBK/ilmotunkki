@@ -89,7 +89,7 @@ const cleanOrphanCustomers = async () => {
   return customerResult;
 }
 export default {
-  '*/1 * * * *': async({ strapi}: {strapi: Strapi}) => {
+  '*/10 * * * *': async({ strapi}: {strapi: Strapi}) => {
     const [newOrders, pendingOrders, expiredOrders] = await cleanExpiredOrders();
     const [customerResult, itemResult] = await Promise.all([
       cleanOrphanCustomers(),

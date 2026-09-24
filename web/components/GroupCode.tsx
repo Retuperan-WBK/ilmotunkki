@@ -64,6 +64,9 @@ const GroupCode = ({locale, order}: Props) => {
       const { message } = error;
       if (error.status === 429) 
         return setGroupCodeError('Liian monta yritystä peräkkäin. Odota hetki');
+      if (message === 'INVALID') {
+        return setGroupCodeError('Ryhmäkoodi saa sisältää vain kirjaimia (A-Ö) ja numeroita');
+      }
       if (message === 'DUPLICATE') {
         return setGroupCodeError('Tämä koodi on jo olemassa, valitse toinen koodi');
       }
@@ -93,6 +96,9 @@ const GroupCode = ({locale, order}: Props) => {
       console.log(error);
       if (error.status === 429) 
         return setGroupCodeError('Liian monta yritystä peräkkäin. Odota hetki');
+      if (message === 'INVALID') {
+        return setGroupCodeError('Ryhmäkoodi saa sisältää vain kirjaimia (A-Ö) ja numeroita');
+      }
       if (message === 'NOMATCH') {
         return setGroupCodeError('Tätä ryhmäkoodia ei löytynyt');
       }
@@ -127,7 +133,8 @@ const GroupCode = ({locale, order}: Props) => {
 
   const handleGroupCodeChange = (e: ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
-    setGroupCode(e.target.value.toUpperCase());
+    // Group codes may only contain numbers and letters from the Finnish/Swedish alphabet.
+    setGroupCode(e.target.value.toUpperCase().replace(/[^A-ZÅÄÖ0-9]/g, ''));
   }
 
   return(

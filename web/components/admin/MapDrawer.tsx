@@ -23,6 +23,7 @@ const MapDrawer = () => {
   const isAddMode = currentMode === 'add-seat';
   const isEditMode = currentMode === 'edit-seat';
   const isMultiSelectMode = currentMode === 'multi-select';
+  const inputClass = 'mt-1 w-full rounded-lg border border-white/15 bg-[#101a2b] px-3 py-2 text-sm text-white focus:border-sky-400 focus:outline-none';
 
   const handleTabChange = (mode: 'add-seat' | 'edit-seat' | 'multi-select') => {
     setMode(mode);
@@ -62,23 +63,24 @@ const MapDrawer = () => {
     setSelectedSeat(null);
   };
 
-  const handleDeleteSeat = () => {
+  const handleDeleteSeat = async () => {
     if (!selectedSeat) return;
 
-    deleteSeat(selectedSeat.id);
-    setSelectedSeat(null);
+    if (await deleteSeat(selectedSeat.id)) setSelectedSeat(null);
   };
 
   useEffect(() => {
     setMode("edit-seat");
-  }, []);
+  }, [setMode]);
 
   return (
-    <div className="p-6 pl-2 pr-2 h-full w-full flex flex-col">
-      <h1 className="text-xl font-bold mb-4">Kartta</h1>
-      <div className='py-4 flex-1 overflow-y-auto mb-16'>
-        <div className="flex flex-col p-4">
-          <h2 className="text-lg font-bold">Istuimia</h2>
+    <div className="flex h-full min-h-0 w-full flex-col">
+      <div className="shrink-0 border-b border-white/10 p-4">
+        <h1 className="text-xl font-bold text-white">Kartan hallinta</h1>
+      </div>
+      <div className='min-h-0 flex-1 overflow-y-auto p-4'>
+        <div className="rounded-xl border border-white/10 bg-[#223149] p-4">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-300">Istuinpaikat</h2>
           <p className="text-base mt-2">
             Istuimia yhteensä: {sections.reduce((acc, section) => acc + section.attributes.seats.data.length, 0)}
           </p>
@@ -90,7 +92,7 @@ const MapDrawer = () => {
             ))}
           </p>
 
-          <h2 className="text-lg font-bold mt-4">Lippuluokat</h2>
+          <h2 className="mt-4 text-sm font-semibold uppercase tracking-wide text-slate-300">Lippuluokat</h2>
           <div className="text-base flex flex-col ml-4">
             {itemTypes.map((item) => (
               <span key={item.id} className='flex flex-col'>
@@ -108,40 +110,40 @@ const MapDrawer = () => {
         </div>
 
         {/* Tab Buttons */}
-        <div className="flex">
+        <div className="mt-4 flex flex-wrap gap-1 rounded-xl bg-[#101a2b] p-1">
           <button
-            className={`px-4 py-2 ${isAddMode ? 'bg-[#6d6d6d]' : 'bg-[#4f4f4f]'} text-white`}
+            className={`rounded-lg px-3 py-2 text-xs font-semibold ${isAddMode ? 'bg-sky-500/20 text-sky-100' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}
             onClick={() => handleTabChange('add-seat')}
           >
             Lisää istuin
           </button>
 
           <button
-            className={`px-4 py-2 ${isEditMode ? 'bg-[#5f5f5f]' : 'bg-[#4f4f4f]'} text-white`}
+            className={`rounded-lg px-3 py-2 text-xs font-semibold ${isEditMode ? 'bg-sky-500/20 text-sky-100' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}
             onClick={() => handleTabChange('edit-seat')}
           >
             Muokkaa istuimia
           </button>
           <button
-            className={`px-4 py-2 ${ isMultiSelectMode ? 'bg-[#5f5f5f]' : 'bg-[#4f4f4f]'} text-white`}
+            className={`rounded-lg px-3 py-2 text-xs font-semibold ${isMultiSelectMode ? 'bg-sky-500/20 text-sky-100' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}
             onClick={() => handleTabChange('multi-select')}
           >
-            Bulk update
+            Useita istuimia
           </button>
         </div>
 
         {isAddMode && (
-          <div className="flex flex-col bg-[#545454] p-4 ">
+          <div className="mt-3 flex flex-col rounded-xl border border-white/10 bg-[#223149] p-4">
             <h2 className="text-lg font-bold">Lisää istuin</h2>
 
-            <p className='text-sm'> Lisää istuin pitämällä Shift pohjassa ja klikkaamalla karttaa</p>
+            <p className='mt-1 text-sm text-slate-300'>Valitse luokka, pidä Shift pohjassa ja klikkaa karttaa.</p>
 
             <label className="mt-2 text-sm">Rivi</label>
             <input
               type="text"
               value={newSeat.row}
               onChange={(e) => setNewSeat({ ...newSeat, row: e.target.value })}
-              className="p-2 bg-[#868686] rounded-md"
+              className={inputClass}
             />
 
             <label className="mt-2 text-sm">Numero</label>
@@ -149,7 +151,7 @@ const MapDrawer = () => {
               type="text"
               value={newSeat.seatNumber}
               onChange={(e) => setNewSeat({ ...newSeat, seatNumber: e.target.value })}
-              className="p-2 bg-[#868686] rounded-md"
+              className={inputClass}
             />
 
             <label className="mt-2 text-sm">Lisähuomio</label>
@@ -157,14 +159,15 @@ const MapDrawer = () => {
               type="text"
               value={newSeat.special}
               onChange={(e) => setNewSeat({ ...newSeat, special: e.target.value })}
-              className="p-2 bg-[#868686] rounded-md"
+              className={inputClass}
             />
             <label className="mt-2 text-sm">Lippuluokka</label>
             <select
               value={newSeat.itemType}
               onChange={(e) => setNewSeat({ ...newSeat, itemType: parseInt(e.target.value) })}
-              className="p-2 bg-[#868686] rounded-md"
+              className={inputClass}
             >
+              <option value={0} disabled>Valitse luokka</option>
               {itemTypes.map((item) => (
                 <option key={item.id} value={item.id}>
                   {item.attributes.slug}
@@ -177,7 +180,7 @@ const MapDrawer = () => {
         {isEditMode && (
           selectedSeat ? (
 
-          <div className="flex flex-col bg-[#545454] p-4">
+          <div className="mt-3 flex flex-col rounded-xl border border-white/10 bg-[#223149] p-4">
             <h2 className="text-lg font-bold">Muokkaa istuinta</h2>
 
             <label className="mt-2 text-sm">Rivi</label>
@@ -187,7 +190,7 @@ const MapDrawer = () => {
               onChange={(e) => 
                 setSelectedSeat({id: selectedSeat.id, attributes: { ...selectedSeat.attributes, Row: e.target.value }})
               }
-              className="p-2 bg-[#868686] rounded-md"
+              className={inputClass}
             />
 
             <label className="mt-2 text-sm">Numero</label>
@@ -197,7 +200,7 @@ const MapDrawer = () => {
               onChange={(e) => 
                 setSelectedSeat({id: selectedSeat.id, attributes: { ...selectedSeat.attributes, Number: e.target.value }})
               }
-              className="p-2 bg-[#868686] rounded-md"
+              className={inputClass}
             />
 
             <label className="mt-2 text-sm">X-koordinaatti</label>
@@ -208,7 +211,7 @@ const MapDrawer = () => {
               onChange={(e) => 
                 setSelectedSeat({id: selectedSeat.id, attributes: { ...selectedSeat.attributes, x_cord: parseFloat(e.target.value) }})
               }
-              className="p-2 bg-[#868686] rounded-md"
+              className={inputClass}
             />
 
             <label className="mt-2 text-sm">Y-koordinaatti</label>
@@ -219,7 +222,7 @@ const MapDrawer = () => {
               onChange={(e) => 
                 setSelectedSeat({id: selectedSeat.id, attributes: { ...selectedSeat.attributes, y_cord: parseFloat(e.target.value) }})
               }
-              className="p-2 bg-[#868686] rounded-md"
+              className={inputClass}
             />
 
             <label className="mt-2 text-sm">Lisähuomio</label>
@@ -229,13 +232,13 @@ const MapDrawer = () => {
               onChange={(e) => 
                 setSelectedSeat({id: selectedSeat.id, attributes: { ...selectedSeat.attributes, special: e.target.value }})
               }
-              className="p-2 bg-[#868686] rounded-md"
+              className={inputClass}
             />
             <label className="mt-2 text-sm">Lippuluokka</label>
             <select
-              value={selectedSeat.attributes.item_type.data?.id || ""}
-              onChange={(e) => setSelectedSeat({...selectedSeat, itemTypeId: parseInt(e.target.value)})}
-              className="p-2 bg-[#868686] rounded-md"
+              value={selectedSeat.itemTypeId ?? selectedSeat.attributes.item_type.data?.id ?? ''}
+              onChange={(e) => setSelectedSeat({...selectedSeat, itemTypeId: e.target.value ? Number(e.target.value) : 0})}
+              className={inputClass}
             >
               <option value={""}>Ei valittu</option>
               {itemTypes.map((item) => (
@@ -245,28 +248,28 @@ const MapDrawer = () => {
               ))}
             </select>
             <button
-              className="mt-4 px-4 py-2 bg-green-500 text-white rounded-md"
+              className="mt-4 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-[#102134] hover:bg-emerald-400"
               onClick={() => handleUpdateSeat()}
             >
               Päivitä istuin
             </button>
 
             <button
-              className="mt-2 px-4 py-2 bg-red-500 text-white rounded-md"
+              className="mt-2 rounded-lg border border-rose-400/30 bg-rose-500/15 px-4 py-2 text-sm font-semibold text-rose-200 hover:bg-rose-500/25"
               onClick={() => handleDeleteSeat()}
             >
               Poista istuin
             </button>
           </div>
           ) : (
-            <div className="flex flex-col bg-[#545454] p-4">
-              <h2 className="text-lg font-bold">Valitse istuin</h2>
+            <div className="mt-3 rounded-xl border border-dashed border-white/15 bg-[#223149] p-4">
+              <h2 className="text-sm font-semibold">Valitse istuin kartalta muokataksesi sitä.</h2>
             </div>
           )
         )}
 
         {isMultiSelectMode && (
-          <div className="flex flex-col bg-[#545454] p-4 ">
+          <div className="mt-3 flex flex-col rounded-xl border border-white/10 bg-[#223149] p-4">
             <h2 className="text-lg font-bold">Valitut Istuimet</h2>
             
             <p>{multiSelectedSeats.length} paikkaa valittu</p>
@@ -275,7 +278,7 @@ const MapDrawer = () => {
             <select
               value={newSeat.itemType|| ""}
               onChange={(e) => setNewSeat({...newSeat, itemType: parseInt(e.target.value)})}
-              className="p-2 bg-[#868686] rounded-md"
+              className={inputClass}
             >
               <option value={""}>Ei valittu</option>
               {itemTypes.map((item) => (
@@ -286,7 +289,8 @@ const MapDrawer = () => {
             </select>
 
             <button
-              className="mt-4 px-4 py-2 bg-green-500 text-white rounded-md"
+              disabled={!multiSelectedSeats.length || !newSeat.itemType}
+              className="mt-4 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-[#102134] hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
               onClick={handleBulkUpdate}
             >
               Päivitä Lippuluokat

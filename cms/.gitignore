@@ -67,6 +67,7 @@ $RECYCLE.BIN/
 .tmp
 *.log
 *.sql
+!seed-demo-orders.sql
 *.sqlite
 *.sqlite3
 

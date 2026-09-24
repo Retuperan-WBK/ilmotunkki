@@ -3,6 +3,7 @@ import { useAdminContext } from "./AdminContext";
 import TicketList from "./TicketList";
 import DisabledSvg from "./DisabledSvg";
 import InviteSvg from "./InviteSvg";
+import CopyableEmail from "./CopyableEmail";
 
 const GroupsDrawer = () => {
 
@@ -19,28 +20,11 @@ const GroupsDrawer = () => {
   } = useAdminContext();
   const [search, setSearch] = useState("");
   const scrollableDivRef = useRef<HTMLDivElement>(null);
-  const [listScrollPosition, setListScrollPosition] = useState(0);
+  const listScrollPosition = useRef(0);
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (scrollableDivRef.current) {
-        setListScrollPosition(scrollableDivRef.current.scrollTop);
-      }
-    };
-
-    const div = scrollableDivRef.current;
-    if (div) {
-      div.addEventListener('scroll', handleScroll);
-      div.scrollTop = listScrollPosition; // Set initial scroll position
-    }
-    
-    return () => {
-      if (div) {
-        div.removeEventListener('scroll', handleScroll);
-      }
-    };
-
-  }, [listScrollPosition, setListScrollPosition, selectedGroup]);
+    if (scrollableDivRef.current) scrollableDivRef.current.scrollTop = listScrollPosition.current;
+  }, [selectedGroup]);
 
   const getOrderStatusColor = (placedCount: number, totalCount: number) => {
     if (placedCount === 0) return "bg-red-500"; // All unplaced
@@ -110,16 +94,16 @@ const GroupsDrawer = () => {
     const orders = selectedGroup.attributes.orders?.data || [];
 
     return (
-      <div className="py-4 px-2 flex flex-col items-start w-full h-full">
+      <div className="flex h-full min-h-0 w-full flex-col p-4">
         <button
-          className="mb-4 underline"
+          className="mb-3 self-start rounded-lg px-2 py-1 text-sm font-medium text-sky-300 hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400"
           onClick={() => setSelectedGroup(null)}
         >
           ← Takaisin ryhmiin
         </button>
-        <h1 className="text-xl font-bold mb-4 truncate max-w-full select-text">Ryhmä: {selectedGroup.attributes.name}</h1>
+        <h1 className="mb-3 max-w-full truncate text-xl font-bold select-text">Ryhmä: {selectedGroup.attributes.name}</h1>
 
-        <div className="flex flex-col flex-1 bg-[#868686] border-4 border-[#868686] rounded-md p-2 overflow-y-auto w-full mb-16">
+        <div className="flex min-h-0 w-full flex-1 flex-col overflow-y-auto rounded-xl border border-white/10 bg-[#223149] p-3">
           <p className="text-md font-bold mb-4">
             Tilaukset ({orders.length})
           </p>
@@ -131,7 +115,7 @@ const GroupsDrawer = () => {
             return (
               <div
                 key={order.id}
-                className="flex flex-col bg-[#5e5e5e] rounded-md py-4 px-2 mb-4"
+                className="mb-3 flex flex-col rounded-xl border border-white/10 bg-[#182639] p-3"
               >
                 <div className="flex justify-between items-center">
                   <p className="text-md font-bold select-text">
@@ -142,26 +126,23 @@ const GroupsDrawer = () => {
                     {placedCount}/{totalCount} paikkaa
                   </p>
                 </div>
-                <div className="flex items-center justify-between">
-                  <p className="text-sm mt-2 cursor-pointer select-text">
-                    Email: <span onClick={() => navigator.clipboard.writeText(order.attributes.customer?.data.attributes.email)} className="cursor-pointer hover:underline">{order.attributes.customer?.data.attributes.email}</span>
-                  </p>
-                  {unplacedCount === 0 && (order.attributes.tickets_sent === true ?
-                  <button className="bg-gray-500 text-white p-1 rounded-md cursor-not-allowed
-                  " disabled>
-                    Liput Lähetetty
-                  </button> :
-                  (
-                  <div className="flex gap-1">
-                    <button onClick={() => handleSendTicketsManually(order, selectedGroup.attributes.name)} className="bg-blue-500 text-white p-1 rounded-md">
-                      Aseta liput lähetetyksi
+                <CopyableEmail className="mt-2" email={order.attributes.customer?.data.attributes.email} />
+                {unplacedCount === 0 && (
+                  order.attributes.tickets_sent === true ? (
+                    <button className="mt-2 w-fit cursor-not-allowed rounded-md bg-gray-500 px-3 py-1.5 text-sm text-white" disabled>
+                      Liput Lähetetty
                     </button>
-                    <button onClick={() => handleSendTickets(order, selectedGroup.attributes.name)} className="bg-green-500 text-white p-1 rounded-md">
-                      Lähetä liput
-                    </button>
-                  </div>))
-                  }
-                </div>
+                  ) : (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <button onClick={() => handleSendTicketsManually(order, selectedGroup.attributes.name)} className="rounded-md bg-blue-500 px-3 py-1.5 text-sm text-white hover:opacity-90">
+                        Aseta liput lähetetyksi
+                      </button>
+                      <button onClick={() => handleSendTickets(order, selectedGroup.attributes.name)} className="rounded-md bg-green-500 px-3 py-1.5 text-sm text-white hover:opacity-90">
+                        Lähetä liput
+                      </button>
+                    </div>
+                  )
+                )}
                 <div className="flex items-center gap-2 w-full">
                   <div className="w-full border-gray-400 border-y-2">
                   {order.attributes.customer.data.attributes.special_arragements &&
@@ -206,27 +187,32 @@ const GroupsDrawer = () => {
         )
     )
   );
+  const matchesSearch = (group: typeof groups[number]) => group.attributes.name.toLowerCase().includes(search.trim().toLowerCase());
+  const visibleUnplacedGroups = groups_with_unplaced_tickets.filter(matchesSearch);
+  const visiblePlacedGroups = groups_without_unplaced_tickets.filter(matchesSearch);
 
   return (
-    <div className="p-6 pl-2 pr-0 h-full w-full flex flex-col">
-      <div className="flex items-center flex-col mb-4">
-        <div className="flex gap-4 justify-start w-full ml-2">
-          <h1 className="text-2xl font-bold mr-4">Ryhmät ({groups.length})</h1>
+    <div className="flex h-full min-h-0 w-full flex-col">
+      <div className="shrink-0 border-b border-white/10 p-4">
+        <div>
+          <h1 className="text-xl font-bold text-white">Ryhmät <span className="text-sm font-normal text-slate-400">{groups.length}</span></h1>
+        </div>
+        <div className="mt-3">
           <input
               type="text"
-              placeholder="Hae nimellä"
+              aria-label="Hae ryhmiä nimellä"
+              placeholder="Hae ryhmän nimellä…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-[40%] p-1 rounded-sm text-sm text-black"
+              className="w-full rounded-lg border border-white/15 bg-[#101a2b] px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-white/40 focus:outline-none"
             />
         </div>
-        {/* Sort and Filter Section */}
-        <div className="flex gap-4 items-center my-2">
-          <div className="flex-col">
+        <div className="mt-3 flex gap-2">
             <select 
+              aria-label="Järjestä ryhmät"
               value={orderSortOption}
               onChange={handleSortChange} 
-              className="p-1 bg-[#868686] rounded-md mb-1"
+              className="min-w-0 flex-1 rounded-lg border border-white/10 bg-[#26374f] px-2 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-sky-400"
             >
               <option value="newest">Uusin ensin</option>
               <option value="oldest">Vanhin ensin</option>
@@ -234,9 +220,10 @@ const GroupsDrawer = () => {
               <option value="smallest">Pienin ensin</option>
             </select>
             <select 
+              aria-label="Suodata ryhmiä lipputyypin mukaan"
               value={selectedTicketType} 
               onChange={handleSelectTicketType}
-              className="p-1 bg-[#868686] rounded-md"
+              className="min-w-0 flex-1 rounded-lg border border-white/10 bg-[#26374f] px-2 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-sky-400"
             >
               <option value="">Kaikki lipputyypit</option>
               {ticketTypes.map((type) => (
@@ -245,23 +232,22 @@ const GroupsDrawer = () => {
                 </option>
               ))}
             </select>
-          </div>
-          <div className="flex gap-2 pr-2">
-            <label onClick={() => toggleFilter('kutsuvieras')} className={orderFilters.kutsuvieras ? 'bg-red-700 rounded-md p-[2px]' : 'p-[2px]'}>
-              Kutsuvieras
-            </label>
-            <label onClick={() => toggleFilter('erikoisjarjestely')} className={orderFilters.erikoisjarjestely ? 'bg-red-700 rounded-md p-[2px]' : 'p-[2px]'}>
-              Erikoisjärjestely
-            </label>
-          </div>
         </div>
+        <div className="mt-3 flex flex-wrap gap-1.5">
+            <button type="button" aria-pressed={orderFilters.kutsuvieras} onClick={() => toggleFilter('kutsuvieras')} className={`rounded-full border px-2.5 py-1 text-xs ${orderFilters.kutsuvieras ? 'border-white/40 bg-white/10 text-white' : 'border-white/15 text-slate-300 hover:bg-white/10'}`}>
+              Kutsuvieras
+            </button>
+            <button type="button" aria-pressed={orderFilters.erikoisjarjestely} onClick={() => toggleFilter('erikoisjarjestely')} className={`rounded-full border px-2.5 py-1 text-xs ${orderFilters.erikoisjarjestely ? 'border-white/40 bg-white/10 text-white' : 'border-white/15 text-slate-300 hover:bg-white/10'}`}>
+              Erikoisjärjestely
+            </button>
+            {(search || selectedTicketType || orderFilters.kutsuvieras || orderFilters.erikoisjarjestely) &&
+              <button type="button" className="px-2 text-xs text-sky-300 hover:underline" onClick={() => { setSearch(''); setSelectedTicketType(''); setOrderFilters({ ...orderFilters, kutsuvieras: false, erikoisjarjestely: false, ticketType: '' }); }}>Tyhjennä</button>}
+          </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto mb-16" ref={scrollableDivRef}>
-        <h2 className="text-md font-bold mb-4">Plassaamattomat ({groups_with_unplaced_tickets.length})</h2>
-        {groups_with_unplaced_tickets.filter((group) => { 
-          return group.attributes.name.toLowerCase().includes(search.toLowerCase());
-        }).map((group) => {
+      <div className="min-h-0 flex-1 overflow-y-auto p-4" ref={scrollableDivRef} onScroll={event => { listScrollPosition.current = event.currentTarget.scrollTop; }}>
+        <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-amber-200">Plassaamattomat ({visibleUnplacedGroups.length})</h2>
+        {visibleUnplacedGroups.map((group) => {
           const orders = group.attributes.orders?.data || [];
           const totalTickets = orders.reduce(
             (sum, order) => sum + (order.attributes.items?.data.length || 0),
@@ -284,7 +270,9 @@ const GroupsDrawer = () => {
           return (
             <div
                 key={group.id}
-                className="flex flex-col bg-[#868686] rounded-md p-4 mr-1 mb-4 cursor-pointer"
+                role="button" tabIndex={0} aria-label={`Avaa ryhmä: ${group.attributes.name}`}
+                onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setSelectedGroup(group); } }}
+                className="mb-2 flex cursor-pointer flex-col rounded-xl border border-white/10 bg-[#223149] p-3 transition-colors hover:border-white/25 hover:bg-[#293c57] focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400"
                 onClick={() => setSelectedGroup(group)}
               >
               <div className="flex-col justify-between items-center">
@@ -318,11 +306,10 @@ const GroupsDrawer = () => {
           );
         })}
 
-        <h2 className="text-md font-bold mt-6 mb-4">Plassatut ({groups_without_unplaced_tickets.length})</h2>
+        {visibleUnplacedGroups.length === 0 && <p className="rounded-xl border border-dashed border-white/15 p-4 text-sm text-slate-400">Ei hakua vastaavia ryhmiä.</p>}
+        <h2 className="mb-3 mt-6 text-xs font-semibold uppercase tracking-widest text-emerald-200">Plassatut ({visiblePlacedGroups.length})</h2>
         {/* Sort so that groups with ticket sent are last */}
-        {groups_without_unplaced_tickets.filter((group) => { 
-          return group.attributes.name.toLowerCase().includes(search.toLowerCase());
-        }).sort((a, b) => {
+        {visiblePlacedGroups.sort((a, b) => {
           const a_sent = a.attributes.orders?.data.every((order) => order.attributes.tickets_sent === true);
           const b_sent = b.attributes.orders?.data.every((order) => order.attributes.tickets_sent === true);
           if (a_sent && !b_sent) return 1;
@@ -353,11 +340,13 @@ const GroupsDrawer = () => {
           return (
             <div
                 key={group.id}
-                className="flex flex-col bg-[#868686] rounded-md p-4 mr-1 mb-4 cursor-pointer"
+                role="button" tabIndex={0} aria-label={`Avaa ryhmä: ${group.attributes.name}`}
+                onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setSelectedGroup(group); } }}
+                className="mb-2 flex cursor-pointer flex-col rounded-xl border border-white/10 bg-[#223149] p-3 transition-colors hover:border-white/25 hover:bg-[#293c57] focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400"
                 onClick={() => setSelectedGroup(group)}
               >
               { all_orders_sent && 
-              <div className="bg-green-500 text-white p-1 -m-2 mb-0 rounded-md">
+              <div className="mb-2 w-fit rounded-full bg-emerald-500/20 px-2 py-1 text-xs text-emerald-200">
                 Liput Lähetetty
               </div>
               }
@@ -391,6 +380,7 @@ const GroupsDrawer = () => {
             </div>
           );
         })}
+        {visiblePlacedGroups.length === 0 && <p className="rounded-xl border border-dashed border-white/15 p-4 text-sm text-slate-400">Ei hakua vastaavia ryhmiä.</p>}
       </div>
     </div>
   );
