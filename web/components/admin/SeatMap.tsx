@@ -18,10 +18,9 @@ const colors: Record<string, string> = {
   opiskelija: '#db9368',
 };
 
-const Seats = memo(function Seats({ section, imageWidth, imageHeight, filter, selectedSeat, selectedGroup, selectedOrder, selectedIds, suppressClickRef, onSeatClick }: {
+const Seats = memo(function Seats({ section, scale, filter, selectedSeat, selectedGroup, selectedOrder, selectedIds, suppressClickRef, onSeatClick }: {
   section: Section | null;
-  imageWidth: number;
-  imageHeight: number;
+  scale: number;
   filter: { filter: 'show-class' | 'show-itemtype' | 'highlight-group' | 'highlight-order' | 'special' | null; showReserved: boolean };
   selectedSeat: Seat | null;
   selectedGroup: AdminGroup | null;
@@ -46,8 +45,8 @@ const Seats = memo(function Seats({ section, imageWidth, imageHeight, filter, se
       if (selectedSeat?.id === seat.id || selected.has(seat.id)) fill = '#ee2725';
       const stroke = !filter.showReserved ? '#181818' : !assigned ? '#19b77c' : order?.attributes.tickets_sent ? '#8754dc' : '#ee2725';
       const textColor = fill === colors.deluxe || fill === '#facc15' ? '#211d1d' : '#ffffff';
-      const x = seat.attributes.x_cord / imageWidth * MAP_SIZE;
-      const y = seat.attributes.y_cord / imageHeight * MAP_SIZE;
+      const x = seat.attributes.x_cord * scale;
+      const y = seat.attributes.y_cord * scale;
       return <g key={seat.id} onClick={event => {
         event.stopPropagation();
         if (suppressClickRef.current) {
@@ -83,6 +82,16 @@ export default function SeatMap() {
   const [legendOpen, setLegendOpen] = useState(true);
   const selectedIds = useMemo(() => multiSelectedSeats.map(seat => seat.id), [multiSelectedSeats]);
 
+  const image = activeSection?.attributes.background_image.data?.attributes;
+  // The SVG world matches the background image's aspect ratio (longest side = MAP_SIZE)
+  // so the map is never stretched. Seats are stored in image pixel coordinates and are
+  // multiplied by this same scale to land on the image.
+  const imageWidth = image?.width || MAP_SIZE;
+  const imageHeight = image?.height || MAP_SIZE;
+  const worldScale = MAP_SIZE / Math.max(imageWidth, imageHeight);
+  const worldWidth = imageWidth * worldScale;
+  const worldHeight = imageHeight * worldScale;
+
   const drawView = useCallback(() => {
     if (frameRef.current !== null) return;
     frameRef.current = requestAnimationFrame(() => {
@@ -94,16 +103,24 @@ export default function SeatMap() {
   const fitMap = useCallback(() => {
     const viewport = viewportRef.current;
     if (!viewport || !viewport.clientWidth || !viewport.clientHeight) return;
-    const unitsPerPixel = MAP_SIZE / (Math.min(viewport.clientWidth, viewport.clientHeight) * 0.92);
-    const width = viewport.clientWidth * unitsPerPixel;
-    const height = viewport.clientHeight * unitsPerPixel;
+    const viewAspect = viewport.clientWidth / viewport.clientHeight;
+    const worldAspect = worldWidth / worldHeight;
+    let width: number;
+    let height: number;
+    if (worldAspect > viewAspect) {
+      width = worldWidth / 0.92;
+      height = width / viewAspect;
+    } else {
+      height = worldHeight / 0.92;
+      width = height * viewAspect;
+    }
     viewRef.current = {
-      x: (MAP_SIZE - width) / 2,
-      y: (MAP_SIZE - height) / 2,
+      x: worldWidth / 2 - width / 2,
+      y: worldHeight / 2 - height / 2,
       width, height, fitWidth: width, fitHeight: height,
     };
     drawView();
-  }, [drawView]);
+  }, [drawView, worldWidth, worldHeight]);
 
   useEffect(() => {
     const viewport = viewportRef.current;
@@ -196,11 +213,12 @@ export default function SeatMap() {
     if (svgRef.current) svgRef.current.style.cursor = 'grab';
     if (pointer.moved || !activeSection || (event.target !== svgRef.current && !(event.target instanceof SVGImageElement) && !(event.target instanceof SVGRectElement))) return;
     const rect = viewportRef.current?.getBoundingClientRect();
-    const image = activeSection.attributes.background_image.data?.attributes;
     if (!rect || !image || !image.width || !image.height) return;
-    const x = viewRef.current.x + (event.clientX - rect.left) / rect.width * viewRef.current.width;
-    const y = viewRef.current.y + (event.clientY - rect.top) / rect.height * viewRef.current.height;
-    if (x >= 0 && x <= MAP_SIZE && y >= 0 && y <= MAP_SIZE) handleMapClick(x / MAP_SIZE * image.width, y / MAP_SIZE * image.height, event.shiftKey);
+    const worldX = viewRef.current.x + (event.clientX - rect.left) / rect.width * viewRef.current.width;
+    const worldY = viewRef.current.y + (event.clientY - rect.top) / rect.height * viewRef.current.height;
+    const x = worldX / worldScale;
+    const y = worldY / worldScale;
+    if (x >= 0 && x <= image.width && y >= 0 && y <= image.height) handleMapClick(x, y, event.shiftKey);
   };
 
   const handlePointerCancel = () => {
@@ -234,18 +252,17 @@ export default function SeatMap() {
     { value: 'special', label: 'Erikoispaikat' },
   ] as const;
 
-  const image = activeSection?.attributes.background_image.data?.attributes;
   return (
     <div className="flex h-full min-h-0 flex-col bg-[#101a28]">
-      <div className="z-20 shrink-0 border-b border-white/10 bg-[#172337] px-4 py-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="z-20 shrink-0 border-b border-white/10 bg-[#172337] px-3 py-2 lg:px-4 lg:py-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 lg:gap-3">
           <div className="flex min-w-0 items-center gap-3">
             <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-400">Salikartta</h2>
-            <div className="flex flex-wrap gap-1 rounded-lg bg-[#0e1929] p-1" aria-label="Kartan lohko">
+            <div className="flex flex-nowrap gap-1 overflow-x-auto rounded-lg bg-[#0e1929] p-1" aria-label="Kartan lohko">
               {sections.map(section => (
                 <button key={section.id} type="button" onClick={() => setActiveSection(section.id)}
                   aria-pressed={activeSection?.id === section.id}
-                  className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400 ${activeSection?.id === section.id ? 'bg-sky-500/20 text-sky-200' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
+                  className={`shrink-0 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400 ${activeSection?.id === section.id ? 'bg-sky-500/20 text-sky-200' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
                   {section.attributes.Name}
                 </button>
               ))}
@@ -256,10 +273,10 @@ export default function SeatMap() {
             Näytä varatut / vapaat
           </label>
         </div>
-        <div className="mt-3 flex flex-wrap gap-1.5" aria-label="Kartan väritys">
+        <div className="mt-2 flex flex-nowrap gap-1.5 overflow-x-auto pb-0.5 lg:mt-3 lg:flex-wrap lg:overflow-visible" aria-label="Kartan väritys">
           {filters.map(option => (
             <button key={option.value} type="button" onClick={() => toggleFilter(option.value)} aria-pressed={filter.filter === option.value}
-              className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400 ${filter.filter === option.value ? 'border-sky-400/50 bg-sky-500/20 text-sky-100' : 'border-white/10 bg-white/5 text-slate-300 hover:border-white/30 hover:text-white'}`}>
+              className={`shrink-0 whitespace-nowrap rounded-full border px-3 py-1 text-xs font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400 ${filter.filter === option.value ? 'border-sky-400/50 bg-sky-500/20 text-sky-100' : 'border-white/10 bg-white/5 text-slate-300 hover:border-white/30 hover:text-white'}`}>
               {option.label}
             </button>
           ))}
@@ -279,8 +296,8 @@ export default function SeatMap() {
             if (rect) zoomAt(event.clientX - rect.left, event.clientY - rect.top, 1.5);
           }}>
           <rect x={view.x} y={view.y} width={view.width} height={view.height} fill="#adadad" />
-          {image && <image href={`/api/admin/image?url=${encodeURIComponent(image.url)}`} x="0" y="0" width={MAP_SIZE} height={MAP_SIZE} preserveAspectRatio="none" />}
-          <Seats section={activeSection} imageWidth={image?.width || 1} imageHeight={image?.height || 1}
+          {image && <image href={`/api/admin/image?url=${encodeURIComponent(image.url)}`} x="0" y="0" width={worldWidth} height={worldHeight} preserveAspectRatio="none" />}
+          <Seats section={activeSection} scale={worldScale}
             filter={filter} selectedSeat={selectedSeat} selectedGroup={selectedGroup} selectedOrder={selectedOrder}
             selectedIds={selectedIds} suppressClickRef={suppressClickRef} onSeatClick={handleSeatClick} />
         </svg>
