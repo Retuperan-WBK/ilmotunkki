@@ -4,13 +4,14 @@ import React, { createContext, useCallback, useContext, useEffect, useRef, useSt
 import { Order, AdminGroup, Section, Seat, ItemType, Item } from '@/utils/models';
 import { handleAddTicketToSeat_State, handleChangeTicketSeat_State, handleRemoveTicketFromSeat_State, handleSetOrderTicketsSent_State, UpdatedItem } from './UnHolyFunctions';
 import ConfirmDialog, { ConfirmOptions } from './ConfirmDialog';
+import { DEFAULT_ROW_TRANSFORM, RowTransform, getRowSeats, isIdentityTransform, transformRowSeats } from './seatTransforms';
 
 interface AdminContextProps {
   orders: Order[];
   groups: AdminGroup[];
   sections: Section[];
   activeSectionId: number | null;
-  currentMode: 'add-seat' | 'edit-seat' | 'add-ticket-to-seat' | 'change-ticket-seat' | 'multi-select' | null;
+  currentMode: 'add-seat' | 'edit-seat' | 'add-ticket-to-seat' | 'change-ticket-seat' | 'multi-select' | 'edit-row' | null;
   setMode: (mode: AdminContextProps['currentMode']) => void;
   setSelectedTicket: (ticketId: Item | null) => void;
   setActiveSection: (sectionId: number) => void;
@@ -55,6 +56,15 @@ interface AdminContextProps {
   handleSendTickets: (order: Order, groupName?: string) => void;
   handleSendTicketsManually: (order: Order, groupName?: string) => void;
   removeMultipleTicketsFromSeat: (ticketIds: number[]) => void;
+  selectedRow: string | null;
+  setSelectedRow: (row: string | null) => void;
+  rowTransform: RowTransform;
+  setRowTransform: React.Dispatch<React.SetStateAction<RowTransform>>;
+  resetRowTransform: () => void;
+  applyRowTransform: () => Promise<void>;
+  deleteRow: () => Promise<void>;
+  moveSeat: (seatId: number, x_cord: number, y_cord: number) => Promise<void>;
+  bulkSetSeatFields: (ids: number[], fields: { Row?: string; special?: string | null }) => Promise<void>;
 }
 
 const AdminContext = createContext<AdminContextProps | undefined>(undefined);
@@ -119,6 +129,8 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // BottomDrawer
   const [bottomDrawerOpen, setBottomDrawerOpen] = useState(false);
   const [multiSelectedSeats, setMultiSelectedSeats] = useState<Seat[]>([]);
+  const [selectedRow, setSelectedRow] = useState<string | null>(null);
+  const [rowTransform, setRowTransform] = useState<RowTransform>(DEFAULT_ROW_TRANSFORM);
   const [confirmOptions, setConfirmOptions] = useState<ConfirmOptions | null>(null);
   const confirmResolver = useRef<((confirmed: boolean) => void) | null>(null);
 
@@ -469,11 +481,82 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const activeSection = sections.find((section) => section.id === activeSectionId) || null;
 
+  const resetRowTransform = () => setRowTransform(DEFAULT_ROW_TRANSFORM);
+
+  // Move a single seat to new image-pixel coordinates (used by shift+drag).
+  const moveSeat = async (seatId: number, x_cord: number, y_cord: number) => {
+    await fetch(`/api/admin/seats/${seatId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ x_cord, y_cord }),
+      headers: { 'Content-Type': 'application/json' },
+    });
+    await reFetch();
+  };
+
+  // Persist the pending move/scale/rotate transform for the selected row.
+  const applyRowTransform = async () => {
+    const seats = getRowSeats(activeSection, selectedRow);
+    if (!seats.length || isIdentityTransform(rowTransform)) return;
+
+    const transformed = transformRowSeats(seats, rowTransform);
+    await Promise.all(
+      seats.map(seat =>
+        fetch(`/api/admin/seats/${seat.id}`, {
+          method: 'PUT',
+          body: JSON.stringify(transformed[seat.id]),
+          headers: { 'Content-Type': 'application/json' },
+        })
+      )
+    );
+    setRowTransform(DEFAULT_ROW_TRANSFORM);
+    await reFetch();
+  };
+
+  const deleteRow = async () => {
+    const seats = getRowSeats(activeSection, selectedRow);
+    if (!seats.length) return;
+    if (!await confirmAction({
+      title: 'Poista rivi?',
+      message: `Rivi ${selectedRow} (${seats.length} paikkaa) poistetaan kartalta.`,
+      confirmLabel: 'Poista rivi',
+      tone: 'danger',
+    })) return;
+
+    await Promise.all(seats.map(seat => fetch(`/api/admin/seats/${seat.id}`, { method: 'DELETE' })));
+    setSelectedRow(null);
+    setRowTransform(DEFAULT_ROW_TRANSFORM);
+    await reFetch();
+  };
+
+  // Bulk update fields (e.g. Row or special) on a set of seats.
+  const bulkSetSeatFields = async (ids: number[], fields: { Row?: string; special?: string | null }) => {
+    if (!ids.length) return;
+    await Promise.all(
+      ids.map(id =>
+        fetch(`/api/admin/seats/${id}`, {
+          method: 'PUT',
+          body: JSON.stringify(fields),
+          headers: { 'Content-Type': 'application/json' },
+        })
+      )
+    );
+    await reFetch();
+  };
+
+  // Reset row selection when the active section changes.
+  useEffect(() => {
+    setSelectedRow(null);
+    setRowTransform(DEFAULT_ROW_TRANSFORM);
+  }, [activeSectionId]);
+
   const handleSeatClick = async (seat: Seat) => {
 
     switch (currentMode) {
       case 'edit-seat':
         setSelectedSeat(seat);
+        break;
+      case 'edit-row':
+        if (seat.attributes.Row) setSelectedRow(seat.attributes.Row);
         break;
       case 'add-ticket-to-seat':
         if (!selectedTicket) return;
@@ -597,6 +680,15 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         handleSendTickets,
         removeMultipleTicketsFromSeat,
         handleSendTicketsManually,
+        selectedRow,
+        setSelectedRow,
+        rowTransform,
+        setRowTransform,
+        resetRowTransform,
+        applyRowTransform,
+        deleteRow,
+        moveSeat,
+        bulkSetSeatFields,
       }}
     >
       {children}

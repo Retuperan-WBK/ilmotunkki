@@ -17,16 +17,17 @@ export async function PUT(req: NextRequest) {
     const seatId = req.nextUrl.pathname.split('/').pop();
     const body = await req.json();
 
-    const payload = {
-      data: {
-        x_cord: body.x_cord,
-        y_cord: body.y_cord,
-        Row: body.Row,
-        Number: body.Number,
-        item_type: body.item_type || null,
-        special: body.special || null,
-      }
-    };
+    // Only send the fields that were provided so partial updates (e.g. dragging a
+    // seat) do not clear unrelated fields such as item_type or special.
+    const data: Record<string, unknown> = {};
+    if ('x_cord' in body) data.x_cord = body.x_cord;
+    if ('y_cord' in body) data.y_cord = body.y_cord;
+    if ('Row' in body) data.Row = body.Row;
+    if ('Number' in body) data.Number = body.Number;
+    if ('item_type' in body) data.item_type = body.item_type || null;
+    if ('special' in body) data.special = body.special || null;
+
+    const payload = { data };
 
     const response = await fetchAuthenticatedAPI(`/seats/${seatId}`, {
       method: 'PUT',

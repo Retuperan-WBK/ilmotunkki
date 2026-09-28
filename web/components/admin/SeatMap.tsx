@@ -4,6 +4,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent, KeyboardEvent as ReactKeyboardEvent } from 'react';
 import type { Seat, Section, Order, AdminGroup } from '@/utils/models';
 import { useAdminContext } from './AdminContext';
+import { getRowSeats, isIdentityTransform, transformRowSeats } from './seatTransforms';
 
 const MAP_SIZE = 1000;
 const MIN_ZOOM = 0.1;
@@ -18,7 +19,7 @@ const colors: Record<string, string> = {
   opiskelija: '#db9368',
 };
 
-const Seats = memo(function Seats({ section, scale, filter, selectedSeat, selectedGroup, selectedOrder, selectedIds, suppressClickRef, onSeatClick }: {
+const Seats = memo(function Seats({ section, scale, filter, selectedSeat, selectedGroup, selectedOrder, selectedIds, overrides, suppressClickRef, onSeatClick, onSeatPointerDown, onSeatPointerMove, onSeatPointerUp }: {
   section: Section | null;
   scale: number;
   filter: { filter: 'show-class' | 'show-itemtype' | 'highlight-group' | 'highlight-order' | 'special' | null; showReserved: boolean };
@@ -26,8 +27,12 @@ const Seats = memo(function Seats({ section, scale, filter, selectedSeat, select
   selectedGroup: AdminGroup | null;
   selectedOrder: Order | null;
   selectedIds: number[];
+  overrides: Record<number, { x_cord: number; y_cord: number }>;
   suppressClickRef: { current: boolean };
   onSeatClick: (seat: Seat) => void;
+  onSeatPointerDown: (seat: Seat, event: ReactPointerEvent<SVGGElement>) => void;
+  onSeatPointerMove: (event: ReactPointerEvent<SVGGElement>) => void;
+  onSeatPointerUp: (event: ReactPointerEvent<SVGGElement>) => void;
 }) {
   const selected = new Set(selectedIds);
   return <>
@@ -45,16 +50,21 @@ const Seats = memo(function Seats({ section, scale, filter, selectedSeat, select
       if (selectedSeat?.id === seat.id || selected.has(seat.id)) fill = '#ee2725';
       const stroke = !filter.showReserved ? '#181818' : !assigned ? '#19b77c' : order?.attributes.tickets_sent ? '#8754dc' : '#ee2725';
       const textColor = fill === colors.deluxe || fill === '#facc15' ? '#211d1d' : '#ffffff';
-      const x = seat.attributes.x_cord * scale;
-      const y = seat.attributes.y_cord * scale;
-      return <g key={seat.id} onClick={event => {
-        event.stopPropagation();
-        if (suppressClickRef.current) {
-          suppressClickRef.current = false;
-          return;
-        }
-        onSeatClick(seat);
-      }} style={{ cursor: 'pointer' }}>
+      const override = overrides[seat.id];
+      const x = (override?.x_cord ?? seat.attributes.x_cord) * scale;
+      const y = (override?.y_cord ?? seat.attributes.y_cord) * scale;
+      return <g key={seat.id}
+        onPointerDown={event => onSeatPointerDown(seat, event)}
+        onPointerMove={onSeatPointerMove}
+        onPointerUp={onSeatPointerUp}
+        onClick={event => {
+          event.stopPropagation();
+          if (suppressClickRef.current) {
+            suppressClickRef.current = false;
+            return;
+          }
+          onSeatClick(seat);
+        }} style={{ cursor: 'pointer' }}>
         <title>Rivi {seat.attributes.Row}, paikka {seat.attributes.Number} — {order?.attributes.tickets_sent ? 'liput lähetetty' : assigned ? 'varattu' : 'vapaa'}</title>
         <circle cx={x} cy={y} r="3.8" fill={fill} stroke={stroke} strokeWidth={filter.showReserved ? 1.5 : 0.6} />
         <text x={x} y={y} fontSize="4" fontWeight="600" textAnchor="middle" dominantBaseline="central" fill={textColor} style={{ userSelect: 'none', pointerEvents: 'none' }}>{seat.attributes.Number}</text>
@@ -71,6 +81,7 @@ export default function SeatMap() {
     setSelectedOrder, handleSetActiveTab, multiSelectedSeats, setSelectedSeat,
     currentMode, selectedTicket, setMode, setSelectedTicket,
     mapScale,
+    selectedRow, rowTransform, setRowTransform, moveSeat,
   } = useAdminContext();
 
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -79,10 +90,12 @@ export default function SeatMap() {
   const [view, setView] = useState(viewRef.current);
   const frameRef = useRef<number | null>(null);
   const pointerRef = useRef<{ id: number; x: number; y: number; moved: boolean } | null>(null);
+  const dragRef = useRef<{ seatId: number; pointerId: number; startClientX: number; startClientY: number; startX: number; startY: number; mode: 'seat' | 'row' } | null>(null);
   const suppressClickRef = useRef(false);
   const [legendOpen, setLegendOpen] = useState(true);
   const [showBackground, setShowBackground] = useState(true);
   const [showSeats, setShowSeats] = useState(true);
+  const [dragSeat, setDragSeat] = useState<{ id: number; x_cord: number; y_cord: number } | null>(null);
   const selectedIds = useMemo(() => multiSelectedSeats.map(seat => seat.id), [multiSelectedSeats]);
 
   const image = activeSection?.attributes.background_image.data?.attributes;
@@ -96,6 +109,16 @@ export default function SeatMap() {
   const worldHeight = imageHeight * worldScale;
   // Global map size setting (from CMS Global settings). 100% = fit to the viewport.
   const mapScaleFactor = (mapScale > 0 ? mapScale : 100) / 100;
+
+  // Live position overrides for the row transform preview and single-seat dragging.
+  const seatOverrides = useMemo(() => {
+    const overrides: Record<number, { x_cord: number; y_cord: number }> = {};
+    if (activeSection && selectedRow && !isIdentityTransform(rowTransform)) {
+      Object.assign(overrides, transformRowSeats(getRowSeats(activeSection, selectedRow), rowTransform));
+    }
+    if (dragSeat) overrides[dragSeat.id] = { x_cord: dragSeat.x_cord, y_cord: dragSeat.y_cord };
+    return overrides;
+  }, [activeSection, selectedRow, rowTransform, dragSeat]);
 
   const drawView = useCallback(() => {
     if (frameRef.current !== null) return;
@@ -235,6 +258,61 @@ export default function SeatMap() {
     if (svgRef.current) svgRef.current.style.cursor = 'grab';
   };
 
+  const imageDelta = (event: ReactPointerEvent<SVGGElement>, drag: { startClientX: number; startClientY: number }) => {
+    const rect = viewportRef.current?.getBoundingClientRect();
+    if (!rect || !rect.width || !rect.height) return { dx: 0, dy: 0 };
+    return {
+      dx: (event.clientX - drag.startClientX) / rect.width * viewRef.current.width / worldScale,
+      dy: (event.clientY - drag.startClientY) / rect.height * viewRef.current.height / worldScale,
+    };
+  };
+
+  // Shift+drag moves a single seat (edit-seat mode) or the whole selected row (edit-row mode).
+  const handleSeatPointerDown = (seat: Seat, event: ReactPointerEvent<SVGGElement>) => {
+    if (!event.shiftKey) return;
+    const isSeatDrag = currentMode === 'edit-seat';
+    const isRowDrag = currentMode === 'edit-row' && selectedRow !== null && seat.attributes.Row === selectedRow;
+    if (!isSeatDrag && !isRowDrag) return;
+
+    event.stopPropagation();
+    event.preventDefault();
+    try { event.currentTarget.setPointerCapture(event.pointerId); } catch { /* pointer capture unavailable */ }
+
+    dragRef.current = isRowDrag
+      ? { seatId: seat.id, pointerId: event.pointerId, startClientX: event.clientX, startClientY: event.clientY, startX: rowTransform.dx, startY: rowTransform.dy, mode: 'row' }
+      : { seatId: seat.id, pointerId: event.pointerId, startClientX: event.clientX, startClientY: event.clientY, startX: seat.attributes.x_cord, startY: seat.attributes.y_cord, mode: 'seat' };
+
+    if (!isRowDrag) setDragSeat({ id: seat.id, x_cord: seat.attributes.x_cord, y_cord: seat.attributes.y_cord });
+  };
+
+  const handleSeatPointerMove = (event: ReactPointerEvent<SVGGElement>) => {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    const { dx, dy } = imageDelta(event, drag);
+    if (drag.mode === 'row') {
+      setRowTransform(previous => ({ ...previous, dx: drag.startX + dx, dy: drag.startY + dy }));
+    } else {
+      setDragSeat({ id: drag.seatId, x_cord: drag.startX + dx, y_cord: drag.startY + dy });
+    }
+  };
+
+  const handleSeatPointerUp = (event: ReactPointerEvent<SVGGElement>) => {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    dragRef.current = null;
+    suppressClickRef.current = true;
+    if (drag.mode === 'row') return; // Keep the preview; the user commits with "Tallenna".
+    const { dx, dy } = imageDelta(event, drag);
+    const x_cord = drag.startX + dx;
+    const y_cord = drag.startY + dy;
+    // Keep the edit panel in sync so it cannot write back stale coordinates.
+    if (selectedSeat?.id === drag.seatId) {
+      setSelectedSeat({ ...selectedSeat, attributes: { ...selectedSeat.attributes, x_cord, y_cord } });
+    }
+    setDragSeat(null);
+    moveSeat(drag.seatId, x_cord, y_cord);
+  };
+
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     if (event.key === 'Escape' && (selectedTicket || selectedSeat)) {
       setMode(null);
@@ -317,7 +395,8 @@ export default function SeatMap() {
           {showBackground && image && <image href={`/api/admin/image?url=${encodeURIComponent(image.url)}`} x="0" y="0" width={worldWidth} height={worldHeight} preserveAspectRatio="none" />}
           {showSeats && <Seats section={activeSection} scale={worldScale}
             filter={filter} selectedSeat={selectedSeat} selectedGroup={selectedGroup} selectedOrder={selectedOrder}
-            selectedIds={selectedIds} suppressClickRef={suppressClickRef} onSeatClick={handleSeatClick} />}
+            selectedIds={selectedIds} overrides={seatOverrides} suppressClickRef={suppressClickRef} onSeatClick={handleSeatClick}
+            onSeatPointerDown={handleSeatPointerDown} onSeatPointerMove={handleSeatPointerMove} onSeatPointerUp={handleSeatPointerUp} />}
         </svg>
 
         <div className="absolute left-4 top-4 flex items-center gap-1 rounded-xl border border-white/10 bg-[#142235]/95 p-1 shadow-xl" aria-label="Kartan zoomaus">
@@ -343,6 +422,10 @@ export default function SeatMap() {
           </div>
         ) : currentMode === 'add-seat' ? (
           <div className="absolute left-4 top-16 rounded-xl border border-sky-400/30 bg-[#142235]/95 px-3 py-2 text-xs text-sky-100 shadow-xl">Pidä Shift pohjassa ja klikkaa karttaa lisätäksesi istuimen</div>
+        ) : currentMode === 'edit-seat' ? (
+          <div className="absolute left-4 top-16 rounded-xl border border-sky-400/30 bg-[#142235]/95 px-3 py-2 text-xs text-sky-100 shadow-xl">Valitse istuin muokataksesi sitä · Shift + raahaa siirtääksesi istuinta</div>
+        ) : currentMode === 'edit-row' ? (
+          <div className="absolute left-4 top-16 rounded-xl border border-sky-400/30 bg-[#142235]/95 px-3 py-2 text-xs text-sky-100 shadow-xl">Valitse rivi · Shift + raahaa istuinta siirtääksesi koko riviä</div>
         ) : null}
 
         {filter.filter && (

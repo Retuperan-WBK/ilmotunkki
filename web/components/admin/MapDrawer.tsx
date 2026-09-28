@@ -1,38 +1,61 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useAdminContext } from './AdminContext';
+import { getSectionRows } from './seatTransforms';
 
 const MapDrawer = () => {
-  const { 
+  const {
     newSeat,
     setNewSeat,
-    selectedSeat, 
+    selectedSeat,
     setSelectedSeat,
-    updateSeat, 
-    deleteSeat, 
-    setMode, 
-    currentMode, 
+    updateSeat,
+    deleteSeat,
+    setMode,
+    currentMode,
     itemTypes,
     sections,
-    multiSelectedSeats, 
+    activeSection,
+    multiSelectedSeats,
     setMultiSelectedSeats,
     updateMultipleSeats,
+    selectedRow,
+    setSelectedRow,
+    rowTransform,
+    setRowTransform,
+    resetRowTransform,
+    applyRowTransform,
+    deleteRow,
+    bulkSetSeatFields,
   } = useAdminContext();
+
+  const [nudgeStep, setNudgeStep] = useState(5);
+  const [bulkRow, setBulkRow] = useState('');
+  const [bulkSpecial, setBulkSpecial] = useState('');
 
   const isAddMode = currentMode === 'add-seat';
   const isEditMode = currentMode === 'edit-seat';
   const isMultiSelectMode = currentMode === 'multi-select';
+  const isRowMode = currentMode === 'edit-row';
   const inputClass = 'mt-1 w-full rounded-lg border border-white/15 bg-[#101a2b] px-3 py-2 text-sm text-white focus:border-sky-400 focus:outline-none';
+  const toolButtonClass = 'rounded border border-white/15 bg-white/5 px-2 py-1 text-xs text-slate-200 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40';
 
-  const handleTabChange = (mode: 'add-seat' | 'edit-seat' | 'multi-select') => {
+  const rows = useMemo(() => getSectionRows(activeSection), [activeSection]);
+  const rowSeatCount = useMemo(
+    () => (activeSection && selectedRow !== null
+      ? activeSection.attributes.seats.data.filter(seat => seat.attributes.Row === selectedRow).length
+      : 0),
+    [activeSection, selectedRow]
+  );
+
+  const handleTabChange = (mode: 'add-seat' | 'edit-seat' | 'multi-select' | 'edit-row') => {
     setMode(mode);
     if (mode === 'multi-select') {
       setSelectedSeat(null);
     }
     setMultiSelectedSeats([]);
   };
-
 
   const handleBulkUpdate = () => {
     if (!multiSelectedSeats.length) return;
@@ -43,9 +66,21 @@ const MapDrawer = () => {
           id: seat.id,
           special: seat.attributes.special
         };
-       })
+      })
     );
 
+    setMultiSelectedSeats([]);
+  };
+
+  const handleBulkRow = async () => {
+    if (!multiSelectedSeats.length || !bulkRow) return;
+    await bulkSetSeatFields(multiSelectedSeats.map(seat => seat.id), { Row: bulkRow });
+    setMultiSelectedSeats([]);
+  };
+
+  const handleBulkSpecial = async () => {
+    if (!multiSelectedSeats.length) return;
+    await bulkSetSeatFields(multiSelectedSeats.map(seat => seat.id), { special: bulkSpecial || null });
     setMultiSelectedSeats([]);
   };
 
@@ -68,6 +103,13 @@ const MapDrawer = () => {
 
     if (await deleteSeat(selectedSeat.id)) setSelectedSeat(null);
   };
+
+  const nudgeRow = (dx: number, dy: number) =>
+    setRowTransform(prev => ({ ...prev, dx: prev.dx + dx, dy: prev.dy + dy }));
+  const scaleRow = (factor: number) =>
+    setRowTransform(prev => ({ ...prev, scale: Math.round(prev.scale * factor * 10000) / 10000 }));
+  const rotateRow = (delta: number) =>
+    setRowTransform(prev => ({ ...prev, rotation: Math.round((prev.rotation + delta) * 100) / 100 }));
 
   useEffect(() => {
     setMode("edit-seat");
@@ -129,6 +171,12 @@ const MapDrawer = () => {
             onClick={() => handleTabChange('multi-select')}
           >
             Useita istuimia
+          </button>
+          <button
+            className={`rounded-lg px-3 py-2 text-xs font-semibold ${isRowMode ? 'bg-sky-500/20 text-sky-100' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}
+            onClick={() => handleTabChange('edit-row')}
+          >
+            Rivi
           </button>
         </div>
 
@@ -247,6 +295,7 @@ const MapDrawer = () => {
                 </option>
               ))}
             </select>
+            <p className="mt-2 text-xs text-slate-400">Vinkki: Shift + raahaa istuinta kartalla siirtääksesi sen.</p>
             <button
               className="mt-4 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-[#102134] hover:bg-emerald-400"
               onClick={() => handleUpdateSeat()}
@@ -294,6 +343,133 @@ const MapDrawer = () => {
               onClick={handleBulkUpdate}
             >
               Päivitä Lippuluokat
+            </button>
+
+            <div className="mt-4 border-t border-white/10 pt-3">
+              <label className="text-sm">Aseta rivi</label>
+              <div className="mt-1 flex gap-2">
+                <input
+                  type="text"
+                  value={bulkRow}
+                  onChange={(e) => setBulkRow(e.target.value)}
+                  placeholder="Esim. 5"
+                  className={`${inputClass} mt-0`}
+                />
+                <button
+                  disabled={!multiSelectedSeats.length || !bulkRow}
+                  className="shrink-0 rounded-lg bg-sky-500/20 px-3 py-2 text-xs font-semibold text-sky-100 hover:bg-sky-500/30 disabled:cursor-not-allowed disabled:opacity-50"
+                  onClick={handleBulkRow}
+                >
+                  Aseta
+                </button>
+              </div>
+
+              <label className="mt-3 block text-sm">Aseta lisähuomio</label>
+              <div className="mt-1 flex gap-2">
+                <input
+                  type="text"
+                  value={bulkSpecial}
+                  onChange={(e) => setBulkSpecial(e.target.value)}
+                  placeholder="Tyhjä = poista huomio"
+                  className={`${inputClass} mt-0`}
+                />
+                <button
+                  disabled={!multiSelectedSeats.length}
+                  className="shrink-0 rounded-lg bg-sky-500/20 px-3 py-2 text-xs font-semibold text-sky-100 hover:bg-sky-500/30 disabled:cursor-not-allowed disabled:opacity-50"
+                  onClick={handleBulkSpecial}
+                >
+                  Aseta
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isRowMode && (
+          <div className="mt-3 flex flex-col rounded-xl border border-white/10 bg-[#223149] p-4">
+            <h2 className="text-lg font-bold">Rivin muokkaus</h2>
+            <p className="mt-1 text-sm text-slate-300">
+              Valitse rivi ja siirrä, skaalaa tai kierrä sitä. Voit myös pitää Shift pohjassa ja raahata rivin istuinta kartalla.
+            </p>
+
+            <label className="mt-2 text-sm">Rivi</label>
+            <select
+              value={selectedRow ?? ''}
+              onChange={(e) => { setSelectedRow(e.target.value || null); resetRowTransform(); }}
+              className={inputClass}
+            >
+              <option value="">Valitse rivi</option>
+              {rows.map((row) => (
+                <option key={row} value={row}>{row}</option>
+              ))}
+            </select>
+            {selectedRow && <p className="mt-1 text-xs text-slate-400">{rowSeatCount} paikkaa</p>}
+
+            <div className="mt-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Siirto</span>
+                <label className="flex items-center gap-2 text-xs text-slate-400">
+                  askel
+                  <input
+                    type="number"
+                    min={1}
+                    value={nudgeStep}
+                    onChange={(e) => setNudgeStep(Math.max(1, Number(e.target.value) || 1))}
+                    className="w-16 rounded border border-white/15 bg-[#101a2b] px-2 py-1 text-white"
+                  />
+                </label>
+              </div>
+              <div className="mx-auto mt-1 grid w-32 grid-cols-3 gap-1">
+                <span />
+                <button type="button" className={toolButtonClass} onClick={() => nudgeRow(0, -nudgeStep)}>↑</button>
+                <span />
+                <button type="button" className={toolButtonClass} onClick={() => nudgeRow(-nudgeStep, 0)}>←</button>
+                <button type="button" className={toolButtonClass} onClick={() => nudgeRow(0, nudgeStep)}>↓</button>
+                <button type="button" className={toolButtonClass} onClick={() => nudgeRow(nudgeStep, 0)}>→</button>
+              </div>
+            </div>
+
+            <div className="mt-3 flex items-center justify-between">
+              <span className="text-sm">Skaalaus</span>
+              <div className="flex items-center gap-1">
+                <button type="button" className={toolButtonClass} onClick={() => scaleRow(0.99)}>−1%</button>
+                <span className="w-14 text-center text-xs tabular-nums">{Math.round(rowTransform.scale * 100)}%</span>
+                <button type="button" className={toolButtonClass} onClick={() => scaleRow(1.01)}>+1%</button>
+              </div>
+            </div>
+
+            <div className="mt-2 flex items-center justify-between">
+              <span className="text-sm">Kierto</span>
+              <div className="flex items-center gap-1">
+                <button type="button" className={toolButtonClass} onClick={() => rotateRow(-1)}>−1°</button>
+                <span className="w-14 text-center text-xs tabular-nums">{rowTransform.rotation.toFixed(1)}°</span>
+                <button type="button" className={toolButtonClass} onClick={() => rotateRow(1)}>+1°</button>
+              </div>
+            </div>
+
+            <div className="mt-4 flex gap-2">
+              <button
+                disabled={!selectedRow}
+                className="flex-1 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-[#102134] hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={() => applyRowTransform()}
+              >
+                Tallenna muutokset
+              </button>
+              <button
+                disabled={!selectedRow}
+                className="rounded-lg border border-white/15 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={() => resetRowTransform()}
+              >
+                Peruuta
+              </button>
+            </div>
+
+            <button
+              disabled={!selectedRow}
+              className="mt-2 rounded-lg border border-rose-400/30 bg-rose-500/15 px-4 py-2 text-sm font-semibold text-rose-200 hover:bg-rose-500/25 disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={() => deleteRow()}
+            >
+              Poista rivi
             </button>
           </div>
         )}
