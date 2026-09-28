@@ -38,6 +38,7 @@ interface AdminContextProps {
   setSelectedSeat: (seat: ExtendedSeat | null) => void;
   itemTypes: ItemType[];
   fetchItemTypes: () => Promise<void>;
+  mapScale: number;
   filter: HighlightedSeat;
   setFilter: (filter: HighlightedSeat) => void;
   bottomDrawerOpen: boolean;
@@ -94,6 +95,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [currentMode, setCurrentMode] = useState<AdminContextProps['currentMode']>(null);
   const [activeTab, setActiveTab] = useState<'tilaukset' | 'ryhmat' | 'kartta'>('tilaukset'); // State to track active tab
   const [itemTypes, setItemTypes] = useState<ItemType[]>([]);
+  const [mapScale, setMapScale] = useState(100);
 
   const [orderSortOption, setOrderSortOption] = useState<'newest' | 'oldest' | 'largest' | 'smallest'>('newest');
   const [orderFilters, setOrderFilters] = useState<{ kutsuvieras: boolean, erikoisjarjestely: boolean, ticketType: string, noGroup: boolean}>({ kutsuvieras: false, erikoisjarjestely: false, ticketType: '', noGroup: false });
@@ -150,6 +152,20 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const res = await fetch("/api/admin/itemtypes");
     const data = await res.json();
     setItemTypes(data);
+  };
+
+  // Fetch global admin settings (e.g. map scale)
+  const fetchSettings = async () => {
+    try {
+      const res = await fetch("/api/admin/settings");
+      if (!res.ok) return;
+      const data = await res.json();
+      if (typeof data?.mapScale === 'number' && data.mapScale > 0) {
+        setMapScale(data.mapScale);
+      }
+    } catch (error) {
+      console.error('Failed to fetch admin settings', error);
+    }
   };
 
   // Fetch all groups
@@ -526,6 +542,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     fetchGroups();
     fetchSections();
     fetchItemTypes();
+    fetchSettings();
   }, [fetchSections]);
 
   return (
@@ -555,6 +572,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setSelectedSeat,
         itemTypes,
         fetchItemTypes,
+        mapScale,
         newSeat,
         setNewSeat,
         selectedTicket,

@@ -6,8 +6,8 @@ import type { Seat, Section, Order, AdminGroup } from '@/utils/models';
 import { useAdminContext } from './AdminContext';
 
 const MAP_SIZE = 1000;
-const MIN_ZOOM = 0.65;
-const MAX_ZOOM = 6;
+const MIN_ZOOM = 0.1;
+const MAX_ZOOM = 8;
 
 type View = { x: number; y: number; width: number; height: number; fitWidth: number; fitHeight: number };
 
@@ -70,6 +70,7 @@ export default function SeatMap() {
     bottomDrawerOpen, setBottomDrawerOpen, orders, groups, setSelectedGroup,
     setSelectedOrder, handleSetActiveTab, multiSelectedSeats, setSelectedSeat,
     currentMode, selectedTicket, setMode, setSelectedTicket,
+    mapScale,
   } = useAdminContext();
 
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -80,6 +81,8 @@ export default function SeatMap() {
   const pointerRef = useRef<{ id: number; x: number; y: number; moved: boolean } | null>(null);
   const suppressClickRef = useRef(false);
   const [legendOpen, setLegendOpen] = useState(true);
+  const [showBackground, setShowBackground] = useState(true);
+  const [showSeats, setShowSeats] = useState(true);
   const selectedIds = useMemo(() => multiSelectedSeats.map(seat => seat.id), [multiSelectedSeats]);
 
   const image = activeSection?.attributes.background_image.data?.attributes;
@@ -91,6 +94,8 @@ export default function SeatMap() {
   const worldScale = MAP_SIZE / Math.max(imageWidth, imageHeight);
   const worldWidth = imageWidth * worldScale;
   const worldHeight = imageHeight * worldScale;
+  // Global map size setting (from CMS Global settings). 100% = fit to the viewport.
+  const mapScaleFactor = (mapScale > 0 ? mapScale : 100) / 100;
 
   const drawView = useCallback(() => {
     if (frameRef.current !== null) return;
@@ -114,13 +119,16 @@ export default function SeatMap() {
       height = worldHeight / 0.92;
       width = height * viewAspect;
     }
+    // Apply the global scale as the default zoom, keeping the aspect ratio intact.
+    const scaledWidth = width / mapScaleFactor;
+    const scaledHeight = height / mapScaleFactor;
     viewRef.current = {
-      x: worldWidth / 2 - width / 2,
-      y: worldHeight / 2 - height / 2,
-      width, height, fitWidth: width, fitHeight: height,
+      x: worldWidth / 2 - scaledWidth / 2,
+      y: worldHeight / 2 - scaledHeight / 2,
+      width: scaledWidth, height: scaledHeight, fitWidth: width, fitHeight: height,
     };
     drawView();
-  }, [drawView, worldWidth, worldHeight]);
+  }, [drawView, worldWidth, worldHeight, mapScaleFactor]);
 
   useEffect(() => {
     const viewport = viewportRef.current;
@@ -268,10 +276,20 @@ export default function SeatMap() {
               ))}
             </div>
           </div>
-          <label className="flex cursor-pointer items-center gap-2 text-xs text-slate-300">
-            <input type="checkbox" checked={filter.showReserved} onChange={() => setFilter({ ...filter, showReserved: !filter.showReserved })} className="accent-sky-400" />
-            Näytä varatut / vapaat
-          </label>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <label className="flex cursor-pointer items-center gap-2 text-xs text-slate-300">
+              <input type="checkbox" checked={filter.showReserved} onChange={() => setFilter({ ...filter, showReserved: !filter.showReserved })} className="accent-sky-400" />
+              Näytä varatut / vapaat
+            </label>
+            <label className="flex cursor-pointer items-center gap-2 text-xs text-slate-300">
+              <input type="checkbox" checked={showBackground} onChange={() => setShowBackground(value => !value)} className="accent-sky-400" />
+              Taustakartta
+            </label>
+            <label className="flex cursor-pointer items-center gap-2 text-xs text-slate-300">
+              <input type="checkbox" checked={showSeats} onChange={() => setShowSeats(value => !value)} className="accent-sky-400" />
+              Paikat
+            </label>
+          </div>
         </div>
         <div className="mt-2 flex flex-nowrap gap-1.5 overflow-x-auto pb-0.5 lg:mt-3 lg:flex-wrap lg:overflow-visible" aria-label="Kartan väritys">
           {filters.map(option => (
@@ -296,10 +314,10 @@ export default function SeatMap() {
             if (rect) zoomAt(event.clientX - rect.left, event.clientY - rect.top, 1.5);
           }}>
           <rect x={view.x} y={view.y} width={view.width} height={view.height} fill="#adadad" />
-          {image && <image href={`/api/admin/image?url=${encodeURIComponent(image.url)}`} x="0" y="0" width={worldWidth} height={worldHeight} preserveAspectRatio="none" />}
-          <Seats section={activeSection} scale={worldScale}
+          {showBackground && image && <image href={`/api/admin/image?url=${encodeURIComponent(image.url)}`} x="0" y="0" width={worldWidth} height={worldHeight} preserveAspectRatio="none" />}
+          {showSeats && <Seats section={activeSection} scale={worldScale}
             filter={filter} selectedSeat={selectedSeat} selectedGroup={selectedGroup} selectedOrder={selectedOrder}
-            selectedIds={selectedIds} suppressClickRef={suppressClickRef} onSeatClick={handleSeatClick} />
+            selectedIds={selectedIds} suppressClickRef={suppressClickRef} onSeatClick={handleSeatClick} />}
         </svg>
 
         <div className="absolute left-4 top-4 flex items-center gap-1 rounded-xl border border-white/10 bg-[#142235]/95 p-1 shadow-xl" aria-label="Kartan zoomaus">

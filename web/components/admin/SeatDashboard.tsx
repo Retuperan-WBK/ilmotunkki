@@ -55,7 +55,7 @@ export default function SeatDashboard() {
   return (
     <div className="flex min-h-screen flex-col bg-[#0c1523] text-slate-100 lg:h-full lg:min-h-0">
       <header className="shrink-0 border-b border-white/10 bg-[#111d2e] px-3 py-2 lg:px-6 lg:py-3">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-16 items-center justify-center overflow-hidden rounded-lg bg-white/5 sm:h-12 sm:w-20"><Logo /></div>
             <div>
@@ -63,17 +63,7 @@ export default function SeatDashboard() {
               <h1 className="text-lg font-bold tracking-tight text-white sm:text-xl">Plassitunkki</h1>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2 text-sm">
-            <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 lg:px-4 lg:py-2"><span className="text-slate-400">Tilauksia </span><strong className="ml-1 text-lg text-white">{orders.length}</strong></div>
-            <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 lg:px-4 lg:py-2"><span className="text-slate-400">Lippuja </span><strong className="ml-1 text-lg text-white">{total}</strong></div>
-            <div className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-3 py-1.5 lg:px-4 lg:py-2"><span className="text-emerald-200">Plassattu </span><strong className="ml-1 text-lg text-white">{placed}/{total}</strong></div>
-            <button type="button" onClick={refresh} disabled={refreshing} aria-label="Päivitä tiedot" title="Päivitä tiedot"
-              className="rounded-xl border border-white/15 px-3 py-1.5 text-sm font-medium text-slate-200 transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400 disabled:opacity-50 lg:py-2.5">
-              {refreshing ? 'Päivitetään…' : '↻ Päivitä'}
-            </button>
-          </div>
-        </div>
-        <div className="mt-2 flex flex-wrap items-center justify-between gap-2 lg:mt-3">
+
           <nav className="flex flex-wrap gap-1" aria-label="Ylläpidon näkymät">
             {tabs.map(tab => (
               <button key={tab.id} type="button" onClick={() => changeTab(tab.id)} aria-current={activeTab === tab.id ? 'page' : undefined}
@@ -82,7 +72,21 @@ export default function SeatDashboard() {
               </button>
             ))}
           </nav>
-          <p className="text-xs text-slate-400">DeLuxe {ticketCounts.deluxe} · I {ticketCounts.iluokka} · II {ticketCounts.iiluokka} · Opiskelija {ticketCounts.opiskelija}</p>
+
+          <div className="ml-auto flex items-center gap-2">
+            <div className="flex flex-col items-end gap-0.5">
+              <div className="flex flex-wrap items-center justify-end gap-2 text-sm">
+                <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 lg:px-4 lg:py-2"><span className="text-slate-400">Tilauksia </span><strong className="ml-1 text-lg text-white">{orders.length}</strong></div>
+                <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 lg:px-4 lg:py-2"><span className="text-slate-400">Lippuja </span><strong className="ml-1 text-lg text-white">{total}</strong></div>
+                <div className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-3 py-1.5 lg:px-4 lg:py-2"><span className="text-emerald-200">Plassattu </span><strong className="ml-1 text-lg text-white">{placed}/{total}</strong></div>
+              </div>
+              <p className="text-[11px] leading-tight text-slate-400">DeLuxe {ticketCounts.deluxe} · I {ticketCounts.iluokka} · II {ticketCounts.iiluokka} · Opiskelija {ticketCounts.opiskelija}</p>
+            </div>
+            <button type="button" onClick={refresh} disabled={refreshing} aria-label="Päivitä tiedot" title="Päivitä tiedot"
+              className="shrink-0 rounded-xl border border-white/15 px-3 py-1.5 text-sm font-medium text-slate-200 transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400 disabled:opacity-50 lg:py-2.5">
+              {refreshing ? 'Päivitetään…' : '↻ Päivitä'}
+            </button>
+          </div>
         </div>
         {refreshError && <p role="alert" className="mt-2 text-sm text-rose-300">Tietojen päivitys epäonnistui. Yritä uudelleen.</p>}
       </header>
