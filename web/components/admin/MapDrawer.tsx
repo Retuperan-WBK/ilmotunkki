@@ -1,8 +1,11 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useAdminContext } from './AdminContext';
 import { getSectionRows } from './seatTransforms';
+
+const formatPercent = (value: number) => String(Math.round(value * 10000) / 100);
+const formatDegrees = (value: number) => String(Math.round(value * 100) / 100);
 
 const MapDrawer = () => {
   const {
@@ -33,6 +36,8 @@ const MapDrawer = () => {
   const [nudgeStep, setNudgeStep] = useState(5);
   const [bulkRow, setBulkRow] = useState('');
   const [bulkSpecial, setBulkSpecial] = useState('');
+  const [rowInputs, setRowInputs] = useState({ scaleX: '100', scaleY: '100', rotation: '0' });
+  const rowInputsFocused = useRef(false);
 
   const isAddMode = currentMode === 'add-seat';
   const isEditMode = currentMode === 'edit-seat';
@@ -112,6 +117,43 @@ const MapDrawer = () => {
     setRowTransform(prev => ({ ...prev, scaleY: Math.round(prev.scaleY * factor * 10000) / 10000 }));
   const rotateRow = (delta: number) =>
     setRowTransform(prev => ({ ...prev, rotation: Math.round((prev.rotation + delta) * 100) / 100 }));
+
+  const syncRowInputs = () => setRowInputs({
+    scaleX: formatPercent(rowTransform.scaleX),
+    scaleY: formatPercent(rowTransform.scaleY),
+    rotation: formatDegrees(rowTransform.rotation),
+  });
+
+  // Keep the text inputs in sync with button-based changes, unless the user is typing.
+  useEffect(() => {
+    if (rowInputsFocused.current) return;
+    setRowInputs({
+      scaleX: formatPercent(rowTransform.scaleX),
+      scaleY: formatPercent(rowTransform.scaleY),
+      rotation: formatDegrees(rowTransform.rotation),
+    });
+  }, [rowTransform]);
+
+  const updateScaleInput = (axis: 'scaleX' | 'scaleY', raw: string) => {
+    setRowInputs(prev => ({ ...prev, [axis]: raw }));
+    const parsed = parseFloat(raw);
+    if (Number.isFinite(parsed)) {
+      setRowTransform(prev => ({ ...prev, [axis]: parsed / 100 }));
+    }
+  };
+
+  const updateRotationInput = (raw: string) => {
+    setRowInputs(prev => ({ ...prev, rotation: raw }));
+    const parsed = parseFloat(raw);
+    if (Number.isFinite(parsed)) {
+      setRowTransform(prev => ({ ...prev, rotation: parsed }));
+    }
+  };
+
+  const handleRowInputBlur = () => {
+    rowInputsFocused.current = false;
+    syncRowInputs();
+  };
 
   useEffect(() => {
     setMode("edit-seat");
@@ -435,7 +477,19 @@ const MapDrawer = () => {
               <span className="text-sm">Skaalaus X</span>
               <div className="flex items-center gap-1">
                 <button type="button" className={toolButtonClass} onClick={() => scaleRowX(0.99)}>−1%</button>
-                <span className="w-14 text-center text-xs tabular-nums">{Math.round(rowTransform.scaleX * 100)}%</span>
+                <div className="flex items-center gap-0.5">
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    step={0.5}
+                    value={rowInputs.scaleX}
+                    onFocus={() => { rowInputsFocused.current = true; }}
+                    onBlur={handleRowInputBlur}
+                    onChange={e => updateScaleInput('scaleX', e.target.value)}
+                    className="w-16 rounded border border-white/15 bg-[#101a2b] px-2 py-1 text-center text-xs tabular-nums text-white focus:border-sky-400 focus:outline-none"
+                  />
+                  <span className="text-xs text-slate-400">%</span>
+                </div>
                 <button type="button" className={toolButtonClass} onClick={() => scaleRowX(1.01)}>+1%</button>
               </div>
             </div>
@@ -444,7 +498,19 @@ const MapDrawer = () => {
               <span className="text-sm">Skaalaus Y</span>
               <div className="flex items-center gap-1">
                 <button type="button" className={toolButtonClass} onClick={() => scaleRowY(0.99)}>−1%</button>
-                <span className="w-14 text-center text-xs tabular-nums">{Math.round(rowTransform.scaleY * 100)}%</span>
+                <div className="flex items-center gap-0.5">
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    step={0.5}
+                    value={rowInputs.scaleY}
+                    onFocus={() => { rowInputsFocused.current = true; }}
+                    onBlur={handleRowInputBlur}
+                    onChange={e => updateScaleInput('scaleY', e.target.value)}
+                    className="w-16 rounded border border-white/15 bg-[#101a2b] px-2 py-1 text-center text-xs tabular-nums text-white focus:border-sky-400 focus:outline-none"
+                  />
+                  <span className="text-xs text-slate-400">%</span>
+                </div>
                 <button type="button" className={toolButtonClass} onClick={() => scaleRowY(1.01)}>+1%</button>
               </div>
             </div>
@@ -453,7 +519,19 @@ const MapDrawer = () => {
               <span className="text-sm">Kierto</span>
               <div className="flex items-center gap-1">
                 <button type="button" className={toolButtonClass} onClick={() => rotateRow(-1)}>−1°</button>
-                <span className="w-14 text-center text-xs tabular-nums">{rowTransform.rotation.toFixed(1)}°</span>
+                <div className="flex items-center gap-0.5">
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    step={0.5}
+                    value={rowInputs.rotation}
+                    onFocus={() => { rowInputsFocused.current = true; }}
+                    onBlur={handleRowInputBlur}
+                    onChange={e => updateRotationInput(e.target.value)}
+                    className="w-16 rounded border border-white/15 bg-[#101a2b] px-2 py-1 text-center text-xs tabular-nums text-white focus:border-sky-400 focus:outline-none"
+                  />
+                  <span className="text-xs text-slate-400">°</span>
+                </div>
                 <button type="button" className={toolButtonClass} onClick={() => rotateRow(1)}>+1°</button>
               </div>
             </div>
