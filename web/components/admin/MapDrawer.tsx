@@ -106,8 +106,10 @@ const MapDrawer = () => {
 
   const nudgeRow = (dx: number, dy: number) =>
     setRowTransform(prev => ({ ...prev, dx: prev.dx + dx, dy: prev.dy + dy }));
-  const scaleRow = (factor: number) =>
-    setRowTransform(prev => ({ ...prev, scale: Math.round(prev.scale * factor * 10000) / 10000 }));
+  const scaleRowX = (factor: number) =>
+    setRowTransform(prev => ({ ...prev, scaleX: Math.round(prev.scaleX * factor * 10000) / 10000 }));
+  const scaleRowY = (factor: number) =>
+    setRowTransform(prev => ({ ...prev, scaleY: Math.round(prev.scaleY * factor * 10000) / 10000 }));
   const rotateRow = (delta: number) =>
     setRowTransform(prev => ({ ...prev, rotation: Math.round((prev.rotation + delta) * 100) / 100 }));
 
@@ -430,11 +432,20 @@ const MapDrawer = () => {
             </div>
 
             <div className="mt-3 flex items-center justify-between">
-              <span className="text-sm">Skaalaus</span>
+              <span className="text-sm">Skaalaus X</span>
               <div className="flex items-center gap-1">
-                <button type="button" className={toolButtonClass} onClick={() => scaleRow(0.99)}>−1%</button>
-                <span className="w-14 text-center text-xs tabular-nums">{Math.round(rowTransform.scale * 100)}%</span>
-                <button type="button" className={toolButtonClass} onClick={() => scaleRow(1.01)}>+1%</button>
+                <button type="button" className={toolButtonClass} onClick={() => scaleRowX(0.99)}>−1%</button>
+                <span className="w-14 text-center text-xs tabular-nums">{Math.round(rowTransform.scaleX * 100)}%</span>
+                <button type="button" className={toolButtonClass} onClick={() => scaleRowX(1.01)}>+1%</button>
+              </div>
+            </div>
+
+            <div className="mt-2 flex items-center justify-between">
+              <span className="text-sm">Skaalaus Y</span>
+              <div className="flex items-center gap-1">
+                <button type="button" className={toolButtonClass} onClick={() => scaleRowY(0.99)}>−1%</button>
+                <span className="w-14 text-center text-xs tabular-nums">{Math.round(rowTransform.scaleY * 100)}%</span>
+                <button type="button" className={toolButtonClass} onClick={() => scaleRowY(1.01)}>+1%</button>
               </div>
             </div>
 

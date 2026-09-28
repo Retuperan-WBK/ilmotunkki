@@ -95,6 +95,9 @@ export default function SeatMap() {
   const [legendOpen, setLegendOpen] = useState(true);
   const [showBackground, setShowBackground] = useState(true);
   const [showSeats, setShowSeats] = useState(true);
+  const [backgroundOpacity, setBackgroundOpacity] = useState(1);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const settingsRef = useRef<HTMLDivElement>(null);
   const [dragSeat, setDragSeat] = useState<{ id: number; x_cord: number; y_cord: number } | null>(null);
   const selectedIds = useMemo(() => multiSelectedSeats.map(seat => seat.id), [multiSelectedSeats]);
 
@@ -171,6 +174,18 @@ export default function SeatMap() {
   useEffect(() => {
     if (sections.length && !activeSection) setActiveSection(sections[0].id);
   }, [sections, activeSection, setActiveSection]);
+
+  // Close the map settings dropdown when clicking outside of it.
+  useEffect(() => {
+    if (!settingsOpen) return;
+    const onPointerDown = (event: MouseEvent) => {
+      if (settingsRef.current && !settingsRef.current.contains(event.target as Node)) {
+        setSettingsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onPointerDown);
+    return () => document.removeEventListener('mousedown', onPointerDown);
+  }, [settingsOpen]);
 
   const zoomAt = useCallback((px: number, py: number, factor: number) => {
     const current = viewRef.current;
@@ -354,19 +369,49 @@ export default function SeatMap() {
               ))}
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-            <label className="flex cursor-pointer items-center gap-2 text-xs text-slate-300">
-              <input type="checkbox" checked={filter.showReserved} onChange={() => setFilter({ ...filter, showReserved: !filter.showReserved })} className="accent-sky-400" />
-              Näytä varatut / vapaat
-            </label>
-            <label className="flex cursor-pointer items-center gap-2 text-xs text-slate-300">
-              <input type="checkbox" checked={showBackground} onChange={() => setShowBackground(value => !value)} className="accent-sky-400" />
-              Taustakartta
-            </label>
-            <label className="flex cursor-pointer items-center gap-2 text-xs text-slate-300">
-              <input type="checkbox" checked={showSeats} onChange={() => setShowSeats(value => !value)} className="accent-sky-400" />
-              Paikat
-            </label>
+          <div className="relative" ref={settingsRef}>
+            <button
+              type="button"
+              onClick={() => setSettingsOpen(open => !open)}
+              aria-expanded={settingsOpen}
+              aria-haspopup="true"
+              className="flex items-center gap-2 rounded-lg border border-white/15 px-3 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400"
+            >
+              <span aria-hidden="true">⚙</span>
+              Asetukset
+            </button>
+            {settingsOpen && (
+              <div className="absolute right-0 top-full z-30 mt-2 w-64 rounded-xl border border-white/10 bg-[#142235] p-3 text-xs text-slate-200 shadow-2xl">
+                <label className="flex cursor-pointer items-center gap-2 py-1">
+                  <input type="checkbox" checked={filter.showReserved} onChange={() => setFilter({ ...filter, showReserved: !filter.showReserved })} className="accent-sky-400" />
+                  Näytä varatut / vapaat
+                </label>
+                <label className="flex cursor-pointer items-center gap-2 py-1">
+                  <input type="checkbox" checked={showSeats} onChange={() => setShowSeats(value => !value)} className="accent-sky-400" />
+                  Paikat
+                </label>
+                <label className="flex cursor-pointer items-center gap-2 py-1">
+                  <input type="checkbox" checked={showBackground} onChange={() => setShowBackground(value => !value)} className="accent-sky-400" />
+                  Taustakartta
+                </label>
+                <div className="mt-2 border-t border-white/10 pt-2">
+                  <div className="flex items-center justify-between">
+                    <span>Taustan peittävyys</span>
+                    <span className="tabular-nums text-slate-400">{Math.round(backgroundOpacity * 100)}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    value={Math.round(backgroundOpacity * 100)}
+                    disabled={!showBackground}
+                    onChange={event => setBackgroundOpacity(Number(event.target.value) / 100)}
+                    className="mt-1 w-full accent-sky-400 disabled:opacity-40"
+                    aria-label="Taustakartan peittävyys"
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
         <div className="mt-2 flex flex-nowrap gap-1.5 overflow-x-auto pb-0.5 lg:mt-3 lg:flex-wrap lg:overflow-visible" aria-label="Kartan väritys">
@@ -392,7 +437,7 @@ export default function SeatMap() {
             if (rect) zoomAt(event.clientX - rect.left, event.clientY - rect.top, 1.5);
           }}>
           <rect x={view.x} y={view.y} width={view.width} height={view.height} fill="#adadad" />
-          {showBackground && image && <image href={`/api/admin/image?url=${encodeURIComponent(image.url)}`} x="0" y="0" width={worldWidth} height={worldHeight} preserveAspectRatio="none" />}
+          {showBackground && image && <image href={`/api/admin/image?url=${encodeURIComponent(image.url)}`} x="0" y="0" width={worldWidth} height={worldHeight} preserveAspectRatio="none" opacity={backgroundOpacity} />}
           {showSeats && <Seats section={activeSection} scale={worldScale}
             filter={filter} selectedSeat={selectedSeat} selectedGroup={selectedGroup} selectedOrder={selectedOrder}
             selectedIds={selectedIds} overrides={seatOverrides} suppressClickRef={suppressClickRef} onSeatClick={handleSeatClick}

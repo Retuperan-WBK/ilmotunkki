@@ -1,11 +1,15 @@
 import { Seat, Section } from '@/utils/models';
 
-export type RowTransform = { dx: number; dy: number; scale: number; rotation: number };
+export type RowTransform = { dx: number; dy: number; scaleX: number; scaleY: number; rotation: number };
 
-export const DEFAULT_ROW_TRANSFORM: RowTransform = { dx: 0, dy: 0, scale: 1, rotation: 0 };
+export const DEFAULT_ROW_TRANSFORM: RowTransform = { dx: 0, dy: 0, scaleX: 1, scaleY: 1, rotation: 0 };
 
 export const isIdentityTransform = (transform: RowTransform) =>
-  transform.dx === 0 && transform.dy === 0 && transform.scale === 1 && transform.rotation === 0;
+  transform.dx === 0 &&
+  transform.dy === 0 &&
+  transform.scaleX === 1 &&
+  transform.scaleY === 1 &&
+  transform.rotation === 0;
 
 export const getSectionRows = (section: Section | null): string[] => {
   if (!section) return [];
@@ -40,8 +44,8 @@ export const transformRowSeats = (
 
   const result: Record<number, { x_cord: number; y_cord: number }> = {};
   seats.forEach(seat => {
-    const px = (seat.attributes.x_cord - centerX) * transform.scale;
-    const py = (seat.attributes.y_cord - centerY) * transform.scale;
+    const px = (seat.attributes.x_cord - centerX) * transform.scaleX;
+    const py = (seat.attributes.y_cord - centerY) * transform.scaleY;
     result[seat.id] = {
       x_cord: centerX + px * cos - py * sin + transform.dx,
       y_cord: centerY + px * sin + py * cos + transform.dy,
