@@ -17,6 +17,13 @@ const nextConfig = {
         port: '1337',
         pathname: '/uploads/**',
       },
+      // Production Docker Compose service name for the CMS.
+      {
+        protocol: 'http',
+        hostname: 'liput-cms',
+        port: '1337',
+        pathname: '/uploads/**',
+      },
       {
         protocol: 'https',
         hostname: '*.paytrail.com',
