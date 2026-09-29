@@ -5,6 +5,7 @@ import type { PointerEvent as ReactPointerEvent, KeyboardEvent as ReactKeyboardE
 import type { Seat, Section, Order, AdminGroup } from '@/utils/models';
 import { useAdminContext } from './AdminContext';
 import { getRowSeats, isIdentityTransform, transformRowSeats } from './seatTransforms';
+import { useLocalStorageState } from './useLocalStorageState';
 
 const MAP_SIZE = 1000;
 const MIN_ZOOM = 0.1;
@@ -93,9 +94,11 @@ export default function SeatMap() {
   const dragRef = useRef<{ seatId: number; pointerId: number; startClientX: number; startClientY: number; startX: number; startY: number; mode: 'seat' | 'row' } | null>(null);
   const suppressClickRef = useRef(false);
   const [legendOpen, setLegendOpen] = useState(true);
-  const [showBackground, setShowBackground] = useState(true);
-  const [showSeats, setShowSeats] = useState(true);
-  const [backgroundOpacity, setBackgroundOpacity] = useState(1);
+  // Map view settings persist across sessions.
+  const [showBackground, setShowBackground] = useLocalStorageState('adminMap.showBackground', true);
+  const [showSeats, setShowSeats] = useLocalStorageState('adminMap.showSeats', true);
+  const [backgroundOpacity, setBackgroundOpacity] = useLocalStorageState('adminMap.backgroundOpacity', 1);
+  const [showReserved, setShowReserved] = useLocalStorageState('adminMap.showReserved', true);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const settingsRef = useRef<HTMLDivElement>(null);
   const [dragSeat, setDragSeat] = useState<{ id: number; x_cord: number; y_cord: number } | null>(null);
@@ -383,7 +386,7 @@ export default function SeatMap() {
             {settingsOpen && (
               <div className="absolute right-0 top-full z-30 mt-2 w-64 rounded-xl border border-white/10 bg-[#142235] p-3 text-xs text-slate-200 shadow-2xl">
                 <label className="flex cursor-pointer items-center gap-2 py-1">
-                  <input type="checkbox" checked={filter.showReserved} onChange={() => setFilter({ ...filter, showReserved: !filter.showReserved })} className="accent-sky-400" />
+                  <input type="checkbox" checked={showReserved} onChange={() => setShowReserved(value => !value)} className="accent-sky-400" />
                   Näytä varatut / vapaat
                 </label>
                 <label className="flex cursor-pointer items-center gap-2 py-1">
@@ -439,7 +442,7 @@ export default function SeatMap() {
           <rect x={view.x} y={view.y} width={view.width} height={view.height} fill="#adadad" />
           {showBackground && image && <image href={`/api/admin/image?url=${encodeURIComponent(image.url)}`} x="0" y="0" width={worldWidth} height={worldHeight} preserveAspectRatio="none" opacity={backgroundOpacity} />}
           {showSeats && <Seats section={activeSection} scale={worldScale}
-            filter={filter} selectedSeat={selectedSeat} selectedGroup={selectedGroup} selectedOrder={selectedOrder}
+            filter={{ ...filter, showReserved }} selectedSeat={selectedSeat} selectedGroup={selectedGroup} selectedOrder={selectedOrder}
             selectedIds={selectedIds} overrides={seatOverrides} suppressClickRef={suppressClickRef} onSeatClick={handleSeatClick}
             onSeatPointerDown={handleSeatPointerDown} onSeatPointerMove={handleSeatPointerMove} onSeatPointerUp={handleSeatPointerUp} />}
         </svg>
@@ -452,7 +455,7 @@ export default function SeatMap() {
           <button type="button" onClick={fitMap} title="Sovita kartta näkymään (0)" className="rounded-lg px-2.5 py-2 text-xs font-medium text-slate-200 hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400">Sovita</button>
         </div>
 
-        {filter.showReserved && (
+        {showReserved && (
           <div className="absolute bottom-4 left-4 flex flex-wrap gap-x-3 gap-y-1 rounded-lg border border-white/10 bg-[#142235]/95 px-3 py-2 text-xs text-slate-200 shadow-lg" aria-label="Paikkojen tilat">
             <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-full border-[3px] border-[#19b77c] bg-[#292929]" />Vapaa</span>
             <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-full border-[3px] border-[#ee2725] bg-[#292929]" />Varattu</span>
