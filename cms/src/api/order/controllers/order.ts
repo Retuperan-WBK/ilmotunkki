@@ -20,10 +20,10 @@ export default factories.createCoreController('api::order.order', {
     // Requires a signed-in dashboard user AND the createAdmin role permission.
     if (!ctx.state.user) return ctx.unauthorized('Authentication required');
     try {
-      const order = await strapi.service('api::order.order').createAdmin(ctx.request.body?.data);
+      const { order, confirmationEmailStatus } = await strapi.service('api::order.order').createAdmin(ctx.request.body?.data);
       const sanitizedOrder = await this.sanitizeOutput(order, ctx);
       ctx.status = 201;
-      return this.transformResponse(sanitizedOrder);
+      return this.transformResponse(sanitizedOrder, { confirmationEmailStatus });
     } catch (error) {
       if (error instanceof AdminOrderInputError) return ctx.badRequest(error.message);
       strapi.log.error(`Failed to create admin order: ${error}`);

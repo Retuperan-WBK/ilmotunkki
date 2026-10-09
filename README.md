@@ -208,11 +208,12 @@ When a user adds an item to cart, it is already added to an order. This means th
 
 #### Creating orders from the admin dashboard
 
-In `/admin`, open **Tilaukset** and click the small **+ Uusi tilaus** button. Fill in the customer's details, choose whether they are an invited guest, and enter quantities for each ticket type. Additional customer fields are under **Muut asiakastiedot**. Email is optional.
+In `/admin`, open **Tilaukset** and click the small **+ Uusi tilaus** button. Fill in the customer's first name, last name, optional email, special arrangements and language, choose whether they are an invited guest, and enter quantities for each ticket type. The form shows unit prices, the total number of tickets and the total amount.
 
 - **Odottaa verkkomaksua** creates a non-expiring `admin-new` order. The customer can pay through their edit link.
 - **Maksettu / laskutetaan erikseen** creates an `ok` order without taking an online payment. Invited guests automatically use this status.
-- Creation saves the customer, order and all tickets in one database transaction. No email is sent at creation; assign seats and send tickets using the existing dashboard actions.
+- Creation saves the customer, order and all tickets in one database transaction. Select **Lähetä tilausvahvistus sähköpostitse** to send the normal localized confirmation email after the order has been saved. An email address is required when this is selected. A sending failure is reported in the order view while the saved order remains available.
+- Assign seats and send the actual tickets using the existing dashboard actions.
 - The form uses the ticket types configured in Strapi and supports up to 1000 tickets per order. Like manual CMS creation, it bypasses the public checkout's sale dates, inventory/overflow and per-order limits.
 - The created order opens immediately for seating. **Asiakkaan muokkaus- ja maksulinkki** opens the customer's edit page, whose URL can be shared with them. Editing and deleting orders remain available through Strapi.
 

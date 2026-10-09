@@ -6,14 +6,8 @@ import { AdminOrderInput } from '@/utils/models';
 import { useAdminContext } from './AdminContext';
 
 const inputClass = 'mt-1 w-full rounded-lg border border-white/15 bg-[#101a2b] px-3 py-2 text-sm text-white focus:border-white/40 focus:outline-none';
-const additionalFields = [
-  { name: 'postalCode', label: 'Postinumero' },
-  { name: 'startYear', label: 'Aloitusvuosi' },
-  { name: 'diet', label: 'Ruokavalio' },
-  { name: 'group', label: 'Järjestö / ryhmä (asiakastieto)' },
-  { name: 'avec', label: 'Avec' },
-  { name: 'representativeOf', label: 'Edustettava taho' },
-] as const;
+const euros = new Intl.NumberFormat('fi-FI', { style: 'currency', currency: 'EUR' });
+const formatPrice = (cents: number) => euros.format(cents / 100);
 
 export default function CreateOrderDialog({ onClose }: { onClose: () => void }) {
   const { itemTypes, createOrder } = useAdminContext();
@@ -25,9 +19,11 @@ export default function CreateOrderDialog({ onClose }: { onClose: () => void }) 
   const [quantities, setQuantities] = useState<Record<number, string>>({});
   const [invited, setInvited] = useState(false);
   const [status, setStatus] = useState<AdminOrderInput['status']>('admin-new');
+  const [sendConfirmation, setSendConfirmation] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const total = itemTypes.reduce((sum, itemType) => sum + (Number(quantities[itemType.id]) || 0), 0);
+  const totalPrice = itemTypes.reduce((sum, itemType) => sum + (Number(quantities[itemType.id]) || 0) * itemType.attributes.price, 0);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -44,12 +40,10 @@ export default function CreateOrderDialog({ onClose }: { onClose: () => void }) 
     const customer: AdminOrderInput['customer'] = {
       firstName: String(form.get('firstName') || ''),
       lastName: String(form.get('lastName') || ''),
+      email: String(form.get('email') || ''),
+      special_arragements: String(form.get('special_arragements') || ''),
       locale: form.get('locale') === 'en' ? 'en' : 'fi',
     };
-    for (const field of ['email', 'phone', 'special_arragements', 'extra', ...additionalFields.map(field => field.name)]) {
-      customer[field] = String(form.get(field) || '');
-    }
-    for (const field of ['accept', 'nonalcoholic', 'greeting']) customer[field] = form.has(field);
     const tickets = itemTypes
       .map(itemType => ({ itemTypeId: itemType.id, quantity: Number(quantities[itemType.id]) || 0 }))
       .filter(ticket => ticket.quantity > 0);
@@ -58,7 +52,7 @@ export default function CreateOrderDialog({ onClose }: { onClose: () => void }) 
     setSubmitting(true);
     setError('');
     try {
-      await createOrder({ customer, kutsuvieras: invited, status: invited ? 'ok' : status, tickets });
+      await createOrder({ customer, kutsuvieras: invited, status: invited ? 'ok' : status, tickets, sendConfirmation });
       onClose();
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Tilauksen luominen epäonnistui.');
@@ -86,11 +80,8 @@ export default function CreateOrderDialog({ onClose }: { onClose: () => void }) 
             <label className="text-sm">Sukunimi *
               <input required name="lastName" autoComplete="family-name" maxLength={255} className={inputClass} />
             </label>
-            <label className="text-sm">Sähköposti (valinnainen)
-              <input type="email" name="email" autoComplete="email" maxLength={255} className={inputClass} />
-            </label>
-            <label className="text-sm">Puhelinnumero
-              <input type="tel" name="phone" autoComplete="tel" maxLength={255} className={inputClass} />
+            <label className="text-sm">Sähköposti {sendConfirmation ? '*' : '(valinnainen)'}
+              <input type="email" name="email" required={sendConfirmation} autoComplete="email" maxLength={255} className={inputClass} />
             </label>
             <label className="text-sm">Asiakkaan kieli
               <select name="locale" className={inputClass} defaultValue="fi">
@@ -112,46 +103,34 @@ export default function CreateOrderDialog({ onClose }: { onClose: () => void }) 
           <label className="block text-sm">Erikoisjärjestelyt
             <textarea name="special_arragements" rows={2} maxLength={10000} className={inputClass} />
           </label>
-          <details className="rounded-lg border border-white/10 p-3">
-            <summary className="cursor-pointer text-sm text-slate-300">Muut asiakastiedot</summary>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              {additionalFields.map(field => (
-                <label key={field.name} className="text-sm">{field.label}
-                  <input name={field.name} maxLength={255} className={inputClass} />
-                </label>
-              ))}
-            </div>
-            <label className="mt-3 block text-sm">Lisätiedot
-              <textarea name="extra" rows={2} maxLength={10000} className={inputClass} />
-            </label>
-            <div className="mt-3 space-y-2 text-sm">
-              {[
-                { name: 'nonalcoholic', label: 'Alkoholiton' },
-                { name: 'greeting', label: 'Tervehdys' },
-                { name: 'accept', label: 'Nimen saa näyttää ilmoittautuneiden listalla' },
-              ].map(field => (
-                <label key={field.name} className="flex cursor-pointer items-center gap-2">
-                  <input type="checkbox" name={field.name} className="h-4 w-4 accent-sky-400" />
-                  {field.label}
-                </label>
-              ))}
-            </div>
-          </details>
           <div className="rounded-lg border border-white/10 p-3">
             <h3 className="mb-2 text-sm font-semibold">Liput</h3>
             {itemTypes.map(itemType => (
               <label key={itemType.id} className="flex items-center justify-between gap-3 border-b border-white/5 py-2 text-sm last:border-0">
-                <span>{translation[itemType.attributes.slug] || itemType.attributes.slug}</span>
+                <span>
+                  <span className="block">{translation[itemType.attributes.slug] || itemType.attributes.slug}</span>
+                  <span className="text-xs text-slate-400">{formatPrice(itemType.attributes.price)} / lippu</span>
+                </span>
                 <input type="number" min={0} max={1000} step={1} placeholder="0" aria-label={`${translation[itemType.attributes.slug] || itemType.attributes.slug}: lippujen määrä`}
                   value={quantities[itemType.id] ?? ''} onChange={event => setQuantities(current => ({ ...current, [itemType.id]: event.target.value }))}
                   className="w-24 rounded-lg border border-white/15 bg-[#101a2b] px-3 py-2 text-right text-sm text-white focus:outline-none" />
               </label>
             ))}
             {!itemTypes.length && <p className="text-sm text-slate-400">Lipputyyppejä ei ole ladattu. Sulje lomake ja päivitä näkymä.</p>}
-            <p className="mt-3 text-sm font-semibold">Yhteensä {total} lippua</p>
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-sm font-semibold" aria-live="polite" aria-atomic="true">
+              <span>Yhteensä {total} lippua</span>
+              <span className="text-base tabular-nums">{formatPrice(totalPrice)}</span>
+            </div>
             {total > 1000 && <p className="mt-1 text-sm text-rose-300">Tilauksessa voi olla enintään 1000 lippua.</p>}
           </div>
-          <p className="text-xs text-slate-400">Luominen ei lähetä sähköpostia. Verkkomaksua odottavan tilauksen asiakas voi maksaa muokkauslinkin kautta.</p>
+          <div>
+            <label className="flex cursor-pointer items-center gap-2 text-sm">
+              <input type="checkbox" checked={sendConfirmation} onChange={event => setSendConfirmation(event.target.checked)} className="h-4 w-4 accent-sky-400" />
+              Lähetä tilausvahvistus sähköpostitse
+            </label>
+            <p className="mt-1 text-xs text-slate-400">Käyttää normaalia tilausvahvistusta asiakkaan valitsemalla kielellä.</p>
+          </div>
+          <p className="text-xs text-slate-400">Verkkomaksua odottavan tilauksen asiakas voi maksaa muokkauslinkin kautta. Kutsuvierailta ei peritä verkkomaksua.</p>
         </fieldset>
         {error && <p role="alert" className="mx-5 mb-4 rounded-lg bg-rose-500/10 p-3 text-sm text-rose-300">{error}</p>}
         <div className="flex flex-wrap justify-end gap-2 border-t border-white/10 px-5 py-4">

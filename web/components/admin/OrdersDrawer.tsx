@@ -21,6 +21,7 @@ const OrdersDrawer = () => {
     groups,
     setSelectedGroup,
     handleSetActiveTab,
+    orderCreationEmail,
   } = useAdminContext();
   const [search, setSearch] = useState('');
   const scrollableDivRef = useRef<HTMLDivElement>(null);
@@ -115,6 +116,12 @@ const OrdersDrawer = () => {
           ← Takaisin tilauksiin
         </button>
         <h1 className="mb-3 text-xl font-bold">Tilauksen tiedot</h1>
+        {orderCreationEmail?.orderId === selectedOrder.id && orderCreationEmail.status !== 'not-requested' && (
+          <p role={orderCreationEmail.status === 'failed' ? 'alert' : 'status'}
+            className={`mb-3 rounded-lg p-3 text-sm ${orderCreationEmail.status === 'failed' ? 'bg-rose-500/10 text-rose-300' : 'bg-emerald-500/10 text-emerald-200'}`}>
+            {orderCreationEmail.status === 'sent' ? 'Tilaus luotu ja tilausvahvistus lähetetty.' : 'Tilaus luotu, mutta tilausvahvistuksen lähettäminen epäonnistui.'}
+          </p>
+        )}
         <div className="flex min-h-0 w-full flex-1 flex-col overflow-y-auto rounded-xl border border-white/10 bg-[#223149] p-4">
           <div className="flex justify-between items-start flex-col">
             <p className="truncate text-lg font-bold text-white select-text">

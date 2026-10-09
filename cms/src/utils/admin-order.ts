@@ -1,19 +1,16 @@
 import type { Strapi } from '@strapi/strapi';
 
 const MAX_TICKETS = 1000;
-const TEXT_FIELDS = [
-  'firstName', 'lastName', 'email', 'phone', 'postalCode', 'startYear', 'extra',
-  'diet', 'group', 'avec', 'representativeOf', 'special_arragements',
-] as const;
-const CHECKBOX_FIELDS = ['accept', 'nonalcoholic', 'greeting'] as const;
+const TEXT_FIELDS = ['firstName', 'lastName', 'email', 'special_arragements'] as const;
 
 export class AdminOrderInputError extends Error {}
 
 export type AdminOrderInput = {
-  customer: Record<string, string | boolean>;
+  customer: Record<string, string>;
   kutsuvieras: boolean;
   status: 'admin-new' | 'ok';
   tickets: { itemTypeId: number; quantity: number }[];
+  sendConfirmation: boolean;
 };
 
 const isObject = (value: unknown): value is Record<string, unknown> =>
@@ -29,7 +26,7 @@ export const parseAdminOrderInput = (body: unknown): AdminOrderInput => {
   for (const field of TEXT_FIELDS) {
     const value = body.customer[field];
     if (value === undefined) continue;
-    const maxLength = field === 'extra' || field === 'special_arragements' ? 10000 : 255;
+    const maxLength = field === 'special_arragements' ? 10000 : 255;
     if (typeof value !== 'string' || value.length > maxLength) {
       throw new AdminOrderInputError(`Asiakastieto ${field} on virheellinen tai liian pitkä.`);
     }
@@ -41,18 +38,19 @@ export const parseAdminOrderInput = (body: unknown): AdminOrderInput => {
   if (customer.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email as string)) {
     throw new AdminOrderInputError('Sähköpostiosoite on virheellinen.');
   }
-  for (const field of CHECKBOX_FIELDS) {
-    const value = body.customer[field];
-    if (value !== undefined && typeof value !== 'boolean') {
-      throw new AdminOrderInputError(`Asiakastieto ${field} on virheellinen.`);
-    }
-    customer[field] = value === true;
-  }
   const locale = body.customer.locale ?? 'fi';
   if (locale !== 'fi' && locale !== 'en') {
     throw new AdminOrderInputError('Valitse asiakkaan kieleksi suomi tai englanti.');
   }
   customer.locale = locale;
+
+  if (body.sendConfirmation !== undefined && typeof body.sendConfirmation !== 'boolean') {
+    throw new AdminOrderInputError('Tilausvahvistuksen lähetysvalinta on virheellinen.');
+  }
+  const sendConfirmation = body.sendConfirmation === true;
+  if (sendConfirmation && !customer.email) {
+    throw new AdminOrderInputError('Anna sähköpostiosoite tilausvahvistuksen lähettämistä varten.');
+  }
 
   if (body.kutsuvieras !== undefined && typeof body.kutsuvieras !== 'boolean') {
     throw new AdminOrderInputError('Kutsuvierasvalinta on virheellinen.');
@@ -86,15 +84,19 @@ export const parseAdminOrderInput = (body: unknown): AdminOrderInput => {
     return { itemTypeId, quantity };
   });
 
-  return { customer, kutsuvieras, status: kutsuvieras ? 'ok' : status, tickets };
+  return { customer, kutsuvieras, status: kutsuvieras ? 'ok' : status, tickets, sendConfirmation };
 };
 
-export const createAdminOrder = async (strapi: Strapi, body: unknown) => {
+export const createAdminOrder = async (
+  strapi: Strapi,
+  body: unknown,
+  sendConfirmationEmail: (order: { id: number }) => Promise<void>,
+) => {
   const input = parseAdminOrderInput(body);
 
   // The customer, order and individual tickets must either all be saved or all
   // rolled back. Admin orders deliberately bypass public checkout limits.
-  return strapi.db.transaction(async () => {
+  const order = await strapi.db.transaction(async () => {
     const itemTypes = await strapi.query('api::item-type.item-type').findMany({
       where: { id: { $in: input.tickets.map(ticket => ticket.itemTypeId) } },
       select: ['id'],
@@ -124,4 +126,18 @@ export const createAdminOrder = async (strapi: Strapi, body: unknown) => {
       populate: ['customer', 'group', 'items.itemType', 'items.seat', 'items.seat.section'],
     });
   });
+
+  // Email is sent only after the transaction commits. A delivery failure must
+  // not make the admin retry creation and accidentally duplicate the order.
+  let confirmationEmailStatus: 'not-requested' | 'sent' | 'failed' = 'not-requested';
+  if (input.sendConfirmation) {
+    try {
+      await sendConfirmationEmail(order);
+      confirmationEmailStatus = 'sent';
+    } catch (error) {
+      strapi.log.error(`Failed to send confirmation email for admin order ${order.id}: ${error}`);
+      confirmationEmailStatus = 'failed';
+    }
+  }
+  return { order, confirmationEmailStatus };
 };

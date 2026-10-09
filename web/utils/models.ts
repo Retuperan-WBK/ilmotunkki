@@ -134,12 +134,19 @@ export type AdminOrderInput = {
   customer: {
     firstName: string;
     lastName: string;
+    email?: string;
+    special_arragements?: string;
     locale: 'fi' | 'en';
-    [key: string]: string | boolean;
   };
   kutsuvieras: boolean;
   status: 'admin-new' | 'ok';
   tickets: { itemTypeId: number; quantity: number }[];
+  sendConfirmation: boolean;
+};
+
+export type AdminOrderResult = {
+  order: Order;
+  confirmationEmailStatus: 'not-requested' | 'sent' | 'failed';
 };
 
 type PaymentMethodGroup = "mobile" | "bank" | "creditcard" | "credit";

@@ -63,7 +63,10 @@ export const POST = async (req: NextRequest) => {
           : result.error?.message || 'Tilauksen luominen epäonnistui.';
       return NextResponse.json({ error }, { status: response.status });
     }
-    return NextResponse.json(result.data, { status: 201 });
+    return NextResponse.json({
+      order: result.data,
+      confirmationEmailStatus: result.meta?.confirmationEmailStatus || 'not-requested',
+    }, { status: 201 });
   } catch (error) {
     console.error('Error creating admin order:', error);
     return NextResponse.json({ error: 'Tilauksen luominen epäonnistui.' }, { status: 500 });

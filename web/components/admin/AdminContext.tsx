@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { Order, AdminGroup, Section, Seat, ItemType, Item, AdminOrderInput } from '@/utils/models';
+import { Order, AdminGroup, Section, Seat, ItemType, Item, AdminOrderInput, AdminOrderResult } from '@/utils/models';
 import { handleAddTicketToSeat_State, handleChangeTicketSeat_State, handleRemoveTicketFromSeat_State, handleSetOrderTicketsSent_State, UpdatedItem } from './UnHolyFunctions';
 import ConfirmDialog, { ConfirmOptions } from './ConfirmDialog';
 import { DEFAULT_ROW_TRANSFORM, RowTransform, getRowSeats, isIdentityTransform, transformRowSeats } from './seatTransforms';
@@ -30,6 +30,7 @@ interface AdminContextProps {
   changeTicketSeat: (ticketId: number, newSeatId: number) => Promise<void>;
   fetchOrders: () => Promise<void>;
   createOrder: (input: AdminOrderInput) => Promise<void>;
+  orderCreationEmail: { orderId: number; status: AdminOrderResult['confirmationEmailStatus'] } | null;
   fetchGroups: () => Promise<void>;
   fetchSections: () => Promise<void>;
   handleMapClick: (x: number, y: number, ctrl: boolean) => void;
@@ -122,6 +123,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // OrderDrawer
 
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [orderCreationEmail, setOrderCreationEmail] = useState<AdminContextProps['orderCreationEmail']>(null);
 
   // GroupDrawer
 
@@ -168,8 +170,9 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || 'Tilauksen luominen epäonnistui.');
-    const order = data as Order;
+    const { order, confirmationEmailStatus } = data as AdminOrderResult;
     setOrders(current => [...current, order]);
+    setOrderCreationEmail({ orderId: order.id, status: confirmationEmailStatus });
     setSelectedTicket(null);
     setCurrentMode(null);
     setSelectedOrder(order);
@@ -664,6 +667,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         changeTicketSeat,
         fetchOrders,
         createOrder,
+        orderCreationEmail,
         fetchGroups,
         fetchSections,
         handleMapClick,
