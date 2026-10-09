@@ -130,6 +130,18 @@ export type Customer = StrapiBaseType<{
   [key: string]: string | number | boolean | null;
 }>;
 
+export type AdminOrderInput = {
+  customer: {
+    firstName: string;
+    lastName: string;
+    locale: 'fi' | 'en';
+    [key: string]: string | boolean;
+  };
+  kutsuvieras: boolean;
+  status: 'admin-new' | 'ok';
+  tickets: { itemTypeId: number; quantity: number }[];
+};
+
 type PaymentMethodGroup = "mobile" | "bank" | "creditcard" | "credit";
 
 type PaytrailFormField = {

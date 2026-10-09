@@ -243,7 +243,9 @@ const sendTicketEmail = async (order: any) => {
 export default {
   beforeCreate(event: Event) {
     const { data } = event.params;
-    data.status = 'new';
+    // Internal admin creation / Content Manager may set a non-expiring status.
+    // The public create controller still forces all new carts to 'new'.
+    data.status = data.status === 'admin-new' || data.status === 'ok' ? data.status : 'new';
     data.uid = v4();
   },
 

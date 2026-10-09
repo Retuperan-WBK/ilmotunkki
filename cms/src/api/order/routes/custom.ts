@@ -1,6 +1,11 @@
 export default {
   routes: [
     {
+      method: "POST",
+      path: "/orders/createAdmin",
+      handler: "order.createAdmin",
+    },
+    {
       method: "GET",
       path: "/orders/findByUid/:uid",
       handler: "order.findByUid",

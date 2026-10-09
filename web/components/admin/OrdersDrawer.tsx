@@ -4,6 +4,7 @@ import TicketList from "./TicketList";
 import InviteSvg from "./InviteSvg";
 import DisabledSvg from "./DisabledSvg";
 import CopyableEmail from "./CopyableEmail";
+import CreateOrderDialog from "./CreateOrderDialog";
 import { Order } from "@/utils/models";
 
 const OrdersDrawer = () => {
@@ -25,6 +26,7 @@ const OrdersDrawer = () => {
   const scrollableDivRef = useRef<HTMLDivElement>(null);
   const listScrollPosition = useRef(0);
   const [selectedTicketType, setSelectedTicketType] = useState('');
+  const [createOpen, setCreateOpen] = useState(false);
 
   useEffect(() => {
     if (scrollableDivRef.current) scrollableDivRef.current.scrollTop = listScrollPosition.current;
@@ -126,6 +128,12 @@ const OrdersDrawer = () => {
             }
           </div>
           <CopyableEmail className="mt-2 break-all" email={selectedOrder.attributes.customer?.data.attributes.email} />
+          {selectedOrder.attributes.customer.data?.attributes.uid && (
+            <a href={`/${selectedOrder.attributes.customer.data.attributes.locale || 'fi'}/edit/${selectedOrder.attributes.customer.data.attributes.uid}`}
+              target="_blank" rel="noreferrer" className="mt-2 w-fit text-xs text-sky-300 hover:underline">
+              Asiakkaan muokkaus- ja maksulinkki ↗
+            </a>
+          )}
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-1">
               <div
@@ -216,6 +224,10 @@ const OrdersDrawer = () => {
       <div className="shrink-0 border-b border-white/10 p-4">
         <div className="flex items-center justify-between gap-2">
           <h1 className="text-xl font-bold text-white">Tilaukset <span className="text-sm font-normal text-slate-400">{orders.length}</span></h1>
+          <button type="button" onClick={() => setCreateOpen(true)}
+            className="shrink-0 rounded-lg px-2 py-1 text-xs font-medium text-slate-400 hover:bg-white/10 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400">
+            + Uusi tilaus
+          </button>
         </div>
         <div className="mt-3">
           <input
@@ -383,6 +395,7 @@ const OrdersDrawer = () => {
         })}
         {visiblePlacedOrders.length === 0 && <p className="rounded-xl border border-dashed border-white/15 p-4 text-sm text-slate-400">Ei hakua vastaavia tilauksia.</p>}
       </div>
+      {createOpen && <CreateOrderDialog onClose={() => setCreateOpen(false)} />}
     </div>
   );
 };

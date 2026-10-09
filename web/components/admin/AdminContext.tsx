@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { Order, AdminGroup, Section, Seat, ItemType, Item } from '@/utils/models';
+import { Order, AdminGroup, Section, Seat, ItemType, Item, AdminOrderInput } from '@/utils/models';
 import { handleAddTicketToSeat_State, handleChangeTicketSeat_State, handleRemoveTicketFromSeat_State, handleSetOrderTicketsSent_State, UpdatedItem } from './UnHolyFunctions';
 import ConfirmDialog, { ConfirmOptions } from './ConfirmDialog';
 import { DEFAULT_ROW_TRANSFORM, RowTransform, getRowSeats, isIdentityTransform, transformRowSeats } from './seatTransforms';
@@ -29,6 +29,7 @@ interface AdminContextProps {
   removeTicketFromSeat: (ticketId: number) => Promise<void>;
   changeTicketSeat: (ticketId: number, newSeatId: number) => Promise<void>;
   fetchOrders: () => Promise<void>;
+  createOrder: (input: AdminOrderInput) => Promise<void>;
   fetchGroups: () => Promise<void>;
   fetchSections: () => Promise<void>;
   handleMapClick: (x: number, y: number, ctrl: boolean) => void;
@@ -157,6 +158,21 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const res = await fetch("/api/admin/orders");
     const data = await res.json();
     setOrders(data);
+  };
+
+  const createOrder = async (input: AdminOrderInput) => {
+    const response = await fetch('/api/admin/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Tilauksen luominen epäonnistui.');
+    const order = data as Order;
+    setOrders(current => [...current, order]);
+    setSelectedTicket(null);
+    setCurrentMode(null);
+    setSelectedOrder(order);
   };
 
   // Fetch item types function
@@ -647,6 +663,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         removeTicketFromSeat,
         changeTicketSeat,
         fetchOrders,
+        createOrder,
         fetchGroups,
         fetchSections,
         handleMapClick,
