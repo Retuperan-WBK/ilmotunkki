@@ -27,6 +27,14 @@ const configuration = {
   ],
   darkMode: 'class', // class/media
   theme: {
+    screens: {
+      sm: '640px',
+      admin: '750px',
+      md: '768px',
+      lg: '1024px',
+      xl: '1280px',
+      '2xl': '1536px',
+    },
     extend: {
       colors: {
         primary: getColor(PRIMARY_COLOR,"red"),
@@ -43,4 +51,3 @@ const configuration = {
 }
 
 export default configuration;
-

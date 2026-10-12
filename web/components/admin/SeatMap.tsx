@@ -83,6 +83,7 @@ export default function SeatMap() {
     currentMode, selectedTicket, setMode, setSelectedTicket,
     mapScale,
     selectedRow, rowTransform, setRowTransform, moveSeat,
+    setMobileView,
   } = useAdminContext();
 
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -162,9 +163,18 @@ export default function SeatMap() {
   useEffect(() => {
     const viewport = viewportRef.current;
     if (!viewport) return;
-    const observer = new ResizeObserver(fitMap);
+    let lastWidth = 0;
+    let lastHeight = 0;
+    const resize = () => {
+      const { clientWidth, clientHeight } = viewport;
+      if (!clientWidth || !clientHeight || (clientWidth === lastWidth && clientHeight === lastHeight)) return;
+      lastWidth = clientWidth;
+      lastHeight = clientHeight;
+      fitMap();
+    };
+    const observer = new ResizeObserver(resize);
     observer.observe(viewport);
-    fitMap();
+    resize();
     return () => {
       observer.disconnect();
       if (frameRef.current !== null) {
@@ -333,6 +343,7 @@ export default function SeatMap() {
 
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     if (event.key === 'Escape' && (selectedTicket || selectedSeat)) {
+      if (selectedTicket) setMobileView('list');
       setMode(null);
       setSelectedTicket(null);
       setSelectedSeat(null);
@@ -359,10 +370,10 @@ export default function SeatMap() {
   return (
     <div className="flex h-full min-h-0 flex-col bg-[#101a28]">
       <div className="z-20 shrink-0 border-b border-white/10 bg-[#172337] px-3 py-2 lg:px-4 lg:py-3">
-        <div className="flex flex-wrap items-center justify-between gap-2 lg:gap-3">
-          <div className="flex min-w-0 items-center gap-3">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-400">Salikartta</h2>
-            <div className="flex flex-nowrap gap-1 overflow-x-auto rounded-lg bg-[#0e1929] p-1" aria-label="Kartan lohko">
+        <div className="flex flex-nowrap items-center justify-between gap-2 lg:gap-3">
+          <div className="flex min-w-0 flex-1 items-center gap-2 lg:gap-3">
+            <h2 className="hidden shrink-0 text-sm font-semibold uppercase tracking-[0.16em] text-slate-400 sm:block">Salikartta</h2>
+            <div className="flex min-w-0 flex-nowrap gap-1 overflow-x-auto rounded-lg bg-[#0e1929] p-1" aria-label="Kartan lohko">
               {sections.map(section => (
                 <button key={section.id} type="button" onClick={() => setActiveSection(section.id)}
                   aria-pressed={activeSection?.id === section.id}
@@ -372,7 +383,7 @@ export default function SeatMap() {
               ))}
             </div>
           </div>
-          <div className="relative" ref={settingsRef}>
+          <div className="relative shrink-0" ref={settingsRef}>
             <button
               type="button"
               onClick={() => setSettingsOpen(open => !open)}
@@ -427,8 +438,15 @@ export default function SeatMap() {
         </div>
       </div>
 
-      <div ref={viewportRef} tabIndex={0} onKeyDown={handleKeyDown}
-        className="relative min-h-[360px] flex-1 overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sky-400"
+      {selectedTicket && (currentMode === 'add-ticket-to-seat' || currentMode === 'change-ticket-seat') && (
+        <div role="status" className="flex shrink-0 items-center justify-between gap-3 border-b border-amber-400/20 bg-[#322a20] px-3 py-2 text-xs text-amber-100 sm:text-sm">
+          <span className="min-w-0 truncate">Valitse vapaa paikka · {selectedTicket.attributes.itemType.data.attributes.slug}</span>
+          <button type="button" className="shrink-0 rounded px-2 py-1 font-semibold underline" onClick={() => { setMode(null); setSelectedTicket(null); setMobileView('list'); }}>Peruuta</button>
+        </div>
+      )}
+
+      <div ref={viewportRef} data-map-viewport tabIndex={0} onKeyDown={handleKeyDown}
+        className="relative min-h-0 flex-1 overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sky-400"
         style={{ touchAction: 'none', backgroundColor: '#adadad' }}
         aria-label="Salikartta. Vieritä hiirtä zoomataksesi kohdistimen kohdalle, vedä siirtääksesi karttaa.">
         <svg ref={svgRef} width="100%" height="100%" viewBox={`${view.x} ${view.y} ${view.width} ${view.height}`}
@@ -463,12 +481,7 @@ export default function SeatMap() {
           </div>
         )}
 
-        {currentMode === 'add-ticket-to-seat' || currentMode === 'change-ticket-seat' ? (
-          <div className="absolute left-4 top-16 flex max-w-sm items-center gap-3 rounded-xl border border-amber-400/30 bg-[#322a20]/95 px-3 py-2 text-sm text-amber-100 shadow-xl">
-            <span>Valitse vapaa paikka kartalta</span>
-            <button type="button" className="font-semibold underline" onClick={() => { setMode(null); setSelectedTicket(null); }}>Peruuta</button>
-          </div>
-        ) : currentMode === 'add-seat' ? (
+        {currentMode === 'add-seat' ? (
           <div className="absolute left-4 top-16 rounded-xl border border-sky-400/30 bg-[#142235]/95 px-3 py-2 text-xs text-sky-100 shadow-xl">Pidä Shift pohjassa ja klikkaa karttaa lisätäksesi istuimen</div>
         ) : currentMode === 'edit-seat' ? (
           <div className="absolute left-4 top-16 rounded-xl border border-sky-400/30 bg-[#142235]/95 px-3 py-2 text-xs text-sky-100 shadow-xl">Valitse istuin muokataksesi sitä · Shift + raahaa siirtääksesi istuinta</div>
@@ -477,7 +490,7 @@ export default function SeatMap() {
         ) : null}
 
         {filter.filter && (
-          <div className="absolute right-4 top-4 max-w-[190px] rounded-xl border border-white/10 bg-[#142235]/95 p-3 text-xs text-slate-200 shadow-xl">
+          <div className="absolute right-4 top-20 max-w-[190px] rounded-xl border border-white/10 bg-[#142235]/95 p-3 text-xs text-slate-200 shadow-xl sm:top-4">
             <button type="button" onClick={() => setLegendOpen(!legendOpen)} aria-expanded={legendOpen} className="w-full text-left font-semibold text-white">
               {filters.find(option => option.value === filter.filter)?.label} <span className="float-right">{legendOpen ? '⌃' : '⌄'}</span>
             </button>
@@ -492,7 +505,7 @@ export default function SeatMap() {
         )}
 
         {bottomDrawerOpen && selectedSeat && (
-          <div className="absolute inset-x-4 bottom-4 rounded-xl border border-white/15 bg-[#172337]/95 p-4 text-sm text-slate-200 shadow-2xl backdrop-blur-sm">
+          <div className="absolute inset-x-4 bottom-4 max-h-[65%] overflow-y-auto rounded-xl border border-white/15 bg-[#172337]/95 p-4 text-sm text-slate-200 shadow-2xl backdrop-blur-sm">
             <div className="flex items-start justify-between gap-3">
               <div><p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Valittu paikka</p><h3 className="mt-1 text-lg font-bold text-white">Rivi {selectedSeat.attributes.Row} · Paikka {selectedSeat.attributes.Number}</h3></div>
               <button type="button" aria-label="Sulje paikan tiedot" onClick={() => { setBottomDrawerOpen(false); setSelectedSeat(null); }} className="rounded-lg border border-white/15 px-3 py-1.5 text-xs font-semibold hover:bg-white/10">Sulje</button>

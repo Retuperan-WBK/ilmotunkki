@@ -34,7 +34,7 @@ const SpecialSeatNotice = ({ description }: { description: string }) => {
 
 const TicketList = ({tickets, tickets_sent} : {tickets: Item[], tickets_sent?: boolean}) => {
 
-  const { selectedTicket, setSelectedTicket, setMode, removeTicketFromSeat, removeMultipleTicketsFromSeat, confirmAction } = useAdminContext();
+  const { selectedTicket, setSelectedTicket, setMode, setMobileView, setSelectedSeat, setBottomDrawerOpen, removeTicketFromSeat, removeMultipleTicketsFromSeat, confirmAction } = useAdminContext();
 
   const getTicketStatusColor = (ticket: Item) => {
     if (ticket.attributes.seat.data) return "bg-green-500"; // Placed
@@ -80,6 +80,9 @@ const TicketList = ({tickets, tickets_sent} : {tickets: Item[], tickets_sent?: b
     }
     setMode('add-ticket-to-seat');
     setSelectedTicket(ticket);
+    setSelectedSeat(null);
+    setBottomDrawerOpen(false);
+    setMobileView('map');
   }
 
   const handleRemoveAllTicketsFromSeat = async () => {
@@ -121,6 +124,9 @@ const TicketList = ({tickets, tickets_sent} : {tickets: Item[], tickets_sent?: b
     }
     setMode('change-ticket-seat');
     setSelectedTicket(ticket);
+    setSelectedSeat(null);
+    setBottomDrawerOpen(false);
+    setMobileView('map');
   }
 
   return (
@@ -160,6 +166,7 @@ const TicketList = ({tickets, tickets_sent} : {tickets: Item[], tickets_sent?: b
               {
                 if (selectedTicket && selectedTicket.id === ticket.id) {
                   setSelectedTicket(null);
+                  setMode(null);
                 } else {
                 if (ticket.attributes.seat.data) {
                   handleMoveTicketToSeat(ticket);

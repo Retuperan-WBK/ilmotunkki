@@ -1040,6 +1040,13 @@ export interface ApiFrontPageFrontPage extends Schema.SingleType {
           localized: true;
         };
       }>;
+    headerFullWidth: Attribute.Boolean &
+      Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Attribute.DefaultTo<false>;
     showSignups: Attribute.Boolean &
       Attribute.SetPluginOptions<{
         i18n: {
@@ -1142,6 +1149,12 @@ export interface ApiGlobalGlobal extends Schema.SingleType {
     description: Attribute.String;
     favicon: Attribute.Media;
     url: Attribute.String;
+    mapScale: Attribute.Integer &
+      Attribute.SetMinMax<{
+        min: 10;
+        max: 500;
+      }> &
+      Attribute.DefaultTo<100>;
     TESTMODE: Attribute.Boolean &
       Attribute.Required &
       Attribute.DefaultTo<false>;

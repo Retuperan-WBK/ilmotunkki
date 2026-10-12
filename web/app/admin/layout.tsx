@@ -10,15 +10,15 @@ type PropType = {
 
 const AdminLayout = ({ children }: PropType) => {
   return (
-    <html lang='fi' className='dark min-h-screen'>
+    <html lang='fi' className='dark min-h-[100dvh]'>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>RWBK Liput - Plassitunkki</title>
         <link rel="icon" href="https://rwbk.fi/favicon.ico" />
       </head>
-      <body className="admin-panel min-h-screen bg-[#101010] text-slate-100">
+      <body className="admin-panel min-h-[100dvh] bg-[#101010] text-slate-100">
         <AppProvider>
-          <main className='mx-auto min-h-screen w-full lg:h-screen'>
+          <main className='mx-auto min-h-[100dvh] w-full admin:h-screen'>
             {children}
           </main>
         </AppProvider>

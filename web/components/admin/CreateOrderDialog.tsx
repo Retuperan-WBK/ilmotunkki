@@ -19,7 +19,10 @@ export default function CreateOrderDialog({ onClose }: { onClose: () => void }) 
   const [quantities, setQuantities] = useState<Record<number, string>>({});
   const [invited, setInvited] = useState(false);
   const [status, setStatus] = useState<AdminOrderInput['status']>('admin-new');
-  const [sendConfirmation, setSendConfirmation] = useState(false);
+  const [email, setEmail] = useState('');
+  const [confirmationPreference, setConfirmationPreference] = useState<boolean | null>(null);
+  const hasEmail = email.trim().length > 0;
+  const sendConfirmation = hasEmail && (confirmationPreference ?? true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const total = itemTypes.reduce((sum, itemType) => sum + (Number(quantities[itemType.id]) || 0), 0);
@@ -81,7 +84,7 @@ export default function CreateOrderDialog({ onClose }: { onClose: () => void }) 
               <input required name="lastName" autoComplete="family-name" maxLength={255} className={inputClass} />
             </label>
             <label className="text-sm">Sähköposti {sendConfirmation ? '*' : '(valinnainen)'}
-              <input type="email" name="email" required={sendConfirmation} autoComplete="email" maxLength={255} className={inputClass} />
+              <input type="email" name="email" value={email} onChange={event => setEmail(event.target.value)} required={sendConfirmation} autoComplete="email" maxLength={255} className={inputClass} />
             </label>
             <label className="text-sm">Asiakkaan kieli
               <select name="locale" className={inputClass} defaultValue="fi">
@@ -125,12 +128,12 @@ export default function CreateOrderDialog({ onClose }: { onClose: () => void }) 
           </div>
           <div>
             <label className="flex cursor-pointer items-center gap-2 text-sm">
-              <input type="checkbox" checked={sendConfirmation} onChange={event => setSendConfirmation(event.target.checked)} className="h-4 w-4 accent-sky-400" />
+              <input type="checkbox" checked={sendConfirmation} disabled={!hasEmail} onChange={event => setConfirmationPreference(event.target.checked)} className="h-4 w-4 accent-sky-400 disabled:opacity-50" />
               Lähetä tilausvahvistus sähköpostitse
             </label>
             <p className="mt-1 text-xs text-slate-400">Käyttää normaalia tilausvahvistusta asiakkaan valitsemalla kielellä.</p>
           </div>
-          <p className="text-xs text-slate-400">Verkkomaksua odottavan tilauksen asiakas voi maksaa muokkauslinkin kautta. Kutsuvierailta ei peritä verkkomaksua.</p>
+          <p className="text-xs text-slate-400">Verkkomaksua odottavan tilauksen asiakas voi maksaa muokkauslinkin kautta.</p>
         </fieldset>
         {error && <p role="alert" className="mx-5 mb-4 rounded-lg bg-rose-500/10 p-3 text-sm text-rose-300">{error}</p>}
         <div className="flex flex-wrap justify-end gap-2 border-t border-white/10 px-5 py-4">

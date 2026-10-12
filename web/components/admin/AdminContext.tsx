@@ -25,9 +25,9 @@ interface AdminContextProps {
   updateSeat: (seatId: number, seatData: Partial<Seat['attributes']>) => Promise<void>;
   deleteSeat: (seatId: number) => Promise<boolean>;
   confirmAction: (options: ConfirmOptions) => Promise<boolean>;
-  addTicketToSeat: (ticketId: number, seatId: number) => Promise<void>;
+  addTicketToSeat: (ticketId: number, seatId: number) => Promise<boolean>;
   removeTicketFromSeat: (ticketId: number) => Promise<void>;
-  changeTicketSeat: (ticketId: number, newSeatId: number) => Promise<void>;
+  changeTicketSeat: (ticketId: number, newSeatId: number) => Promise<boolean>;
   fetchOrders: () => Promise<void>;
   createOrder: (input: AdminOrderInput) => Promise<void>;
   orderCreationEmail: { orderId: number; status: AdminOrderResult['confirmationEmailStatus'] } | null;
@@ -48,6 +48,8 @@ interface AdminContextProps {
   setBottomDrawerOpen: (open: boolean) => void;
   handleSetActiveTab: (tab: 'tilaukset' | 'ryhmat' | 'kartta') => void;
   activeTab: 'tilaukset' | 'ryhmat' | 'kartta';
+  mobileView: 'list' | 'map';
+  setMobileView: (view: 'list' | 'map') => void;
   setMultiSelectedSeats: (seats: Seat[]) => void;
   multiSelectedSeats: Seat[];
   updateMultipleSeats: (seats: {id: number, special: string | null}[]) => Promise<void>;
@@ -106,6 +108,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [activeSectionId, setActiveSectionId] = useState<number | null>(null);
   const [currentMode, setCurrentMode] = useState<AdminContextProps['currentMode']>(null);
   const [activeTab, setActiveTab] = useState<'tilaukset' | 'ryhmat' | 'kartta'>('tilaukset'); // State to track active tab
+  const [mobileView, setMobileView] = useState<AdminContextProps['mobileView']>('list');
   const [itemTypes, setItemTypes] = useState<ItemType[]>([]);
   const [mapScale, setMapScale] = useState(100);
 
@@ -136,6 +139,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [rowTransform, setRowTransform] = useState<RowTransform>(DEFAULT_ROW_TRANSFORM);
   const [confirmOptions, setConfirmOptions] = useState<ConfirmOptions | null>(null);
   const confirmResolver = useRef<((confirmed: boolean) => void) | null>(null);
+  const ticketPlacementPending = useRef(false);
 
   const confirmAction = useCallback((options: ConfirmOptions) => new Promise<boolean>(resolve => {
     confirmResolver.current?.(false);
@@ -272,7 +276,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // Check if the seat is not already occupied
       if (!activeSection) {
         console.error('Section not found');
-        return;
+        return false;
       }
 
       const response = await fetch(`/api/admin/items/${ticketId}`, {
@@ -284,7 +288,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (!response.ok) {
         const errorData = await response.json();
         console.error('Error adding ticket to seat:', errorData);
-        return;
+        return false;
       }
 
       const data = await response.json() as UpdatedItem;
@@ -298,9 +302,10 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setOrders(updatedOrders as Order[]);
       setGroups(updatedGroups as AdminGroup[]);
       setSections(updatedSections as Section[]);
-      
+      return true;
     } catch (error) {
       console.error('Error in addTicketToSeat:', error);
+      return false;
     }
   };
   
@@ -363,7 +368,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (!response.ok) {
         const errorData = await response.json();
         console.error('Error changing ticket seat:', errorData);
-        return;
+        return false;
       }
 
       const data = await response.json() as UpdatedItem;
@@ -377,9 +382,10 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setOrders(updatedOrders as Order[]);
       setGroups(updatedGroups as AdminGroup[]);
       setSections(updatedSections as Section[]);
-
+      return true;
     } catch (error) {
       console.error('Error in changeTicketSeat:', error);
+      return false;
     }
   };
 
@@ -394,6 +400,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setSelectedSeat(null);
     setOrderFilters({ kutsuvieras: false, erikoisjarjestely: false, ticketType: '', noGroup: false });
     setActiveTab(tab);
+    setMobileView('list');
   }
 
   const handleSendTickets = async (order: Order, groupName?: string) => {
@@ -573,52 +580,44 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     switch (currentMode) {
       case 'edit-seat':
         setSelectedSeat(seat);
+        setMobileView('list');
         break;
       case 'edit-row':
-        if (seat.attributes.Row) setSelectedRow(seat.attributes.Row);
+        if (seat.attributes.Row) {
+          setSelectedRow(seat.attributes.Row);
+          setMobileView('list');
+        }
         break;
       case 'add-ticket-to-seat':
-        if (!selectedTicket) return;
+      case 'change-ticket-seat': {
+        if (!selectedTicket || ticketPlacementPending.current) return;
         if (seat.attributes.item.data) {
           alert(`Seat R:${seat.attributes.Row} N:${seat.attributes.Number} is already occupied`);
           return;
         }
-        if (seat.attributes.special?.trim()) {
-          if (!await confirmAction({
+        const moving = currentMode === 'change-ticket-seat';
+        ticketPlacementPending.current = true;
+        try {
+          if (seat.attributes.special?.trim() && !await confirmAction({
             title: 'Paikalla on erityishuomio',
-            message: `Rivi ${seat.attributes.Row}, paikka ${seat.attributes.Number}. Haluatko jatkaa plassausta?`,
+            message: `Rivi ${seat.attributes.Row}, paikka ${seat.attributes.Number}. Haluatko jatkaa ${moving ? 'siirtoa' : 'plassausta'}?`,
             details: seat.attributes.special,
-            confirmLabel: 'Jatka plassausta',
-          })) {
-            return;
-          }
+            confirmLabel: moving ? 'Jatka siirtoa' : 'Jatka plassausta',
+          })) return;
+          const saved = moving
+            ? await changeTicketSeat(selectedTicket.id, seat.id)
+            : await addTicketToSeat(selectedTicket.id, seat.id);
+          if (!saved) return;
+          setSelectedTicket(null);
+          setCurrentMode(null);
+          setSelectedSeat(null);
+          setBottomDrawerOpen(false);
+          setMobileView('list');
+        } finally {
+          ticketPlacementPending.current = false;
         }
-        addTicketToSeat(selectedTicket?.id, seat.id);
-        setSelectedTicket(null);
-        setCurrentMode(null);
-        setSelectedSeat(null);
         break;
-      case 'change-ticket-seat':
-        if (!selectedTicket) return;
-        if (seat.attributes.item.data) {
-          alert(`Seat R:${seat.attributes.Row} N:${seat.attributes.Number} is already occupied`);
-          return;
-        }
-        if (seat.attributes.special?.trim()) {
-          if (!await confirmAction({
-            title: 'Paikalla on erityishuomio',
-            message: `Rivi ${seat.attributes.Row}, paikka ${seat.attributes.Number}. Haluatko jatkaa siirtoa?`,
-            details: seat.attributes.special,
-            confirmLabel: 'Jatka siirtoa',
-          })) {
-            return;
-          }
-        }
-        changeTicketSeat(selectedTicket?.id, seat.id);
-        setSelectedTicket(null);
-        setCurrentMode(null);
-        setSelectedSeat(null);
-        break;
+      }
       case 'multi-select':
         if (multiSelectedSeats.includes(seat)) {
           setMultiSelectedSeats(multiSelectedSeats.filter((selectedSeat) => selectedSeat !== seat));
@@ -691,6 +690,8 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setBottomDrawerOpen,
         handleSetActiveTab,
         activeTab,
+        mobileView,
+        setMobileView,
         setMultiSelectedSeats,
         multiSelectedSeats,
         updateMultipleSeats,
