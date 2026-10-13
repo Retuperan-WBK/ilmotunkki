@@ -438,13 +438,6 @@ export default function SeatMap() {
         </div>
       </div>
 
-      {selectedTicket && (currentMode === 'add-ticket-to-seat' || currentMode === 'change-ticket-seat') && (
-        <div role="status" className="flex shrink-0 items-center justify-between gap-3 border-b border-amber-400/20 bg-[#322a20] px-3 py-2 text-xs text-amber-100 sm:text-sm">
-          <span className="min-w-0 truncate">Valitse vapaa paikka · {selectedTicket.attributes.itemType.data.attributes.slug}</span>
-          <button type="button" className="shrink-0 rounded px-2 py-1 font-semibold underline" onClick={() => { setMode(null); setSelectedTicket(null); setMobileView('list'); }}>Peruuta</button>
-        </div>
-      )}
-
       <div ref={viewportRef} data-map-viewport tabIndex={0} onKeyDown={handleKeyDown}
         className="relative min-h-0 flex-1 overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sky-400"
         style={{ touchAction: 'none', backgroundColor: '#adadad' }}
@@ -464,6 +457,14 @@ export default function SeatMap() {
             selectedIds={selectedIds} overrides={seatOverrides} suppressClickRef={suppressClickRef} onSeatClick={handleSeatClick}
             onSeatPointerDown={handleSeatPointerDown} onSeatPointerMove={handleSeatPointerMove} onSeatPointerUp={handleSeatPointerUp} />}
         </svg>
+
+        {/* Placement instructions must not resize the viewport and reset its pan/zoom. */}
+        {selectedTicket && (currentMode === 'add-ticket-to-seat' || currentMode === 'change-ticket-seat') && (
+          <div role="status" className="absolute bottom-16 left-4 right-4 flex max-w-sm items-center justify-between gap-3 rounded-xl border border-amber-400/30 bg-[#322a20]/95 px-3 py-2 text-xs text-amber-100 shadow-xl sm:text-sm">
+            <span className="min-w-0 truncate">Valitse vapaa paikka · {selectedTicket.attributes.itemType.data.attributes.slug}</span>
+            <button type="button" className="shrink-0 rounded px-2 py-1 font-semibold underline" onClick={() => { setMode(null); setSelectedTicket(null); setMobileView('list'); }}>Peruuta</button>
+          </div>
+        )}
 
         <div className="absolute left-4 top-4 flex items-center gap-1 rounded-xl border border-white/10 bg-[#142235]/95 p-1 shadow-xl" aria-label="Kartan zoomaus">
           <button type="button" onClick={() => zoomFromCenter(1.3)} title="Lähennä" aria-label="Lähennä" className="h-9 w-9 rounded-lg text-xl text-white hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400">+</button>
